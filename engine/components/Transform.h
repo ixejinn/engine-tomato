@@ -1,7 +1,7 @@
-#ifndef ORANGE_TRANSFORM_H
-#define ORANGE_TRANSFORM_H
+#ifndef TOMATO_TRANSFORM_H
+#define TOMATO_TRANSFORM_H
 
-#endif //ORANGE_TRANSFORM_H
+#endif //TOMATO_TRANSFORM_H
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>

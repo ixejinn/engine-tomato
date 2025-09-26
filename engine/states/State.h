@@ -1,9 +1,12 @@
-#ifndef ORANGE_STATE_H
-#define ORANGE_STATE_H
+#ifndef TOMATO_STATE_H
+#define TOMATO_STATE_H
 
-#endif //ORANGE_STATE_H
+#endif //TOMATO_STATE_H
 
 class State {
+private:
+
+
 public:
 
 };

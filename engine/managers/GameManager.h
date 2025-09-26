@@ -1,7 +1,7 @@
-#ifndef ORANGE_GAMEMANAGER_H
-#define ORANGE_GAMEMANAGER_H
+#ifndef TOMATO_GAMEMANAGER_H
+#define TOMATO_GAMEMANAGER_H
 
-#endif //ORANGE_GAMEMANAGER_H
+#endif //TOMATO_GAMEMANAGER_H
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

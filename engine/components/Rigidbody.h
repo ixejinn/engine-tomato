@@ -1,7 +1,7 @@
-#ifndef ORANGE_RIGIDBODY_H
-#define ORANGE_RIGIDBODY_H
+#ifndef TOMATO_RIGIDBODY_H
+#define TOMATO_RIGIDBODY_H
 
-#endif //ORANGE_RIGIDBODY_H
+#endif //TOMATO_RIGIDBODY_H
 
 #include <glm/vec3.hpp>
 
