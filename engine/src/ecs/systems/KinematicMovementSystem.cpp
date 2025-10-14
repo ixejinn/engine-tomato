@@ -5,8 +5,6 @@
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
 
-#include <iostream>
-
 namespace tomato
 {
     void KinematicMovementSystem::Update(World& world, const SimContext& ctx)
@@ -33,9 +31,12 @@ namespace tomato
                 dir = glm::normalize(dir);
 
             pos.position.x += dir.x * speed.speed * ctx.dt;
-            pos.position.z += dir.y * speed.speed * ctx.dt;
+            pos.position.y += dir.y * speed.speed * ctx.dt;
+            // !!! for 3D MOVEMENT !!!
+            //pos.position.z += dir.y * speed.speed * ctx.dt;
 
             // 점프 처리
+            /* !!! for 3D MOVEMENT !!!
             if (HasAction(keydown, InputAction::JUMP) && move.jumpCount < JUMP_COUNT_MAX)
             {
                 // 점프 시작
@@ -57,8 +58,7 @@ namespace tomato
                     move.vy = 0.f;
                 }
             }
-
-            //std::cout << pos.position.x << ", " << pos.position.z << ", " << pos.position.y << std::endl;
+            !!! for 3D MOVEMENT !!! */
         }
     }
 }
