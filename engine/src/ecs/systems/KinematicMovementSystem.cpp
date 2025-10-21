@@ -5,6 +5,18 @@
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
 
+#include "tomato/ecs/SystemRegistry.h"
+REGISTER_CONTROLLER_SYSTEM(KinematicMovementSystem);
+/*namespace
+{
+    tomato::SystemRegistryEntry KinematicEntry{
+        [](std::vector<tomato::CharacterInputHistory>& input)
+        { return std::make_unique<tomato::KinematicMovementSystem>(input); }
+    };
+}*/
+
+#include <iostream>
+
 namespace tomato
 {
     void KinematicMovementSystem::Update(World& world, const SimContext& ctx)
@@ -32,6 +44,9 @@ namespace tomato
 
             pos.position.x += dir.x * speed.speed * ctx.dt;
             pos.position.y += dir.y * speed.speed * ctx.dt;
+
+            std::cout << pos.position.x << ", " << pos.position.y << "\n";
+
             // !!! for 3D MOVEMENT !!!
             //pos.position.z += dir.y * speed.speed * ctx.dt;
 

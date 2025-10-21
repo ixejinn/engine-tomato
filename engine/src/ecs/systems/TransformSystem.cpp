@@ -3,6 +3,9 @@
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/components/Transform.h"
 
+#include "tomato/ecs/SystemRegistry.h"
+REGISTER_SYSTEM(tomato::SystemType::INTEGRATOR, TransformSystem)
+
 namespace tomato
 {
     void TransformSystem::Update(World& world, const SimContext& ctx)

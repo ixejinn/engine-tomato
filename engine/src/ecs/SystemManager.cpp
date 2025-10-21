@@ -1,19 +1,30 @@
 #include "tomato/ecs/SystemManager.h"
+#include "tomato/ecs/SystemRegistry.h"
 #include "tomato/ecs/systems/System.h"
 #include "tomato/ecs/World.h"
 #include "tomato/SimulationContext.h"
 #include "tomato/services/CharacterInputHistory.h"
 
-#include "tomato/ecs/systems/TransformSystem.h"
-#include "tomato/ecs/systems/KinematicMovementSystem.h"
-
 namespace tomato
 {
     SystemManager::SystemManager(std::vector<CharacterInputHistory>& inputHistory)
     {
-        // !!! TEST !!! 수정 필요 !!!
-        controllers_.emplace_back(std::make_unique<KinematicMovementSystem>(inputHistory));
-        collisions_.emplace_back(std::make_unique<TransformSystem>());
+        for (const auto& factory : SystemRegistry::GetInstance().GetControllerFactory())
+            controllers_.emplace_back(factory(inputHistory));
+
+        for (const auto& factory : SystemRegistry::GetInstance().GetFactory(INTEGRATOR))
+            integrators_.emplace_back(factory());
+        for (const auto& factory : SystemRegistry::GetInstance().GetFactory(COLLISION))
+            collisions_.emplace_back(factory());
+
+        for (const auto& factory : SystemRegistry::GetInstance().GetFactory(GAMERULE))
+            gameRules_.emplace_back(factory());
+
+        for (const auto& factory : SystemRegistry::GetInstance().GetFactory(SPAWNER))
+            spawners_.emplace_back(factory());
+
+        for (const auto& factory : SystemRegistry::GetInstance().GetFactory(RENDER))
+            renderers_.emplace_back(factory());
     }
 
     SystemManager::~SystemManager() = default;

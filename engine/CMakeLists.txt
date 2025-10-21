@@ -16,6 +16,7 @@ set(ENGINE_HEADERS
         include/tomato/SimulationContext.h
         include/tomato/DefaultState.h
         include/tomato/ecs/SystemManager.h
+        include/tomato/ecs/SystemRegistry.h
 )
 
 set(ENGINE_SOURCES
@@ -26,6 +27,7 @@ set(ENGINE_SOURCES
         src/ecs/systems/KinematicMovementSystem.cpp
         src/core/DefaultState.cpp
         src/ecs/SystemManager.cpp
+        src/ecs/SystemRegistry.cpp
 )
 
 set(EXTERNAL_SOURCES
