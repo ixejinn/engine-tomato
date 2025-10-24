@@ -34,7 +34,7 @@ set(EXTERNAL_SOURCES
         external/glad/src/glad.c
 )
 
-add_library(engine
+add_library(engine OBJECT
         ${ENGINE_HEADERS}
         ${ENGINE_SOURCES}
         ${EXTERNAL_SOURCES}

@@ -7,13 +7,6 @@
 
 #include "tomato/ecs/SystemRegistry.h"
 REGISTER_CONTROLLER_SYSTEM(KinematicMovementSystem);
-/*namespace
-{
-    tomato::SystemRegistryEntry KinematicEntry{
-        [](std::vector<tomato::CharacterInputHistory>& input)
-        { return std::make_unique<tomato::KinematicMovementSystem>(input); }
-    };
-}*/
 
 #include <iostream>
 

@@ -22,7 +22,6 @@ namespace tomato
         if (glfwGetKey(window, MOVE_KEYS[JUMP]) == GLFW_PRESS)
             curr_.keypress |= InputAction::JUMP;
 
-        //curr_.keydown = static_cast<InputAction>((~prev_.keypress) & curr_.keypress);
         curr_.keydown = ~prev_.keypress & curr_.keypress;
     }
 }
