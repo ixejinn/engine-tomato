@@ -7,9 +7,6 @@ namespace tomato
 {
     class World
     {
-    private:
-        entt::registry registry_;
-
     public:
         entt::registry& GetRegistry() { return registry_; }
         const entt::registry& GetRegistry() const { return registry_; }
@@ -24,6 +21,9 @@ namespace tomato
 
         template <typename... Ts>
         auto View() const { return registry_.view<const Ts...>(); }
+
+    private:
+        entt::registry registry_;
     };
 }
 

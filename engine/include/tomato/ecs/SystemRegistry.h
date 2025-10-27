@@ -26,14 +26,6 @@ namespace tomato
     class SystemRegistry
     {
     private:
-        std::vector<ControllerFactory> controllers_;
-        std::vector<Factory> integrators_;
-        std::vector<Factory> collisions_;
-        std::vector<Factory> gameRules_;
-        std::vector<Factory> spawners_;
-
-        std::vector<Factory> renderers_;
-
         SystemRegistry() = default;
         ~SystemRegistry();
 
@@ -41,17 +33,26 @@ namespace tomato
         SystemRegistry(const SystemRegistry&) = delete;
         SystemRegistry& operator=(const SystemRegistry&) = delete;
 
+        void RegisterSystemFactory(ControllerFactory&& factory);
+        void RegisterSystemFactory(const SystemType& type, Factory&& factory);
+
+        const std::vector<ControllerFactory>& GetControllerFactory() { return controllers_; }
+        const std::vector<Factory>& GetFactory(const SystemType& type);
+
         static SystemRegistry& GetInstance()
         {
             static SystemRegistry instance;
             return instance;
         }
 
-        void RegisterSystemFactory(ControllerFactory&& factory);
-        void RegisterSystemFactory(const SystemType& type, Factory&& factory);
+    private:
+        std::vector<ControllerFactory> controllers_;
+        std::vector<Factory> integrators_;
+        std::vector<Factory> collisions_;
+        std::vector<Factory> gameRules_;
+        std::vector<Factory> spawners_;
 
-        const std::vector<ControllerFactory>& GetControllerFactory() { return controllers_; }
-        const std::vector<Factory>& GetFactory(const SystemType& type);
+        std::vector<Factory> renderers_;
     };
 
     struct SystemRegistryEntry

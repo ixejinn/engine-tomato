@@ -13,6 +13,14 @@ namespace tomato
 
     class SystemManager
     {
+    public:
+        SystemManager(std::vector<CharacterInputHistory>& inputHistory);
+        ~SystemManager();
+
+        void Simulate(World& world, const SimContext& ctx);
+        void Render(const World& world, const SimContext& ctx);
+
+    private:
         std::vector<std::unique_ptr<System>> controllers_;
         std::vector<std::unique_ptr<System>> integrators_;
         std::vector<std::unique_ptr<System>> collisions_;
@@ -20,13 +28,6 @@ namespace tomato
         std::vector<std::unique_ptr<System>> spawners_;
 
         std::vector<std::unique_ptr<System>> renderers_;
-
-    public:
-        SystemManager(std::vector<CharacterInputHistory>& inputHistory);
-        ~SystemManager();
-
-        void Simulate(World& world, const SimContext& ctx);
-        void Render(const World& world, const SimContext& ctx);
     };
 }
 

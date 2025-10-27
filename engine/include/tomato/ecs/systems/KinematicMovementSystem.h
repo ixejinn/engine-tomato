@@ -8,18 +8,18 @@ namespace tomato
 {
     class KinematicMovementSystem : public System
     {
-    private:
-        std::vector<CharacterInputHistory>& inputHistory_;
+    public:
+        KinematicMovementSystem(std::vector<CharacterInputHistory>& inputHistory)
+                : inputHistory_(inputHistory) {}
 
+        void Update(World& world, const SimContext& ctx) override;
+
+    private:
         constexpr static uint8_t JUMP_COUNT_MAX{2};
         constexpr static float JUMP_SPEED{1.f};
         constexpr static float GRAVITY{-1.f};
 
-    public:
-        KinematicMovementSystem(std::vector<CharacterInputHistory>& inputHistory)
-        : inputHistory_(inputHistory) {}
-
-        void Update(World& world, const SimContext& ctx);
+        std::vector<CharacterInputHistory>& inputHistory_;
     };
 }
 

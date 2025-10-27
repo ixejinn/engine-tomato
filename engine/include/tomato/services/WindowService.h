@@ -7,14 +7,6 @@ namespace tomato
 {
     class WindowService
     {
-    private:
-        GLFWwindow* handle_{nullptr};
-
-        int width_;
-        int height_;
-
-        static void OnFramebufferSizeChanged(GLFWwindow* window, int width, int height);
-
     public:
         WindowService(int width, int height, const char* title);
         ~WindowService();
@@ -35,6 +27,14 @@ namespace tomato
 
         // !!! TEMPORAL FUNCTION !!!
         void TMP_CheckEscapeKey();
+
+    private:
+        static void OnFramebufferSizeChanged(GLFWwindow* window, int width, int height);
+
+        GLFWwindow* handle_{nullptr};
+
+        int width_;
+        int height_;
     };
 }
 

@@ -19,12 +19,6 @@ namespace tomato
 
     class InputService
     {
-    private:
-        InputRecord prev_;
-        InputRecord curr_;
-
-        static constexpr std::array<int, 5> MOVE_KEYS{GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_SPACE};
-
     public:
         const InputRecord& GetCurrInputRecord() const { return curr_; }
 
@@ -32,6 +26,12 @@ namespace tomato
         void BeginFrame() { prev_ = curr_; }
 
         void UpdateRecord(GLFWwindow* window, uint32_t tick);
+
+    private:
+        static constexpr std::array<int, 5> MOVE_KEYS{GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_SPACE};
+
+        InputRecord prev_;
+        InputRecord curr_;
     };
 }
 
