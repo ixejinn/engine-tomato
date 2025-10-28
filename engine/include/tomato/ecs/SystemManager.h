@@ -29,6 +29,7 @@ namespace tomato
         std::vector<std::unique_ptr<System>> spawners_;
 
         std::vector<std::unique_ptr<System>> renderers_;
+        std::vector<std::unique_ptr<System>> camera_;
     };
 }
 

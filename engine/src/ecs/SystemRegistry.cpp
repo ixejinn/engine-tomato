@@ -33,6 +33,10 @@ namespace tomato
             case RENDER:
                 renderers_.push_back(std::move(factory));
                 break;
+
+            case CAMERA:
+                camera_.push_back(std::move(factory));
+                break;
         }
     }
 
@@ -57,6 +61,9 @@ namespace tomato
 
             case RENDER:
                 return renderers_;
+            
+            case CAMERA:
+                return camera_;
         }
         // !!! ERROR !!!
         return integrators_;
