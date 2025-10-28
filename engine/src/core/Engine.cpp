@@ -1,4 +1,5 @@
 #include "tomato/Engine.h"
+#include "tomato/services/WindowService.h"
 #include "tomato/ecs/World.h"
 #include "tomato/DefaultState.h"
 #include "tomato/SimulationContext.h"
@@ -71,14 +72,14 @@ namespace tomato
             int simulationNum = std::min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
             while (simulationNum--) {
                 // !!! 지금은 비어있는 Simulation Context 전달 !!!
-                systemManager_.Simulate(*world_, SimContext{});
+                systemManager_.Simulate(*this, SimContext{});
 
                 adder_ -= dt_;
             }
             start_ = cur;
 
             // 렌더
-            systemManager_.Render(*world_, SimContext{});
+            systemManager_.Render(*this, SimContext{});
 
             window_.SwapBuffers();
             window_.PollEvents();

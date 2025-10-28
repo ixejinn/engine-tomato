@@ -5,10 +5,12 @@
 
 namespace tomato
 {
+    class Engine;
+
     class TransformSystem : public System
     {
     public:
-        void Update(World& world, const SimContext& ctx) override;
+        void Update(Engine& engine, const SimContext& ctx) override;
     };
 }
 

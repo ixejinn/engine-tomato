@@ -3,7 +3,7 @@
 
 namespace tomato
 {
-    class World;
+    class Engine;
     struct SimContext;
 
     class System
@@ -14,10 +14,10 @@ namespace tomato
     public:
         virtual ~System() = default;
 
-        virtual void Update(World& world, const SimContext& ctx) = 0;
+        virtual void Update(Engine& engine, const SimContext& ctx) = 0;
 
         // !!! FOR RENDERING ONLY - FUNCTION OVERLOADING !!!
-        virtual void Update(const World& world, const SimContext& ctx) {}
+        virtual void Update(const Engine& engine, const SimContext& ctx) {}
     };
 }
 

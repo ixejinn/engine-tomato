@@ -1,5 +1,6 @@
 #include "tomato/ecs/systems/TransformSystem.h"
 #include "glm/gtc/matrix_transform.hpp"
+#include "tomato/Engine.h"
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/components/Transform.h"
 
@@ -8,9 +9,9 @@ REGISTER_SYSTEM(tomato::SystemType::INTEGRATOR, TransformSystem)
 
 namespace tomato
 {
-    void TransformSystem::Update(World& world, const SimContext& ctx)
+    void TransformSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        auto view = world.View<PositionComponent, RotationComponent, ScaleComponent, WorldMatrixComponent>();
+        auto view = engine.GetWorld().View<PositionComponent, RotationComponent, ScaleComponent, WorldMatrixComponent>();
 
         for (auto [e, pos, rot, scl, mat] : view.each())
         {

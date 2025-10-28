@@ -4,13 +4,13 @@
 #include <chrono>
 #include <memory>
 #include <vector>
-#include "tomato/services/WindowService.h"          // WindowService& window_
 #include "tomato/services/InputService.h"           // InputService input_
 #include "tomato/services/CharacterInputHistory.h"  // std::vector<CharacterInputHistory> inputHistory_
 #include "tomato/ecs/SystemManager.h"               // SystemManager systemManager_
 
 namespace tomato
 {
+    class WindowService;
     class World;
     class State;
 
@@ -24,6 +24,13 @@ namespace tomato
         void SetNextState(std::unique_ptr<State>&& newState);
 
         void Run();
+
+        const WindowService& GetWindow() const { return window_; }
+
+        const std::vector<CharacterInputHistory>& GetInputHistory() const { return inputHistory_; }
+
+        World& GetWorld() { return *world_; }
+        const World& GetWorld() const { return *world_; }
 
     private:
         constexpr static int MAX_PLAYER_NUM{4};

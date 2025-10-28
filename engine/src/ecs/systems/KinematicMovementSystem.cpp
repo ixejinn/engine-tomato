@@ -1,4 +1,5 @@
 #include "tomato/ecs/systems/KinematicMovementSystem.h"
+#include "tomato/Engine.h"
 #include "tomato/SimulationContext.h"
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/components/Transform.h"
@@ -6,20 +7,19 @@
 #include "tomato/ecs/components/Movement.h"
 
 #include "tomato/ecs/SystemRegistry.h"
-REGISTER_CONTROLLER_SYSTEM(KinematicMovementSystem);
-
-#include <iostream>
+REGISTER_SYSTEM(tomato::SystemType::CONTROLLER, KinematicMovementSystem);
 
 namespace tomato
 {
-    void KinematicMovementSystem::Update(World& world, const SimContext& ctx)
+    void KinematicMovementSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        auto view = world.View<PositionComponent, SpeedComponent, InputChannelComponent, MovementComponent>();
+        auto view = engine.GetWorld().View<PositionComponent, SpeedComponent, InputChannelComponent, MovementComponent>();
+        auto inputHistory = engine.GetInputHistory();
 
         for (auto [e, pos, speed, ch, move] : view.each())
         {
-            InputAction keypress{inputHistory_[ch.channel][ctx.tick].keypress};
-            InputAction keydown{inputHistory_[ch.channel][ctx.tick].keydown};
+            InputAction keypress{inputHistory[ch.channel][ctx.tick].keypress};
+            InputAction keydown{inputHistory[ch.channel][ctx.tick].keydown};
 
             // 이동 처리
             int x = 0, y = 0;
@@ -37,8 +37,6 @@ namespace tomato
 
             pos.position.x += dir.x * speed.speed * ctx.dt;
             pos.position.y += dir.y * speed.speed * ctx.dt;
-
-            std::cout << pos.position.x << ", " << pos.position.y << "\n";
 
             // !!! for 3D MOVEMENT !!!
             //pos.position.z += dir.y * speed.speed * ctx.dt;

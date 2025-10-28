@@ -33,10 +33,8 @@ namespace tomato
         SystemRegistry(const SystemRegistry&) = delete;
         SystemRegistry& operator=(const SystemRegistry&) = delete;
 
-        void RegisterSystemFactory(ControllerFactory&& factory);
         void RegisterSystemFactory(const SystemType& type, Factory&& factory);
 
-        const std::vector<ControllerFactory>& GetControllerFactory() { return controllers_; }
         const std::vector<Factory>& GetFactory(const SystemType& type);
 
         static SystemRegistry& GetInstance()
@@ -46,7 +44,7 @@ namespace tomato
         }
 
     private:
-        std::vector<ControllerFactory> controllers_;
+        std::vector<Factory> controllers_;
         std::vector<Factory> integrators_;
         std::vector<Factory> collisions_;
         std::vector<Factory> gameRules_;
@@ -57,15 +55,14 @@ namespace tomato
 
     struct SystemRegistryEntry
     {
-        SystemRegistryEntry(ControllerFactory&& factory) { SystemRegistry::GetInstance().RegisterSystemFactory(std::move(factory)); }
-        SystemRegistryEntry(const SystemType& type, Factory&& factory) { SystemRegistry::GetInstance().RegisterSystemFactory(type, std::move(factory)); }
+        SystemRegistryEntry(const SystemType& type, Factory&& factory)
+        {
+            SystemRegistry::GetInstance().RegisterSystemFactory(type, std::move(factory));
+        }
     };
 }
 
 #define REGISTER_SYSTEM(TYPE, CLASS)\
 namespace { static tomato::SystemRegistryEntry CLASS##Entry{TYPE, []() { return std::make_unique<tomato::CLASS>(); }}; }
-
-#define REGISTER_CONTROLLER_SYSTEM(CLASS)\
-namespace { static tomato::SystemRegistryEntry CLASS##Entry{[](std::vector<tomato::CharacterInputHistory>& input) { return std::make_unique<tomato::CLASS>(input); }}; }
 
 #endif //TOMATO_SYSTEMREGISTRY_H

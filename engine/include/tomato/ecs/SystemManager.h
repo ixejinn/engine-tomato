@@ -6,6 +6,7 @@
 
 namespace tomato
 {
+    class Engine;
     class System;
     class World;
     class SimContext;
@@ -17,8 +18,8 @@ namespace tomato
         SystemManager(std::vector<CharacterInputHistory>& inputHistory);
         ~SystemManager();
 
-        void Simulate(World& world, const SimContext& ctx);
-        void Render(const World& world, const SimContext& ctx);
+        void Simulate(Engine& engine, const SimContext& ctx);
+        void Render(const Engine& engine, const SimContext& ctx);
 
     private:
         std::vector<std::unique_ptr<System>> controllers_;

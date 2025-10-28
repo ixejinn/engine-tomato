@@ -6,17 +6,12 @@ namespace tomato
 {
     SystemRegistry::~SystemRegistry() = default;
 
-    void SystemRegistry::RegisterSystemFactory(ControllerFactory&& factory)
-    {
-        controllers_.push_back(std::move(factory));
-    }
-
     void SystemRegistry::RegisterSystemFactory(const SystemType& type, Factory&& factory)
     {
         switch (type)
         {
             case CONTROLLER:
-                // !!! ERROR !!!
+                controllers_.push_back(std::move(factory));
                 break;
 
             case INTEGRATOR:
@@ -46,7 +41,7 @@ namespace tomato
         switch (type)
         {
             case CONTROLLER:
-                break;
+                return controllers_;
 
             case INTEGRATOR:
                 return integrators_;

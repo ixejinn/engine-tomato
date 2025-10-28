@@ -9,8 +9,8 @@ namespace tomato
 {
     SystemManager::SystemManager(std::vector<CharacterInputHistory>& inputHistory)
     {
-        for (const auto& factory : SystemRegistry::GetInstance().GetControllerFactory())
-            controllers_.emplace_back(factory(inputHistory));
+        for (const auto& factory : SystemRegistry::GetInstance().GetFactory(CONTROLLER))
+            controllers_.emplace_back(factory());
 
         for (const auto& factory : SystemRegistry::GetInstance().GetFactory(INTEGRATOR))
             integrators_.emplace_back(factory());
@@ -29,30 +29,30 @@ namespace tomato
 
     SystemManager::~SystemManager() = default;
 
-    void SystemManager::Simulate(World& world, const SimContext& ctx)
+    void SystemManager::Simulate(Engine& engine, const SimContext& ctx)
     {
         // input
         for (auto& system : controllers_)
-            system->Update(world, ctx);
+            system->Update(engine, ctx);
 
         // physics
         for (auto& system : integrators_)
-            system->Update(world, ctx);
+            system->Update(engine, ctx);
         for (auto& system : collisions_)
-            system->Update(world, ctx);
+            system->Update(engine, ctx);
 
         // game logic
         for (auto& system : gameRules_)
-            system->Update(world, ctx);
+            system->Update(engine, ctx);
 
         // spawn
         for (auto& system : spawners_)
-            system->Update(world, ctx);
+            system->Update(engine, ctx);
     }
 
-    void SystemManager::Render(const World& world, const SimContext& ctx)
+    void SystemManager::Render(const Engine& engine, const SimContext& ctx)
     {
         for (const auto& system : renderers_)
-            system->Update(world, ctx);
+            system->Update(engine, ctx);
     }
 }
