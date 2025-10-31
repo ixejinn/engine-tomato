@@ -35,11 +35,11 @@ namespace tomato
             if (glm::length(dir) > 1)
                 dir = glm::normalize(dir);
 
-            pos.position.x += dir.x * speed.speed * ctx.dt;
-            pos.position.y += dir.y * speed.speed * ctx.dt;
+            pos.position.x += dir.x * speed.speed * Engine::FIXED_DELTA_TIME;
+            pos.position.y += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
 
             // !!! for 3D MOVEMENT !!!
-            //pos.position.z += dir.y * speed.speed * ctx.dt;
+            //pos.position.z += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
 
             // 점프 처리
             /* !!! for 3D MOVEMENT !!!
@@ -53,8 +53,8 @@ namespace tomato
             if (move.jumpCount > 0)
             {
                 // 점프 중
-                move.vy += GRAVITY * ctx.dt;
-                pos.position.y += move.vy * ctx.dt;
+                move.vy += GRAVITY * Engine::FIXED_DELTA_TIME;
+                pos.position.y += move.vy * Engine::FIXED_DELTA_TIME;
 
                 if (pos.position.y <= 0)
                 {
