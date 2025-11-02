@@ -26,6 +26,7 @@ set(ENGINE_HEADERS
         include/tomato/services/InputService.h
         include/tomato/services/InputTypes.h
         include/tomato/services/WindowService.h
+        include/tomato/services/network/Socket.h
 )
 
 set(ENGINE_SOURCES
@@ -42,7 +43,7 @@ set(ENGINE_SOURCES
         src/render/Texture.cpp
         src/services/InputService.cpp
         src/services/WindowService.cpp
-)
+        src/services/network/Socket.cpp)
 
 set(EXTERNAL_SOURCES
         external/glad/src/glad.c
