@@ -17,7 +17,8 @@ namespace tomato
         COLLISION,
         GAMERULE,
         SPAWNER,
-        RENDER
+        RENDER,
+        CAMERA,
     };
 
     using Factory = std::function<std::unique_ptr<System>()>;
@@ -51,6 +52,7 @@ namespace tomato
         std::vector<Factory> spawners_;
 
         std::vector<Factory> renderers_;
+        std::vector<Factory> camera_;
     };
 
     struct SystemRegistryEntry

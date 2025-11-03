@@ -4,6 +4,8 @@
 #include "tomato/ecs/World.h"
 #include "tomato/SimulationContext.h"
 #include "tomato/services/CharacterInputHistory.h"
+#include "tomato/ecs/systems/RenderSystem.h"
+#include "tomato/ecs/systems/CameraSystem.h"
 
 namespace tomato
 {
@@ -25,6 +27,9 @@ namespace tomato
 
         for (const auto& factory : SystemRegistry::GetInstance().GetFactory(RENDER))
             renderers_.emplace_back(factory());
+
+        for (const auto& factory : SystemRegistry::GetInstance().GetFactory(CAMERA))
+            camera_.emplace_back(factory());
     }
 
     SystemManager::~SystemManager() = default;
@@ -48,10 +53,15 @@ namespace tomato
         // spawn
         for (auto& system : spawners_)
             system->Update(engine, ctx);
+
+        // camera
+        //for (auto& system : camera_)
+        //    system->Update(engine, ctx);
     }
 
     void SystemManager::Render(const Engine& engine, const SimContext& ctx)
     {
+        glClear(GL_COLOR_BUFFER_BIT);
         for (const auto& system : renderers_)
             system->Update(engine, ctx);
     }
