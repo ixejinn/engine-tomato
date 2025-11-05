@@ -4,6 +4,8 @@
 #include <WinSock2.h>
 #include <memory>
 
+#include "SocketAddress.h"
+
 namespace tomato
 {
 	class Socket
@@ -14,7 +16,7 @@ namespace tomato
 		//bool InitSocket();
 		SocketPtr CreateSocket();
 
-		int Bind(const sockaddr& inToAddress);
+		int Bind(const SocketAddress& inBindAddress);
 		int SendTo(const void* inToSend, int inLength, const sockaddr& inToAddress);
 		int ReceiveFrom(void* inToReceive, int inMaxLength, sockaddr& outFromAddress);
 
