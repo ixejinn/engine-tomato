@@ -26,11 +26,14 @@ set(ENGINE_HEADERS
         include/tomato/services/InputService.h
         include/tomato/services/InputTypes.h
         include/tomato/services/WindowService.h
-        include/tomato/services/network/Socket.h
-        include/tomato/services/network/SocketAddress.h
+        #include/tomato/services/network/Socket.h
+        #include/tomato/services/network/SocketAddress.h
         include/tomato/services/network/NetworkService.h
         include/tomato/serialization/BitReader.h
         include/tomato/serialization/BitWriter.h
+        include/tomato/services/network/NetBitReader.h
+        include/tomato/services/network/CoreNetwork.h
+        include/tomato/services/network/NetBitWriter.h
 )
 
 set(ENGINE_SOURCES
@@ -47,10 +50,11 @@ set(ENGINE_SOURCES
         src/render/Texture.cpp
         src/services/InputService.cpp
         src/services/WindowService.cpp
-        src/services/network/Socket.cpp
-        src/services/network/SocketAddress.cpp
+        #src/services/network/Socket.cpp
+        #src/services/network/SocketAddress.cpp
         src/serialization/BitReader.cpp
         src/serialization/BitWriter.cpp
+        src/services/network/NetBitReader.cpp
 )
 
 set(EXTERNAL_SOURCES
