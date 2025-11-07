@@ -47,6 +47,7 @@ set(ENGINE_SOURCES
         src/render/Texture.cpp
         src/services/InputService.cpp
         src/services/WindowService.cpp
+        src/services/network/NetworkService.cpp
         src/services/network/Socket.cpp
         src/services/network/SocketAddress.cpp
         src/serialization/BitReader.cpp
@@ -78,9 +79,14 @@ target_link_libraries(engine PUBLIC glfw)
 
 if (WIN32)
     target_link_libraries(engine PUBLIC opengl32)
+
 elseif(APPLE)
     target_link_libraries(engine PUBLIC "-framework OpenGL")
 else()
     find_package(OpenGL REQUIRED)
     target_link_libraries(engine PUBLIC OpenGL::GL)
+endif()
+
+if (WIN32)
+    target_link_libraries(engine PUBLIC ws2_32)
 endif()

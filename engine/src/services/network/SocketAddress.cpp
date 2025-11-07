@@ -1,11 +1,10 @@
 #include "tomato/services/network/SocketAddress.h"
-#include <string>
-#include <WinSock2.h>
+
 #include <WS2tcpip.h>
 
 namespace tomato
 {
-	std::string tomato::SocketAddress::ToString() const
+	std::string SocketAddress::ToString() const
 	{
 		// NOTE: Currently supports only IPv4.
 		//       For IPv6, format should be [address]:port (to avoid ':' ambiguity). Planned for future extension.

@@ -4,28 +4,33 @@
 #include <WinSock2.h>
 #include <memory>
 
-#include "SocketAddress.h"
-
 namespace tomato
 {
+	class SocketAddress;
+	class Socket;
+	typedef std::shared_ptr<Socket> SocketPtr;
+
 	class Socket
 	{
 	public:
+		static SocketPtr CreateSocket();
+
 		~Socket();
 
-		//bool InitSocket();
-		SocketPtr CreateSocket();
+		bool InitWinsock();
+		void CleanUp();
 
 		int Bind(const SocketAddress& inBindAddress);
-		int SendTo(const void* inToSend, int inLength, const sockaddr& inToAddress);
-		int ReceiveFrom(void* inToReceive, int inMaxLength, sockaddr& outFromAddress);
+		int SendTo(const void* inToSend, int inLength, const SocketAddress& inToAddress);
+		int ReceiveFrom(void* inToReceive, int inMaxLength, SocketAddress& outFromAddress);
+
+		int SetNonBlockingMode(bool nonBlocking);
 
 	private:
 		Socket(SOCKET inSocket) : socket_(inSocket) {};
 		SOCKET socket_;
 	};
 
-	typedef std::shared_ptr<Socket> SocketPtr;
 }
 
 #endif // !TOMATO_SOCKET_H

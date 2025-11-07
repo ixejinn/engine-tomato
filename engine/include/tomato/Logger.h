@@ -24,8 +24,8 @@ public:
 		switch (level_)
 		{
 			case LOG: std::cout << "[LOG] "; break;
-			case WARN: std::cout << "[WARN] " << "(" << file_ << " : " << line_ << ") "; break;
-			case ERR: std::cout << "[ERR] " << "(" << file_ << " : " << line_ << ") "; break;
+			case WARN: std::cout << "[WARN] " << "(" << file_ << " : " << line_ << ")"; break;
+			case ERR: std::cout << "[ERR] " << "(" << file_ << " : " << line_ << ")"; break;
 		}
 		std::cout << buffer_.str() << std::endl;
 	}
