@@ -4,7 +4,7 @@
 
 namespace tomato
 {
-    NetBitReader::NetBitReader(uint8_t* const input, const int16_t& byteSize)
+    NetBitReader::NetBitReader(uint8_t* const input, const int16_t byteSize)
     {
         if (byteSize <= MAX_PACKET_SIZE)
         {

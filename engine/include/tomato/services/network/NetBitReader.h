@@ -9,7 +9,7 @@ namespace tomato
     class NetBitReader
     {
     public:
-        NetBitReader(uint8_t* const input, const int16_t& byteSize);
+        NetBitReader(uint8_t* input, int16_t byteSize);
 
         // outValue < maxValue
         template<typename T>
@@ -22,7 +22,7 @@ namespace tomato
         }
 
     private:
-        uint32_t DeserializeInt(const uint32_t maxValue);
+        uint32_t DeserializeInt(uint32_t maxValue);
 
         uint8_t* buffer_{nullptr};  // reference
         int16_t byteNum_;

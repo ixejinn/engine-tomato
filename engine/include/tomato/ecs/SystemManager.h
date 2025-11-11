@@ -15,7 +15,7 @@ namespace tomato
     class SystemManager
     {
     public:
-        SystemManager(std::vector<CharacterInputHistory>& inputHistory);
+        explicit SystemManager(std::vector<CharacterInputHistory>& inputHistory);
         ~SystemManager();
 
         void Simulate(Engine& engine, const SimContext& ctx);

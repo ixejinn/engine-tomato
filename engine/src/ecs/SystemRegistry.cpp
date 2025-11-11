@@ -6,7 +6,7 @@ namespace tomato
 {
     SystemRegistry::~SystemRegistry() = default;
 
-    void SystemRegistry::RegisterSystemFactory(const SystemType& type, Factory&& factory)
+    void SystemRegistry::RegisterSystemFactory(const SystemType type, Factory&& factory)
     {
         switch (type)
         {
@@ -40,7 +40,7 @@ namespace tomato
         }
     }
 
-    const std::vector<Factory>& SystemRegistry::GetFactory(const SystemType& type)
+    const std::vector<Factory>& SystemRegistry::GetFactory(const SystemType type)
     {
         switch (type)
         {
