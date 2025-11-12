@@ -49,7 +49,7 @@ namespace tomato
 		sockaddr_in*		GetAsSockAddrIn()			{ return reinterpret_cast<sockaddr_in*>(&sockAddr_); }
 		const sockaddr_in*	GetAsSockAddrIn()	const	{ return reinterpret_cast<const sockaddr_in*>(&sockAddr_); }
 		
-	}
+	};
 };
 
 #endif // !TOMATO_SOCKET_ADDRESS_H
