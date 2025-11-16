@@ -16,9 +16,11 @@ namespace tomato
 
 		NetworkService();
 
-	private:
-		bool InitSocket();
+		void ReadIncomingData();
+		void SendOutgoingData(const SocketAddress& inToAddress);
 
+		bool InitSocket();
+	private:
 
 
 		std::map<uint32_t, std::string> playerToName;

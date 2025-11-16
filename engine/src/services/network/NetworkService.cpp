@@ -15,10 +15,10 @@ namespace tomato
 		socket_ = Socket::CreateSocket();
 
 		uint32_t port = 7777;
-		SocketAddress myAddr(INADDR_ANY, port);
+		SocketAddress myAddr((uint32_t)INADDR_ANY, port);
 		socket_->Bind(myAddr);
 
-		TMT_LOG << "Initializing NetworkService at port " << port;
+		TMT_LOG << "Initializing NetworkService at " << myAddr.ToString();
 
 		if (socket_ == nullptr)
 			return false;
@@ -29,5 +29,32 @@ namespace tomato
 		return true;
 	}
 
+	void NetworkService::ReadIncomingData()
+	{
+		//std::cout << "ReadData\n";
+		char buffer[512] = { '\0' };
+		SocketAddress fromAddr;
 
+		int readByteCount = socket_->ReceiveFrom(buffer, sizeof(buffer) - 1, fromAddr);
+		
+		if (readByteCount == 0)
+			return;
+		else if (readByteCount > 0)
+		{
+			buffer[readByteCount] = '\0';
+			std::cout << "[" << fromAddr.ToString() << "] : " << buffer << '\n';
+		}
+	}
+
+	void NetworkService::SendOutgoingData(const SocketAddress& inToAddress)
+	{
+		std::cout << "SendData\n";
+		std::string str;
+		//while (true){
+			std::cin >> str;
+
+			int sentByteCount = socket_->SendTo(str.c_str(), (int)str.size(), inToAddress);
+			std::cout << sentByteCount << std::endl;
+		//}
+	}
 }

@@ -3,10 +3,12 @@
 
 #include <chrono>
 #include <memory>
+#include <thread>
 #include <vector>
 #include "tomato/services/InputService.h"           // InputService input_
 #include "tomato/services/CharacterInputHistory.h"  // std::vector<CharacterInputHistory> inputHistory_
 #include "tomato/ecs/SystemManager.h"               // SystemManager systemManager_
+#include "tomato/services/network/NetworkService.h"
 
 namespace tomato
 {

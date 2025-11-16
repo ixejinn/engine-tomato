@@ -17,6 +17,13 @@ namespace tomato
 			GetAsSockAddrIn()->sin_port = htons(inPort);
 		}
 
+		SocketAddress(const char* inAddress, uint16_t inPort)
+		{
+			GetAsSockAddrIn()->sin_family = AF_INET;
+			GetIPv4Ref() = inet_addr(inAddress);
+			GetAsSockAddrIn()->sin_port = htons(inPort);
+		}
+
 		SocketAddress(const sockaddr& inSockAddr)
 		{
 			memcpy(&sockAddr_, &inSockAddr, sizeof(sockaddr));
@@ -36,6 +43,13 @@ namespace tomato
 				(GetIPv4Ref() == other.GetIPv4Ref());
 		}
 
+		size_t GetHash() const
+		{
+			return (GetIPv4Ref()) |
+				((static_cast<uint32_t>(GetAsSockAddrIn()->sin_port)) << 13) |
+				sockAddr_.sa_family;
+		}
+
 		uint32_t			GetSize()			const { return sizeof(sockaddr); }
 		std::string			ToString()			const;
 
@@ -52,4 +66,14 @@ namespace tomato
 	};
 }
 
+namespace std
+{
+	template<> struct hash< tomato::SocketAddress >
+	{
+		size_t operator()(const tomato::SocketAddress& inAddress) const
+		{
+			return inAddress.GetHash();
+		}
+	};
+}
 #endif // !TOMATO_SOCKET_ADDRESS_H

@@ -6,10 +6,6 @@
 
 namespace tomato
 {
-	Socket::~Socket()
-	{
-		closesocket(socket_);
-	}
 
 	bool Socket::InitWinsock()
 	{
@@ -39,6 +35,11 @@ namespace tomato
 			TMT_ERR << "Failed to Socket::CreateCocket";
 			return nullptr;
 		}
+	}
+
+	Socket::~Socket()
+	{
+		closesocket(socket_);
 	}
 
 	int Socket::Bind(const SocketAddress& inBindAddress)

@@ -13,12 +13,12 @@ namespace tomato
 	class Socket
 	{
 	public:
+		static bool InitWinsock();
+		static void CleanUp();
 		static SocketPtr CreateSocket();
 
 		~Socket();
 
-		bool InitWinsock();
-		void CleanUp();
 
 		int Bind(const SocketAddress& inBindAddress);
 		int SendTo(const void* inToSend, int inLength, const SocketAddress& inToAddress);
