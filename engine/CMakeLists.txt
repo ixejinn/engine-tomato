@@ -26,8 +26,8 @@ set(ENGINE_HEADERS
         include/tomato/services/InputService.h
         include/tomato/services/InputTypes.h
         include/tomato/services/WindowService.h
-        #include/tomato/services/network/Socket.h
-        #include/tomato/services/network/SocketAddress.h
+        include/tomato/services/network/Socket.h
+        include/tomato/services/network/SocketAddress.h
         include/tomato/services/network/NetworkService.h
         include/tomato/serialization/BitReader.h
         include/tomato/serialization/BitWriter.h
