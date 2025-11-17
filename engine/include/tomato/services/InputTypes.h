@@ -16,33 +16,33 @@ namespace tomato
         JUMP    = 1 << 4
     };
 
-    inline InputAction operator&(const InputAction& l, const InputAction& r)
+    inline InputAction operator&(const InputAction l, const InputAction r)
     {
         return static_cast<InputAction>(static_cast<uint16_t>(l) & static_cast<uint16_t>(r));
     }
 
-    inline InputAction operator|(const InputAction& l, const InputAction& r)
+    inline InputAction operator|(const InputAction l, const InputAction r)
     {
         return static_cast<InputAction>(static_cast<uint16_t>(l) | static_cast<uint16_t>(r));
     }
 
-    inline InputAction operator~(const InputAction& x)
+    inline InputAction operator~(const InputAction x)
     {
         return static_cast<InputAction>(~static_cast<uint16_t>(x));
     }
 
-    inline InputAction operator^(const InputAction& l, const InputAction& r)
+    inline InputAction operator^(const InputAction l, const InputAction r)
     {
         return static_cast<InputAction>(static_cast<uint16_t>(l) ^ static_cast<uint16_t>(r));
     }
 
-    inline InputAction& operator|=(InputAction& l, const InputAction& r)
+    inline InputAction& operator|=(InputAction& l, const InputAction r)
     {
         l = l | r;
         return l;
     }
 
-    inline bool HasAction(const InputAction& x, const InputAction& action)
+    inline bool HasAction(const InputAction x, const InputAction action)
     {
         return (x & action) != InputAction::NONE;
     }

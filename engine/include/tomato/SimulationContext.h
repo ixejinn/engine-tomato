@@ -8,7 +8,6 @@ namespace tomato
     struct SimContext
     {
         uint32_t tick{0};
-        float dt{1 / 60.f};
     };
 }
 

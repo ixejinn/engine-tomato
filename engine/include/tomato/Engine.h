@@ -19,6 +19,9 @@ namespace tomato
     class Engine
     {
     public:
+        static constexpr int FRAME_PER_SECOND{60};
+        static constexpr float FIXED_DELTA_TIME{1.f / FRAME_PER_SECOND};
+
         explicit Engine(WindowService& window);
         ~Engine();
 
@@ -35,10 +38,9 @@ namespace tomato
         const World& GetWorld() const { return *world_; }
 
     private:
-        constexpr static int MAX_PLAYER_NUM{4};
-        constexpr static int MAX_SIMULATION_NUM{3};
-        constexpr static int FRAME_PER_SECOND{60};
-        constexpr static std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
+         static constexpr int MAX_PLAYER_NUM{4};
+         static constexpr int MAX_SIMULATION_NUM{3};
+         static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
 
         WindowService& window_;
 

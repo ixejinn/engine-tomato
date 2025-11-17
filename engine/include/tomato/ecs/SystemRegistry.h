@@ -34,9 +34,9 @@ namespace tomato
         SystemRegistry(const SystemRegistry&) = delete;
         SystemRegistry& operator=(const SystemRegistry&) = delete;
 
-        void RegisterSystemFactory(const SystemType& type, Factory&& factory);
+        void RegisterSystemFactory(SystemType type, Factory&& factory);
 
-        const std::vector<Factory>& GetFactory(const SystemType& type);
+        const std::vector<Factory>& GetFactory(SystemType type);
 
         static SystemRegistry& GetInstance()
         {
@@ -57,7 +57,7 @@ namespace tomato
 
     struct SystemRegistryEntry
     {
-        SystemRegistryEntry(const SystemType& type, Factory&& factory)
+        SystemRegistryEntry(const SystemType type, Factory&& factory)
         {
             SystemRegistry::GetInstance().RegisterSystemFactory(type, std::move(factory));
         }
