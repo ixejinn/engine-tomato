@@ -9,14 +9,14 @@ namespace tomato
     class NetBitReader
     {
     public:
-        NetBitReader(uint8_t* input, int16_t byteSize);
+        NetBitReader(uint8_t* buffer, int16_t byteSize);
 
         // outValue < maxValue
         template<typename T>
         requires std::same_as<T, uint8_t>
               || std::same_as<T, uint16_t>
               || std::same_as<T, uint32_t>
-        void ReadInt(T& outValue, const T& maxValue)
+        void ReadInt(T& outValue, const T maxValue)
         {
             outValue = static_cast<T>(DeserializeInt(maxValue));
         }

@@ -57,6 +57,7 @@ set(ENGINE_SOURCES
         src/serialization/BitReader.cpp
         src/serialization/BitWriter.cpp
         src/services/network/NetBitReader.cpp
+        src/services/network/NetBitWriter.cpp
 )
 
 set(EXTERNAL_SOURCES
