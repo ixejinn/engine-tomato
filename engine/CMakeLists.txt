@@ -35,7 +35,7 @@ set(ENGINE_HEADERS
         include/tomato/services/network/CoreNetwork.h
         include/tomato/services/network/NetBitWriter.h
         include/tomato/containers/MemoryPool.h
-)
+        include/tomato/containers/SPSCQueue.h)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
