@@ -2,65 +2,125 @@
 #define TOMATO_SPSCQ_H
 
 #include <vector>
+#include <array>
 #include <atomic>
+#include <cstddef>
+#include <bit>
+#include <new>
 #include <tomato/Logger.h>
 
-template<typename T>
-class SPSCQueue
+namespace tomato
 {
-public:
-	explicit SPSCQueue(size_t capacity) : capacity_(capacity), buffer_(capacity), head_(0), tail_(0) {}
-
-	bool Enqueue(const T& item)
-	{
-		size_t head = head_.load(std::memory_order_relaxed);
-		size_t next = (head + 1) % capacity_;
-
-		if (next == tail_.load(std::memory_order_acquire))
-		{
-			TMT_ERR << "SPSCQueue is full.";
-			return false;
-		}
-
-		buffer_[head] = item;
-		head_.store(next, std::memory_order_release);
-
-		return true;
-	}
-
-	bool Dequeue(T& out)
-	{
-		size_t tail = tail_.load(std::memory_order_relaxed);
-
-		if (Empty())
-		{
-			TMT_ERR << "SPSCQueue is empty.";
-			return false;
-		}
-
-		out = buffer_[tail];
-		tail_.store((tail + 1) % capacity_, std::memory_order_release);
-
-		return true;
-	}
-
-	bool Empty() const { return head_ == tail_;	}
-	const size_t GetSize() const { return capacity_; }
-	
-#ifdef _DEBUG
-	const T& DebugTailValue() const
-	{
-		size_t last = (tail == 0) ? (capacity_ - 1) : (tail_ - 1);
-		return buffer_[last];
-	}
+#ifdef __cpp_lib_hardware_interference_size
+	constexpr std::size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
+#else
+	constexpr std::size_t CACHE_LINE_SIZE = 64;
 #endif
+	
+	template<typename T, std::size_t sizeT>
+	class SPSCQueue
+	{
+	public:
+		static_assert(sizeT >= 2, "SPSCQueue size must be at least 2");
+		static_assert(std::has_single_bit(sizeT), "Size of the SPSCQueue must be power of 2");
 
-private:
-	size_t capacity_;
-	std::vector<T> buffer_;
+		SPSCQueue() = default;
+		~SPSCQueue()
+		{
+			size_t read = read_.load(std::memory_order_relaxed);
+			size_t write = write_.load(std::memory_order_relaxed);
+			while (read != write)
+			{
+				auto* item = reinterpret_cast<T*>(&cells_[read & mask_].buffer_);
+				item->~T();
+				++read;
+			}
+		}
 
-	std::atomic<size_t> head_; //only producer
-	std::atomic<size_t> tail_; //only consumer
-};
+		bool Enqueue(T item)
+		{
+			const auto write = write_.load(std::memory_order_relaxed);
+			auto read = read_.load(std::memory_order_acquire);
+
+			if(write - read == sizeT)
+			{
+				TMT_ERR << "SPSCQueue is full.";
+				//Error -> Disconnect
+				return false;
+			}
+
+			const auto index = write & mask_;
+			new (cells_[index].buffer_) T(std::move(item));
+			
+			write_.store(write + 1, std::memory_order_release);
+			return true;
+		}
+
+		bool Dequeue(T& out)
+		{
+			auto read = read_.load(std::memory_order_relaxed);
+			const auto write = write_.load(std::memory_order_acquire);
+			if (read == write)
+			{
+				TMT_ERR << "SPSCQueue is empty.";
+				return false;
+			}
+
+			const auto index = read & mask_;
+			auto* item = reinterpret_cast<T*>(cells_[index].buffer_);
+
+			out = std::move(*item);
+			item->~T();
+		
+			read_.store(read + 1, std::memory_order_release);
+			return true;
+		}
+
+		template<typename... Args>
+		bool Emplace(Args&&... args)
+		{
+			const auto write = write_.load(std::memory_order_relaxed);
+			auto read = read_.load(std::memory_order_acquire);
+			const auto index = write & mask_;
+
+			if (write - read == sizeT)
+			{
+				TMT_ERR << "SPSCQueue is full.";
+				return false;
+			}
+
+			new (&cells_[index].buffer_) T(std::forward<Args>(args)...);
+
+			write_.store(write + 1, std::memory_order_release);
+			return true;
+		}
+
+		bool Empty() const { return write_.load(std::memory_order_acquire) == read_.load(std::memory_order_acquire); }
+		const std::size_t GetSize() const { return sizeT; }
+	
+	#ifdef _DEBUG
+		const T* DebugReadValue() const
+		{
+			size_t read = read_.load(std::memory_order_relaxed);
+			size_t write = write_.load(std::memory_order_relaxed);
+			if (read == write) return nullptr;
+
+			return reinterpret_cast<const T*>(cells_[read & mask_].buffer_);
+		}
+	#endif
+
+	private:
+		struct cell_t {
+			alignas(T) std::byte buffer_[sizeof(T)];
+		};
+		
+		static constexpr std::size_t mask_ = sizeT - 1;
+
+		alignas(CACHE_LINE_SIZE) std::atomic<size_t> write_ = 0;
+		alignas(CACHE_LINE_SIZE) std::atomic<size_t> read_ = 0;
+
+		alignas(CACHE_LINE_SIZE) std::array<cell_t, sizeT> cells_;
+	};
+}
 
 #endif // !TOMATO_SPSCQ_H

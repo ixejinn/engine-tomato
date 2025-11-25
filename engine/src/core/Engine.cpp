@@ -69,7 +69,7 @@ namespace tomato
             // 고정 시간 시뮬레이션
             std::chrono::steady_clock::time_point cur = std::chrono::steady_clock::now();
             adder_ += std::chrono::duration<float, std::milli>(cur - start_);
-            int simulationNum = std::min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
+            int simulationNum = min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
             while (simulationNum--) {
                 // !!! 지금은 비어있는 Simulation Context 전달 !!!
                 systemManager_.Simulate(*this, SimContext{});
