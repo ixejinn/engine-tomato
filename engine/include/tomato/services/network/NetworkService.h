@@ -1,27 +1,59 @@
 #ifndef TOMATO_NETWORKSERVICE_H
 #define TOMATO_NETWORKSERVICE_H
 
-#include "tomato/services/network/Socket.h"
-#include "tomato/services/network/SocketAddress.h"
-
 #include <map>
 #include <unordered_map>
 #include <string>
+#include <atomic>
+
+#include "tomato/services/network/CoreNetwork.h"
+#include "tomato/services/network/Socket.h"         // SocketPtr socket_
+#include "tomato/services/network/SocketAddress.h"  // map<..SocketAddress..> ..
+#include "tomato/containers/MemoryPool.h"
 
 namespace tomato
 {
+    class Engine;
+
+    struct Packet
+    {
+        RawBuffer* buffer;
+        std::size_t size;
+        SocketAddress addr;
+
+        Packet(RawBuffer* bufPtr, std::size_t size, SocketAddress addr)
+        : buffer(bufPtr), size(size), addr(addr) {}
+    };
+
 	class NetworkService
 	{
 	public:
+        static constexpr int MAX_PLAYER_NUM{4};
 
-		NetworkService();
+		explicit NetworkService(Engine& engine);
+        ~NetworkService();
 
+        // !!! FOR TEST !!!
 		void ReadIncomingData();
 		void SendOutgoingData(const SocketAddress& inToAddress);
+        // !!! FOR TEST !!!
 
 		bool InitSocket();
-	private:
 
+        void Dispatch();
+        void ProcessPendingPacket();
+        void SendPacket(uint32_t messageType);
+
+        uint32_t GetPlayerID() const { return playerID_; }
+        uint32_t GetPlayerID(SocketAddress& addr)
+        { return socketToPlayer[addr]; }
+
+	private:
+        std::atomic<bool> isNetThreadRunning_{false};
+
+        MemoryPool<RawBuffer, 128> bufferPool_;
+
+        // SPSCQueue<Packet, 128> pendingPackets_;
 
 		std::map<uint32_t, std::string> playerToName;
 		std::map<uint32_t, SocketAddress> playerToSocket;
@@ -29,7 +61,9 @@ namespace tomato
 
 		SocketPtr socket_;
 		std::string name_;
-		uint32_t playerId_;
+		uint32_t playerID_;
+
+        Engine& engine_;
 	};
 }
 

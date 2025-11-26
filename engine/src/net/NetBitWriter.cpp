@@ -1,5 +1,4 @@
-#include "tomato/services/network/NetBitWriter.h"
-#include "tomato/services/network/CoreNetwork.h"
+#include "tomato/net/NetBitWriter.h"
 #include "tomato/Logger.h"
 
 namespace tomato

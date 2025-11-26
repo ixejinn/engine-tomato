@@ -4,19 +4,23 @@
 #include <cstdint>
 #include <concepts>
 
+#include "tomato/services/network/CoreNetwork.h"
+
 namespace tomato
 {
     class NetBitWriter
     {
     public:
         NetBitWriter(uint8_t* output, int16_t byteSize);
+        NetBitWriter(RawBuffer* rawBuffer)
+        : buffer_(rawBuffer->data()), byteNum_(MAX_PACKET_SIZE), bitPos_(0) {}
 
         // inValue < maxValue
         template<typename T>
         requires std::same_as<T, uint8_t>
               || std::same_as<T, uint16_t>
               || std::same_as<T, uint32_t>
-        void WriteInt(const T inValue, const T maxValue)
+        void WriteInt(const T inValue, uint32_t maxValue)
         {
             SerializeInt(inValue, maxValue);
         }

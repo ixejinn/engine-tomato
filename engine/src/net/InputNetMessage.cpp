@@ -1,0 +1,41 @@
+#include "tomato/net/InputNetMessage.h"
+#include "tomato/net/NetBitReader.h"
+#include "tomato/net/NetBitWriter.h"
+#include "tomato/Engine.h"
+#include "tomato/services/network/SocketAddress.h"
+#include "tomato/services/network/NetworkService.h"
+
+#include <limits>
+
+namespace tomato
+{
+    void InputNetMessage::Serialize(NetBitWriter& writer, Engine& engine)
+    {
+        uint32_t tick = engine.GetTick();
+        inputRecord = engine.GetInputHistory()[0][tick];
+        writer.WriteInt(inputRecord.tick, inputRecord.tick + 1);
+        writer.WriteInt(uint16_t(inputRecord.keydown), uint32_t(InputAction::END));
+        writer.WriteInt(uint16_t(inputRecord.keypress), uint32_t(InputAction::END));
+    }
+
+    void InputNetMessage::Deserialize(NetBitReader& reader)
+    {
+        reader.ReadInt(inputRecord.tick, std::numeric_limits<int>::max());
+
+        uint16_t value = 0;
+        reader.ReadInt(value, uint32_t(InputAction::END));
+        inputRecord.keydown = static_cast<InputAction>(value);
+        reader.ReadInt(value, uint32_t(InputAction::END));
+        inputRecord.keypress = static_cast<InputAction>(value);
+    }
+
+    void InputNetMessage::Handler(Engine& engine, SocketAddress& fromAddr)
+    {
+        engine.SetInputHistory(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
+        if (engine.GetLatestTick() > inputRecord.tick)
+            engine.SetLatestTick(inputRecord.tick);
+
+        auto tmp = static_cast<uint16_t>(inputRecord.keydown);
+        std::cout << "[" << inputRecord.tick << "] " << tmp << "\n";
+    }
+}

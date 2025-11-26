@@ -31,10 +31,13 @@ set(ENGINE_HEADERS
         include/tomato/services/network/NetworkService.h
         include/tomato/serialization/BitReader.h
         include/tomato/serialization/BitWriter.h
-        include/tomato/services/network/NetBitReader.h
+        include/tomato/net/NetBitReader.h
         include/tomato/services/network/CoreNetwork.h
-        include/tomato/services/network/NetBitWriter.h
+        include/tomato/net/NetBitWriter.h
         include/tomato/containers/MemoryPool.h
+        include/tomato/net/NetMessageRegistry.h
+        include/tomato/net/NetMessage.h
+        include/tomato/net/InputNetMessage.h
 )
 
 set(ENGINE_SOURCES
@@ -56,8 +59,9 @@ set(ENGINE_SOURCES
         src/services/network/SocketAddress.cpp
         src/serialization/BitReader.cpp
         src/serialization/BitWriter.cpp
-        src/services/network/NetBitReader.cpp
-        src/services/network/NetBitWriter.cpp
+        src/net/NetBitReader.cpp
+        src/net/NetBitWriter.cpp
+        src/net/InputNetMessage.cpp
 )
 
 set(EXTERNAL_SOURCES

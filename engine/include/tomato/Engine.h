@@ -5,10 +5,11 @@
 #include <memory>
 #include <thread>
 #include <vector>
+
 #include "tomato/services/InputService.h"           // InputService input_
 #include "tomato/services/CharacterInputHistory.h"  // std::vector<CharacterInputHistory> inputHistory_
+#include "tomato/services/network/NetworkService.h" // NetworkService::MAX_PLAYER_NUM
 #include "tomato/ecs/SystemManager.h"               // SystemManager systemManager_
-#include "tomato/services/network/NetworkService.h"
 
 namespace tomato
 {
@@ -33,19 +34,33 @@ namespace tomato
         const WindowService& GetWindow() const { return window_; }
 
         const std::vector<CharacterInputHistory>& GetInputHistory() const { return inputHistory_; }
+        void SetInputHistory(uint8_t playerID, const InputRecord& record);
 
         World& GetWorld() { return *world_; }
         const World& GetWorld() const { return *world_; }
 
+        uint32_t GetTick() const { return tick_; }
+
+        uint32_t GetLatestTick() const { return latestTick_; }
+        void SetLatestTick(uint32_t newTick) { latestTick_ = newTick; }
+
+        NetworkService& GetNetworkService() { return network_; }
+
     private:
-         static constexpr int MAX_PLAYER_NUM{4};
          static constexpr int MAX_SIMULATION_NUM{3};
          static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
 
         WindowService& window_;
 
         InputService input_;
-        std::vector<CharacterInputHistory> inputHistory_{MAX_PLAYER_NUM};
+        std::vector<CharacterInputHistory> inputHistory_{NetworkService::MAX_PLAYER_NUM};
+
+        // 사용하는 경우에만 만들게 하던지..
+        // 매칭 서버랑 연결될 때 내 playerID 설정할 수 있는 함수 필요
+        NetworkService network_;
+
+        uint32_t tick_{0};
+        uint32_t latestTick_{0};
 
         std::unique_ptr<World> world_{nullptr};
         SystemManager systemManager_;

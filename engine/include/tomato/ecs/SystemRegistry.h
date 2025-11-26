@@ -22,7 +22,6 @@ namespace tomato
     };
 
     using Factory = std::function<std::unique_ptr<System>()>;
-    using ControllerFactory = std::function<std::unique_ptr<System>(std::vector<CharacterInputHistory>&)>;
 
     class SystemRegistry
     {
@@ -45,6 +44,7 @@ namespace tomato
         }
 
     private:
+        // map<SystemType, std::vector<Factory>>로 바꾸는 건 어떨지
         std::vector<Factory> controllers_;
         std::vector<Factory> integrators_;
         std::vector<Factory> collisions_;

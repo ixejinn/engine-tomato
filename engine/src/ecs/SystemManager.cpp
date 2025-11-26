@@ -1,15 +1,13 @@
 #include "tomato/ecs/SystemManager.h"
 #include "tomato/ecs/SystemRegistry.h"
 #include "tomato/ecs/systems/System.h"
-#include "tomato/ecs/World.h"
-#include "tomato/SimulationContext.h"
-#include "tomato/services/CharacterInputHistory.h"
 #include "tomato/ecs/systems/RenderSystem.h"
 #include "tomato/ecs/systems/CameraSystem.h"
+#include "tomato/SimulationContext.h"
 
 namespace tomato
 {
-    SystemManager::SystemManager(std::vector<CharacterInputHistory>& inputHistory)
+    SystemManager::SystemManager()
     {
         for (const auto& factory : SystemRegistry::GetInstance().GetFactory(CONTROLLER))
             controllers_.emplace_back(factory());

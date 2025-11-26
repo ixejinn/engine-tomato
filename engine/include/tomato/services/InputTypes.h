@@ -13,7 +13,8 @@ namespace tomato
         DOWN    = 1 << 1,
         LEFT    = 1 << 2,
         RIGHT   = 1 << 3,
-        JUMP    = 1 << 4
+        JUMP    = 1 << 4,
+        END
     };
 
     inline InputAction operator&(const InputAction l, const InputAction r)

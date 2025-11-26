@@ -16,6 +16,7 @@ namespace tomato
         constexpr static int MAX_INPUT_TICKS = 100;
 
         const InputRecord& operator[](uint32_t tick) { return history_[tick % MAX_INPUT_TICKS]; }
+        const InputRecord& operator[](uint32_t tick) const { return history_[tick % MAX_INPUT_TICKS]; }
 
         void SetInputHistory(uint32_t tick, const InputRecord& record) { history_[tick % MAX_INPUT_TICKS] = record; }
 

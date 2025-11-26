@@ -16,7 +16,7 @@ namespace tomato
         requires std::same_as<T, uint8_t>
               || std::same_as<T, uint16_t>
               || std::same_as<T, uint32_t>
-        void ReadInt(T& outValue, const T maxValue)
+        void ReadInt(T& outValue, uint32_t maxValue)
         {
             outValue = static_cast<T>(DeserializeInt(maxValue));
         }
