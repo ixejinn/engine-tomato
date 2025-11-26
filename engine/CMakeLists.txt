@@ -38,6 +38,7 @@ set(ENGINE_HEADERS
         include/tomato/net/NetMessageRegistry.h
         include/tomato/net/NetMessage.h
         include/tomato/net/InputNetMessage.h
+        include/tomato/containers/SPSCQueue.h
 )
 
 set(ENGINE_SOURCES
