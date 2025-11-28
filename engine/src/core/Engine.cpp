@@ -6,6 +6,8 @@
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/systems/System.h"
 
+#include <thread>
+
 namespace tomato
 {
     Engine::Engine(WindowService& window)
@@ -45,6 +47,8 @@ namespace tomato
 
     void Engine::Run()
     {
+        std::thread th(&NetworkService::Dispatch, &network_);
+
         while (!window_.ShouldClose() && isRunning_)
         {
             if (nextState_)
@@ -59,6 +63,8 @@ namespace tomato
             input_.UpdateRecord(window_.GetHandle(), tick_);
             inputHistory_[network_.GetPlayerID()].SetInputHistory(tick_, input_.GetCurrInputRecord());
 
+            network_.SendPacket(0);
+
             // 네트워크 관련 객체:          
             // 다른 플레이어로부터 들어온 늦은 입력을 히스토리에 저장하고,
             // 롤백 해야 할 틱 번호 찾음
@@ -66,16 +72,16 @@ namespace tomato
             network_.ProcessPendingPacket();
 
             // 롤백
-            while (latestTick_ < tick_)
-            {
-                systemManager_.Simulate(*this, SimContext{latestTick_});
-                latestTick_++;
-            }
+//            while (latestTick_ < tick_)
+//            {
+//                systemManager_.Simulate(*this, SimContext{latestTick_});
+//                latestTick_++;
+//            }
 
             // 고정 시간 시뮬레이션
             std::chrono::steady_clock::time_point cur = std::chrono::steady_clock::now();
             adder_ += std::chrono::duration<float, std::milli>(cur - start_);
-            int simulationNum = min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
+            int simulationNum = std::min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
             while (simulationNum--) {
                 // !!! 지금은 비어있는 Simulation Context 전달 !!!
                 systemManager_.Simulate(*this, SimContext{tick_});
@@ -89,7 +95,12 @@ namespace tomato
 
             window_.SwapBuffers();
             window_.PollEvents();
+
+            ++tick_;
         }
+
+        network_.isNetThreadRunning_ = false;
+        th.join();
     }
 
     void Engine::SetInputHistory(uint8_t playerID, const tomato::InputRecord &record)

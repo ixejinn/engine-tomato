@@ -12,10 +12,10 @@ namespace tomato
     void InputNetMessage::Serialize(NetBitWriter& writer, Engine& engine)
     {
         uint32_t tick = engine.GetTick();
-        inputRecord = engine.GetInputHistory()[0][tick];
-        writer.WriteInt(inputRecord.tick, inputRecord.tick + 1);
-        writer.WriteInt(uint16_t(inputRecord.keydown), uint32_t(InputAction::END));
-        writer.WriteInt(uint16_t(inputRecord.keypress), uint32_t(InputAction::END));
+        inputRecord = engine.GetInputHistory()[engine.GetNetworkService().GetPlayerID()][tick];
+        writer.WriteInt(tick, std::numeric_limits<int>::max());
+        writer.WriteInt(static_cast<uint16_t>(inputRecord.keydown), static_cast<uint32_t>(InputAction::END));
+        writer.WriteInt(static_cast<uint16_t>(inputRecord.keypress), static_cast<uint32_t>(InputAction::END));
     }
 
     void InputNetMessage::Deserialize(NetBitReader& reader)
@@ -35,7 +35,7 @@ namespace tomato
         if (engine.GetLatestTick() > inputRecord.tick)
             engine.SetLatestTick(inputRecord.tick);
 
-        auto tmp = static_cast<uint16_t>(inputRecord.keydown);
-        std::cout << "[" << inputRecord.tick << "] " << tmp << "\n";
+        auto tmp = static_cast<uint16_t>(inputRecord.keypress);
+        std::cout << "InputNetMessage::Handler [" << engine.GetNetworkService().GetPlayerID(fromAddr) << "] " << inputRecord.tick << " : " << tmp << "\n";
     }
 }

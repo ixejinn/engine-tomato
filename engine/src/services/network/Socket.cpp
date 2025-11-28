@@ -60,7 +60,7 @@ namespace tomato
 		
 		if (byteSentCount <= 0)
 		{
-			TMT_ERR << "Failed to Socket::SendTo";
+			//TMT_ERR << "Failed to Socket::SendTo";
 			return -WSAGetLastError();
 		}
 		else

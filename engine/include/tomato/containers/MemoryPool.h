@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstring>
 #include <cstdint>
+#include <mutex>
 #include "tomato/Logger.h"
 
 namespace tomato
@@ -24,6 +25,8 @@ namespace tomato
                 return nullptr;
             }
 
+            mtx.lock();
+
             usedSize_++;
 
             void* cur = free_;
@@ -35,6 +38,8 @@ namespace tomato
             auto beginB = static_cast<std::byte*>(pool_);
             auto offset = (curB - beginB) / chunkSize_;
             SetValid(offset);
+
+            mtx.unlock();
 
             return ::new (cur) T(std::forward<Args>(args)...);
         }
@@ -59,6 +64,8 @@ namespace tomato
                 return false;
             }
 
+            mtx.lock();
+
             // 할당 상태 확인
             auto offset = diffB / chunkSize_;
             if (!IsValid(offset))
@@ -78,6 +85,8 @@ namespace tomato
 
             // 할당 상태 비트 0
             SetInvalid(offset);
+
+            mtx.unlock();
 
             return true;
         }
@@ -100,6 +109,8 @@ namespace tomato
         std::size_t usedSize_{0};
 
         std::size_t chunkSize_{0};
+
+        std::mutex mtx;
     };
 
     template<typename T, std::size_t N>

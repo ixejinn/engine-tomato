@@ -10,6 +10,7 @@
 #include "tomato/services/network/Socket.h"         // SocketPtr socket_
 #include "tomato/services/network/SocketAddress.h"  // map<..SocketAddress..> ..
 #include "tomato/containers/MemoryPool.h"
+#include "tomato/containers/SPSCQueue.h"
 
 namespace tomato
 {
@@ -17,10 +18,11 @@ namespace tomato
 
     struct Packet
     {
-        RawBuffer* buffer;
+        RawBuffer* buffer{nullptr};
         std::size_t size;
         SocketAddress addr;
 
+        Packet() = default;
         Packet(RawBuffer* bufPtr, std::size_t size, SocketAddress addr)
         : buffer(bufPtr), size(size), addr(addr) {}
     };
@@ -48,12 +50,12 @@ namespace tomato
         uint32_t GetPlayerID(SocketAddress& addr)
         { return socketToPlayer[addr]; }
 
-	private:
         std::atomic<bool> isNetThreadRunning_{false};
 
+	private:
         MemoryPool<RawBuffer, 128> bufferPool_;
 
-        // SPSCQueue<Packet, 128> pendingPackets_;
+        SPSCQueue<Packet, 128> pendingPackets_;
 
 		std::map<uint32_t, std::string> playerToName;
 		std::map<uint32_t, SocketAddress> playerToSocket;

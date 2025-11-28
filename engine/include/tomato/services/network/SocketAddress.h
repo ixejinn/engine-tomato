@@ -11,12 +11,14 @@ namespace tomato
 	class SocketAddress
 	{
 	public:
-		SocketAddress(uint32_t inAddress, uint16_t inPort)
+
+        SocketAddress(uint32_t inAddress, uint16_t inPort)
 		{
 			GetAsSockAddrIn()->sin_family = AF_INET;
 			GetIPv4Ref() = htonl(inAddress);
 			GetAsSockAddrIn()->sin_port = htons(inPort);
 		}
+
 
 		SocketAddress(const char* inAddress, uint16_t inPort)
 		{

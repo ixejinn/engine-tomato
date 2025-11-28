@@ -3,13 +3,33 @@
 #include "tomato/Engine.h"
 #include "tomato/net/NetBitReader.h"
 #include "tomato/net/NetBitWriter.h"
+#include "tomato/net/InputNetMessage.h"
 
 namespace tomato
 {
 	NetworkService::NetworkService(Engine& engine)
-    : engine_(engine), playerID_(0) {}
+    : engine_(engine), playerID_(0)
+    {
+        Socket::InitWinsock();
+        InitSocket();
 
-    NetworkService::~NetworkService() = default;
+        playerToName[0] = "yejin";
+        playerToSocket[0] = SocketAddress{"192.168.204.129", 7777};
+        socketToPlayer[playerToSocket[0]] = 0;
+
+        playerToName[1] = "yujung";
+        playerToSocket[1] = SocketAddress{"192.168.31.234", 7777};
+        socketToPlayer[playerToSocket[1]] = 1;
+
+//        playerToName[1] = "yejin2";
+//        playerToSocket[1] = SocketAddress{"192.168.55.165", 7777};
+//        socketToPlayer[playerToSocket[1]] = 1;
+    }
+
+    NetworkService::~NetworkService()
+    {
+        Socket::CleanUp();
+    }
 
     // !!! FOR TEST !!!
     void NetworkService::ReadIncomingData()
@@ -74,7 +94,7 @@ namespace tomato
 
             if (receivedBytes > 0)
             {
-                //pendingPackets_.replace(buffer, receivedBytes, fromAddr);
+                pendingPackets_.Emplace(buffer, receivedBytes, fromAddr);
             }
             else
                 bufferPool_.Deallocate(buffer);
@@ -83,41 +103,52 @@ namespace tomato
 
     void NetworkService::ProcessPendingPacket()
     {
-        // 큐 반복문에 넣을 부분
-        // PacketHeader 필요
-        //Packet& packet = pendingPackets_.front();
-        //NetBitReader reader(packet.buffer, packet.size);
-
-        uint32_t messageType = -1;
-        //reader.ReadInt(messageType, 4);   // 예비로 비트 2개만 확인하게 함
-
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
-        if (messageType == 0)
+        while (!pendingPackets_.Empty())
         {
+            if (pendingPackets_.Empty())
+                return;
+            Packet packet;
+            pendingPackets_.Dequeue(packet);
+            NetBitReader reader(packet.buffer->data(), packet.size);
 
+            uint32_t messageType = -1;
+            reader.ReadInt(messageType, 4);   // 예비로 비트 2개만 확인하게 함
+
+            if (messageType == 0)
+            {
+                InputNetMessage tmp;
+                tmp.Read(reader, engine_, packet.addr);
+            }
+
+            bufferPool_.Deallocate(packet.buffer);
         }
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
     }
 
     void NetworkService::SendPacket(uint32_t messageType)
     {
-        RawBuffer* rawBuffer = bufferPool_.Allocate();
-        NetBitWriter writer{rawBuffer};
+        //RawBuffer* rawBuffer = bufferPool_.Allocate();
+        RawBuffer rawBuffer;
+        NetBitWriter writer{&rawBuffer};
 
         writer.WriteInt(messageType, 4);
 
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
         if (messageType == 0)
         {
-
+            InputNetMessage tmp;
+            tmp.Write(writer, engine_);
         }
 
         for (auto& playerAddr : playerToSocket)
         {
-            socket_->SendTo(rawBuffer->data(), MAX_PACKET_SIZE, playerAddr.second);
+            if (playerAddr.first == playerID_)
+                continue;
+            socket_->SendTo(rawBuffer.data(), MAX_PACKET_SIZE, playerAddr.second);
         }
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
 
-        bufferPool_.Deallocate(rawBuffer);
+//        bufferPool_.Deallocate(rawBuffer);
     }
 }
