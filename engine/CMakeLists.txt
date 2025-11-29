@@ -75,29 +75,31 @@ add_library(engine STATIC
         ${EXTERNAL_SOURCES}
 )
 
-target_include_directories(engine PUBLIC
+target_include_directories(engine
+        PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
+        ${entt_SOURCE_DIR}/src
+
+        PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/external
         ${CMAKE_CURRENT_LIST_DIR}/external/glad/include
-        ${CMAKE_CURRENT_LIST_DIR}/external/entt/include
-        ${CMAKE_CURRENT_LIST_DIR}/external/glm/include
 )
 
 if (NOT TARGET glfw)
     message(FATAL_ERROR "Target 'glfw' not found")
 endif()
-target_link_libraries(engine PUBLIC glfw)
 
-if (WIN32)
-    target_link_libraries(engine PUBLIC opengl32)
-
-elseif(APPLE)
-    target_link_libraries(engine PUBLIC "-framework OpenGL")
-else()
-    find_package(OpenGL REQUIRED)
-    target_link_libraries(engine PUBLIC OpenGL::GL)
+if (NOT TARGET glm)
+    message(FATAL_ERROR "Target 'glm' not found")
 endif()
 
-if (WIN32)
-    target_link_libraries(engine PUBLIC ws2_32)
-endif()
+# !!! Windows-ONLY !!!
+target_link_libraries(engine
+        PUBLIC
+        glfw
+        glm
+
+        PRIVATE
+        opengl32
+        ws2_32
+)
