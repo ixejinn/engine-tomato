@@ -4,6 +4,8 @@
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
 #include "tomato/ecs/components/Sprite.h"
+#include "tomato/containers/RingArray.h"
+#include <iostream>
 
 void TestState::Init(tomato::World& world)
 {
@@ -20,6 +22,14 @@ void TestState::Init(tomato::World& world)
     world.Emplace<tomato::MovementComponent>(entity);
 
     world.Emplace<tomato::SpriteComponent>(entity, (uint16_t)0, (uint16_t)0);
+
+    //RingArray Test code
+    //tomato::RingArray<int, 4> testRing;
+    //for (int i = 0; i < 10; i++)
+    //{
+    //    testRing[i] = i;
+    //    std::cout << testRing[i] << std::endl;
+    //}
 }
 
 void TestState::Exit() {}

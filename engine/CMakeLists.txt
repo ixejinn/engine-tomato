@@ -39,7 +39,7 @@ set(ENGINE_HEADERS
         include/tomato/net/NetMessage.h
         include/tomato/net/InputNetMessage.h
         include/tomato/containers/SPSCQueue.h
-)
+        include/tomato/containers/RingBuffer.h)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -74,6 +74,8 @@ add_library(engine STATIC
         ${ENGINE_SOURCES}
         ${EXTERNAL_SOURCES}
 )
+
+target_compile_definitions(engine PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
 
 target_include_directories(engine
         PUBLIC
