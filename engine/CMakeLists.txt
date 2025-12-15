@@ -78,10 +78,9 @@ add_library(engine STATIC
 target_include_directories(engine
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
-        ${entt_SOURCE_DIR}/src
 
         PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/external
+        ${CMAKE_CURRENT_LIST_DIR}/external/stb
         ${CMAKE_CURRENT_LIST_DIR}/external/glad/include
 )
 
@@ -93,13 +92,18 @@ if (NOT TARGET glm)
     message(FATAL_ERROR "Target 'glm' not found")
 endif()
 
+if (NOT TARGET EnTT)
+    message(FATAL_ERROR "Target 'EnTT' not found")
+endif()
+
 # !!! Windows-ONLY !!!
 target_link_libraries(engine
         PUBLIC
         glfw
         glm
+        EnTT
 
         PRIVATE
-        opengl32
-        ws2_32
+        opengl32    # OpenGL
+        ws2_32      # Winsock API
 )

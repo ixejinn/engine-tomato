@@ -4,30 +4,19 @@ add_executable(contents
         TestState.cpp
 )
 
-target_link_libraries(contents PRIVATE engine)
-
-# ¼ÎÀÌ´õ Æú´õ
-set(SHADER_DIR ${CMAKE_SOURCE_DIR}/assets)
-
-# ½ÇÇà ÆÄÀÏ ¿· assets Æú´õ °æ·Î
-set(TARGET_ASSETS_DIR $<TARGET_FILE_DIR:contents>/assets)
-
-# ºôµå ÈÄ assets Æú´õ ÅëÂ°·Î º¹»ç
-add_custom_command(TARGET contents POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${SHADER_DIR} ${TARGET_ASSETS_DIR}
+target_link_libraries(contents PRIVATE
+        # Force inclusion of all object files in the static library for SystemRegistry
+        $<LINK_LIBRARY:WHOLE_ARCHIVE, engine>
 )
 
-if (MSVC)
-    target_link_options(contents PRIVATE
-            LINKER:
-            "/WHOLEARCHIVE:engine.lib"
-    )
-else()
-    target_link_options(contents PRIVATE
-            LINKER:
-            "-Wl,--whole-archive"
-            "$<TARGET_FILE:engine>"
-            "-Wl,--no-whole-archive"
-    )
-endif()
+# ì…°ì´ë” í´ë”
+set(SHADER_DIR ${CMAKE_SOURCE_DIR}/assets)
+
+# ì‹¤í–‰ íŒŒì¼ ì˜† assets í´ë” ê²½ë¡œ
+set(TARGET_ASSETS_DIR $<TARGET_FILE_DIR:contents>/assets)
+
+# ë¹Œë“œ í›„ assets í´ë” í†µì§¸ë¡œ ë³µì‚¬
+add_custom_command(TARGET contents POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${SHADER_DIR} ${TARGET_ASSETS_DIR}
+)
