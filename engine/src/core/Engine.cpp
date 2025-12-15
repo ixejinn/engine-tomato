@@ -61,7 +61,7 @@ namespace tomato
             window_.TMP_CheckEscapeKey();
             input_.BeginFrame();
             input_.UpdateRecord(window_.GetHandle(), tick_);
-            inputHistory_[network_.GetPlayerID()].SetInputHistory(tick_, input_.GetCurrInputRecord());
+            inputTimeline_[network_.GetPlayerID()].SetInputHistory(tick_, input_.GetCurrInputRecord());
 
             network_.SendPacket(0);
 
@@ -83,7 +83,6 @@ namespace tomato
             adder_ += std::chrono::duration<float, std::milli>(cur - start_);
             int simulationNum = std::min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
             while (simulationNum--) {
-                // !!! 지금은 비어있는 Simulation Context 전달 !!!
                 systemManager_.Simulate(*this, SimContext{tick_});
 
                 adder_ -= dt_;
@@ -105,6 +104,6 @@ namespace tomato
 
     void Engine::SetInputHistory(uint8_t playerID, const tomato::InputRecord &record)
     {
-        inputHistory_[playerID].SetInputHistory(record.tick, record);
+        inputTimeline_[playerID].SetInputHistory(record.tick, record);
     }
 }

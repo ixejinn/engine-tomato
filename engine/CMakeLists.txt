@@ -22,7 +22,7 @@ set(ENGINE_HEADERS
         include/tomato/render/Mesh.h
         include/tomato/render/Shader.h
         include/tomato/render/Texture.h
-        include/tomato/services/CharacterInputHistory.h
+        include/tomato/services/PlayerInputTimeline.h
         include/tomato/services/InputService.h
         include/tomato/services/InputTypes.h
         include/tomato/services/WindowService.h
@@ -39,7 +39,8 @@ set(ENGINE_HEADERS
         include/tomato/net/NetMessage.h
         include/tomato/net/InputNetMessage.h
         include/tomato/containers/SPSCQueue.h
-        include/tomato/containers/RingBuffer.h)
+        include/tomato/containers/RingBuffer.h
+        include/tomato/EngineConfig.h)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp

@@ -10,7 +10,7 @@ namespace tomato
     class System;
     class World;
     class SimContext;
-    class CharacterInputHistory;
+    class PlayerInputTimeline;
 
     class SystemManager
     {

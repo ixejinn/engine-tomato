@@ -4,12 +4,13 @@
 #include <chrono>
 #include <memory>
 #include <thread>
-#include <vector>
+#include <array>
 
 #include "tomato/services/InputService.h"           // InputService input_
-#include "tomato/services/CharacterInputHistory.h"  // std::vector<CharacterInputHistory> inputHistory_
+#include "tomato/services/PlayerInputTimeline.h"    // PlayersInputTimeline
 #include "tomato/services/network/NetworkService.h" // NetworkService::MAX_PLAYER_NUM
 #include "tomato/ecs/SystemManager.h"               // SystemManager systemManager_
+#include "tomato/EngineConfig.h"
 
 namespace tomato
 {
@@ -20,6 +21,8 @@ namespace tomato
     class Engine
     {
     public:
+        using PlayersInputTimeline = std::array<PlayerInputTimeline, EngineConfig::MAX_PLAYER_NUM>;
+
         static constexpr int FRAME_PER_SECOND{60};
         static constexpr float FIXED_DELTA_TIME{1.f / FRAME_PER_SECOND};
 
@@ -33,7 +36,7 @@ namespace tomato
 
         const WindowService& GetWindow() const { return window_; }
 
-        const std::vector<CharacterInputHistory>& GetInputHistory() const { return inputHistory_; }
+        const PlayersInputTimeline& GetInputTimeline() const { return inputTimeline_; }
         void SetInputHistory(uint8_t playerID, const InputRecord& record);
 
         World& GetWorld() { return *world_; }
@@ -47,13 +50,13 @@ namespace tomato
         NetworkService& GetNetworkService() { return network_; }
 
     private:
-         static constexpr int MAX_SIMULATION_NUM{3};
-         static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
+        static constexpr int MAX_SIMULATION_NUM{3};
+        static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
 
         WindowService& window_;
 
         InputService input_;
-        std::vector<CharacterInputHistory> inputHistory_{NetworkService::MAX_PLAYER_NUM};
+        PlayersInputTimeline inputTimeline_;
 
         // 사용하는 경우에만 만들게 하던지..
         // 매칭 서버랑 연결될 때 내 playerID 설정할 수 있는 함수 필요

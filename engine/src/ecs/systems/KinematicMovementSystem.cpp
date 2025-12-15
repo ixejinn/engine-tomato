@@ -14,7 +14,7 @@ namespace tomato
     void KinematicMovementSystem::Update(Engine& engine, const SimContext& ctx)
     {
         auto view = engine.GetWorld().View<PositionComponent, SpeedComponent, InputChannelComponent, MovementComponent>();
-        auto inputHistory = engine.GetInputHistory();
+        auto inputHistory = engine.GetInputTimeline();
 
         for (auto [e, pos, speed, ch, move] : view.each())
         {

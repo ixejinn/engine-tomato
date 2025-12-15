@@ -30,8 +30,6 @@ namespace tomato
 	class NetworkService
 	{
 	public:
-        static constexpr int MAX_PLAYER_NUM{4};
-
 		explicit NetworkService(Engine& engine);
         ~NetworkService();
 

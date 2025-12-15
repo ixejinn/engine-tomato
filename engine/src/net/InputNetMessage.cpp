@@ -12,7 +12,7 @@ namespace tomato
     void InputNetMessage::Serialize(NetBitWriter& writer, Engine& engine)
     {
         uint32_t tick = engine.GetTick();
-        inputRecord = engine.GetInputHistory()[engine.GetNetworkService().GetPlayerID()][tick];
+        inputRecord = engine.GetInputTimeline()[engine.GetNetworkService().GetPlayerID()][tick];
         writer.WriteInt(tick, std::numeric_limits<int>::max());
         writer.WriteInt(static_cast<uint16_t>(inputRecord.keydown), static_cast<uint32_t>(InputAction::END));
         writer.WriteInt(static_cast<uint16_t>(inputRecord.keypress), static_cast<uint32_t>(InputAction::END));
