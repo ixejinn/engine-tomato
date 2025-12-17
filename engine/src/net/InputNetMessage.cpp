@@ -31,11 +31,8 @@ namespace tomato
 
     void InputNetMessage::Handler(Engine& engine, SocketAddress& fromAddr)
     {
-        engine.SetInputHistory(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
+        engine.SetInputTimeline(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
         if (engine.GetLatestTick() > inputRecord.tick)
             engine.SetLatestTick(inputRecord.tick);
-
-        auto tmp = static_cast<uint16_t>(inputRecord.keypress);
-        std::cout << "InputNetMessage::Handler [" << engine.GetNetworkService().GetPlayerID(fromAddr) << "] " << inputRecord.tick << " : " << tmp << "\n";
     }
 }

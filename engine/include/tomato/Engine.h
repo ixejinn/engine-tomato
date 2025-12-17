@@ -37,7 +37,7 @@ namespace tomato
         const WindowService& GetWindow() const { return window_; }
 
         const PlayersInputTimeline& GetInputTimeline() const { return inputTimeline_; }
-        void SetInputHistory(uint8_t playerID, const InputRecord& record);
+        void SetInputTimeline(uint8_t playerID, const InputRecord &record);
 
         World& GetWorld() { return *world_; }
         const World& GetWorld() const { return *world_; }

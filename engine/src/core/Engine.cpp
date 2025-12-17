@@ -83,26 +83,24 @@ namespace tomato
             adder_ += std::chrono::duration<float, std::milli>(cur - start_);
             int simulationNum = std::min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
             while (simulationNum--) {
-                systemManager_.Simulate(*this, SimContext{tick_});
+                systemManager_.Simulate(*this, SimContext{tick_++});
 
                 adder_ -= dt_;
             }
             start_ = cur;
 
             // 렌더
-            systemManager_.Render(*this, SimContext{});
+            systemManager_.Render(*this, SimContext{tick_});
 
             window_.SwapBuffers();
             window_.PollEvents();
-
-            ++tick_;
         }
 
         network_.isNetThreadRunning_ = false;
         th.join();
     }
 
-    void Engine::SetInputHistory(uint8_t playerID, const tomato::InputRecord &record)
+    void Engine::SetInputTimeline(uint8_t playerID, const InputRecord &record)
     {
         inputTimeline_[playerID].SetInputHistory(record.tick, record);
     }
