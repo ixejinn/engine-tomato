@@ -14,12 +14,16 @@ namespace tomato
     void KinematicMovementSystem::Update(Engine& engine, const SimContext& ctx)
     {
         auto view = engine.GetWorld().View<PositionComponent, SpeedComponent, InputChannelComponent, MovementComponent>();
-        auto inputHistory = engine.GetInputTimeline();
+        auto inputTimeline = engine.GetInputTimeline();
 
         for (auto [e, pos, speed, ch, move] : view.each())
         {
-            InputAction keypress{inputHistory[ch.channel][ctx.tick].keypress};
-            InputAction keydown{inputHistory[ch.channel][ctx.tick].keydown};
+            const auto& inputRec = inputTimeline[ch.channel][ctx.tick];
+            if (inputRec.tick != ctx.tick)
+                continue;
+
+            InputAction keypress{inputRec.keypress};
+            InputAction keydown{inputRec.keydown};
 
             // 이동 처리
             int x = 0, y = 0;

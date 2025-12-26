@@ -48,6 +48,7 @@ namespace tomato
     void Engine::Run()
     {
         std::thread th(&NetworkService::Dispatch, &network_);
+        int frameCnt = 0;
 
         while (!window_.ShouldClose() && isRunning_)
         {
@@ -62,8 +63,6 @@ namespace tomato
             input_.BeginFrame();
             input_.UpdateRecord(window_.GetHandle(), tick_);
             inputTimeline_[network_.GetPlayerID()].SetInputHistory(tick_, input_.GetCurrInputRecord());
-
-            network_.SendPacket(0);
 
             // 네트워크 관련 객체:          
             // 다른 플레이어로부터 들어온 늦은 입력을 히스토리에 저장하고,
@@ -83,7 +82,8 @@ namespace tomato
             adder_ += std::chrono::duration<float, std::milli>(cur - start_);
             int simulationNum = std::min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
             while (simulationNum--) {
-                systemManager_.Simulate(*this, SimContext{tick_++});
+                systemManager_.Simulate(*this, SimContext{++tick_});
+                network_.SendPacket(0);
 
                 adder_ -= dt_;
             }
@@ -94,6 +94,8 @@ namespace tomato
 
             window_.SwapBuffers();
             window_.PollEvents();
+
+            frameCnt++;
         }
 
         network_.isNetThreadRunning_ = false;

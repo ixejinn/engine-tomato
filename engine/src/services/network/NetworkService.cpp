@@ -14,16 +14,16 @@ namespace tomato
         InitSocket();
 
         playerToName[0] = "yejin";
-        playerToSocket[0] = SocketAddress{"192.168.204.129", 7777};
+        playerToSocket[0] = SocketAddress{"192.168.55.165", 7777};
         socketToPlayer[playerToSocket[0]] = 0;
 
-        playerToName[1] = "yujung";
-        playerToSocket[1] = SocketAddress{"192.168.31.234", 7777};
-        socketToPlayer[playerToSocket[1]] = 1;
-
-//        playerToName[1] = "yejin2";
-//        playerToSocket[1] = SocketAddress{"192.168.55.165", 7777};
+//        playerToName[1] = "yujung";
+//        playerToSocket[1] = SocketAddress{"192.168.31.234", 7777};
 //        socketToPlayer[playerToSocket[1]] = 1;
+
+        playerToName[1] = "yejin2";
+        playerToSocket[1] = SocketAddress{"192.168.55.88", 7777};
+        socketToPlayer[playerToSocket[1]] = 1;
     }
 
     NetworkService::~NetworkService()
@@ -91,6 +91,7 @@ namespace tomato
         {
             RawBuffer* buffer = bufferPool_.Allocate();
             int receivedBytes = socket_->ReceiveFrom(buffer, MAX_PACKET_SIZE, fromAddr);
+            //std::cout << "NetworkService::Dispatch() " << engine_.GetTick() << "tick | " << receivedBytes << "\n";
 
             if (receivedBytes > 0)
             {
@@ -106,8 +107,6 @@ namespace tomato
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
         while (!pendingPackets_.Empty())
         {
-            if (pendingPackets_.Empty())
-                return;
             Packet packet;
             pendingPackets_.Dequeue(packet);
             NetBitReader reader(packet.buffer->data(), packet.size);
@@ -119,6 +118,7 @@ namespace tomato
             {
                 InputNetMessage tmp;
                 tmp.Read(reader, engine_, packet.addr);
+                //std::cout << "NetworkService::ProcessPendingPacket() " << engine_.GetTick() << "\n";
             }
 
             bufferPool_.Deallocate(packet.buffer);
@@ -141,11 +141,13 @@ namespace tomato
             tmp.Write(writer, engine_);
         }
 
+        //std::cout << "NetworkService::SendPacket " << engine_.GetTick() << "\n";
         for (auto& playerAddr : playerToSocket)
         {
             if (playerAddr.first == playerID_)
                 continue;
             socket_->SendTo(rawBuffer.data(), MAX_PACKET_SIZE, playerAddr.second);
+            //std::cout << "NetworkService::SendPacket " << engine_.GetTick() << "\n";
         }
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
 

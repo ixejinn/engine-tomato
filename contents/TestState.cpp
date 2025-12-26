@@ -18,7 +18,7 @@ void TestState::Init(tomato::World& world)
 
     world.Emplace<tomato::SpeedComponent>(entity, (float)50.f);
 
-    world.Emplace<tomato::InputChannelComponent>(entity, (uint8_t)0);
+    world.Emplace<tomato::InputChannelComponent>(entity, (uint8_t)1);
     world.Emplace<tomato::MovementComponent>(entity);
 
     world.Emplace<tomato::SpriteComponent>(entity, (uint16_t)0, (uint16_t)0);
