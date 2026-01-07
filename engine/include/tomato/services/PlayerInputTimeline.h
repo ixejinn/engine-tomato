@@ -18,7 +18,7 @@ namespace tomato
         const InputRecord& operator[](uint32_t tick) { return timeline_[tick]; }
         const InputRecord& operator[](uint32_t tick) const { return timeline_[tick]; }
 
-        void SetInputHistory(uint32_t tick, const InputRecord& record) { timeline_[tick] = record; }
+        void SetInputTimeline(uint32_t tick, const InputRecord& record) { timeline_[tick] = record; }
 
     private:
         RingArray<InputRecord, INPUT_ROLLBACK_WINDOW> timeline_;

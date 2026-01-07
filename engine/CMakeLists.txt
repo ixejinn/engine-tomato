@@ -40,7 +40,10 @@ set(ENGINE_HEADERS
         include/tomato/net/InputNetMessage.h
         include/tomato/containers/SPSCQueue.h
         include/tomato/containers/RingBuffer.h
-        include/tomato/EngineConfig.h)
+        include/tomato/EngineConfig.h
+        include/tomato/net/snapshot/RollbackSlice.h
+        include/tomato/net/snapshot/RollbackSliceTimeline.h
+        include/tomato/tomato_types.h)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
