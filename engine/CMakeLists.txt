@@ -41,8 +41,8 @@ set(ENGINE_HEADERS
         include/tomato/containers/SPSCQueue.h
         include/tomato/containers/RingBuffer.h
         include/tomato/EngineConfig.h
-        include/tomato/net/snapshot/RollbackSlice.h
-        include/tomato/net/snapshot/RollbackSliceTimeline.h
+        include/tomato/net/rollback/RollbackSlice.h
+        include/tomato/net/rollback/RollbackSliceTimeline.h
         include/tomato/tomato_types.h)
 
 set(ENGINE_SOURCES
