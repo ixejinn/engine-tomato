@@ -22,7 +22,7 @@ set(ENGINE_HEADERS
         include/tomato/render/Mesh.h
         include/tomato/render/Shader.h
         include/tomato/render/Texture.h
-        include/tomato/services/PlayerInputTimeline.h
+        include/tomato/net/rollback/PlayerInputTimeline.h
         include/tomato/services/InputService.h
         include/tomato/services/InputTypes.h
         include/tomato/services/WindowService.h
@@ -43,7 +43,8 @@ set(ENGINE_HEADERS
         include/tomato/EngineConfig.h
         include/tomato/net/rollback/RollbackSlice.h
         include/tomato/net/rollback/RollbackSliceTimeline.h
-        include/tomato/tomato_types.h)
+        include/tomato/tomato_types.h
+        include/tomato/net/rollback/CoreRollback.h)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -79,7 +80,11 @@ add_library(engine STATIC
         ${EXTERNAL_SOURCES}
 )
 
-target_compile_definitions(engine PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_definitions(engine
+        PRIVATE
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+)
 
 target_include_directories(engine
         PUBLIC
