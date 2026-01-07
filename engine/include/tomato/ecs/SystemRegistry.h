@@ -1,4 +1,4 @@
-#ifndef TOMATO_SYSTEMREGISTRY_H
+﻿#ifndef TOMATO_SYSTEMREGISTRY_H
 #define TOMATO_SYSTEMREGISTRY_H
 
 #include <functional>
