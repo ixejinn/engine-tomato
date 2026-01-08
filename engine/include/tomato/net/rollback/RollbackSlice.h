@@ -16,36 +16,36 @@ namespace tomato
     public:
         void ApplyToWorld(World& world)
         {
-            for (size_t i = 0; i < entities_.size(); ++i)
-            {
-                const auto entity = entities_[i];
-                std::apply([&](auto&... componentVec)
-                           {
-                               (world.Set<Components>(entity, componentVec[i]), ...);
-                           }, components_);
-            }
+//            for (size_t i = 0; i < entities_.size(); ++i)
+//            {
+//                const auto entity = entities_[i];
+//                std::apply([&](auto&... componentVec)
+//                           {
+//                               (world.Set<Components>(entity, componentVec[i]), ...);
+//                           }, components_);
+//            }
         }
 
         void SaveFromWorld(World& world, uint32_t tick)
         {
-            for (size_t i = 0; i < entities_.size(); ++i)
-            {
-                const auto entity = entities_[i];
-                std::apply([&](auto&... componentVec)
-                           {
-                               (SetComponent(world.Get<Components>(entity), componentVec[i]), ...);
-                           }, components_);
-            }
+//            for (size_t i = 0; i < entities_.size(); ++i)
+//            {
+//                const auto entity = entities_[i];
+//                std::apply([&](auto&... componentVec)
+//                           {
+//                               (SetComponent(world.Get<Components>(entity), componentVec[i]), ...);
+//                           }, components_);
+//            }
         }
 
         void Clear()
         {
-            tick_ = 0;
-            entities_.clear();
-            std::apply([](auto&... componentVec)
-                       {
-                           (componentVec.clear(), ...);
-                       }, components_);
+//            tick_ = 0;
+//            entities_.clear();
+//            std::apply([](auto&... componentVec)
+//                       {
+//                           (componentVec.clear(), ...);
+//                       }, components_);
         }
 
     private:
@@ -54,7 +54,7 @@ namespace tomato
 
         uint32_t tick_{0};
 
-        std::vector<World::Entity> entities_;
+        //std::vector<World::Entity> entities_;
         std::tuple<std::vector<Components>...> components_;
     };
 }

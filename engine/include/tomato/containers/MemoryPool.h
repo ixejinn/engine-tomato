@@ -7,11 +7,6 @@
 #include <mutex>
 #include "tomato/Logger.h"
 
-#ifdef max
-#undef max
-#undef min
-#endif // max
-
 namespace tomato
 {
     template<typename T, std::size_t N = 0>

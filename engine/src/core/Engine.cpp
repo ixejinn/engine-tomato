@@ -62,7 +62,7 @@ namespace tomato
             window_.TMP_CheckEscapeKey();
             input_.BeginFrame();
             input_.UpdateRecord(window_.GetHandle(), tick_);
-            inputTimeline_[network_.GetPlayerID()].SetInputTimeline(tick_, input_.GetCurrInputRecord());
+            inputTimelines_[network_.GetPlayerID()].SetData(tick_, input_.GetCurrInputRecord());
 
             // 네트워크 관련 객체:          
             // 다른 플레이어로부터 들어온 늦은 입력을 히스토리에 저장하고,
@@ -102,8 +102,8 @@ namespace tomato
         th.join();
     }
 
-    void Engine::SetInputTimeline(uint8_t playerID, const InputRecord &record)
+    void Engine::SetInputData(uint8_t playerID, const InputRecord &record)
     {
-        inputTimeline_[playerID].SetInputTimeline(record.tick, record);
+        inputTimelines_[playerID].SetData(record.tick, record);
     }
 }

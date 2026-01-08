@@ -22,7 +22,6 @@ set(ENGINE_HEADERS
         include/tomato/render/Mesh.h
         include/tomato/render/Shader.h
         include/tomato/render/Texture.h
-        include/tomato/net/rollback/PlayerInputTimeline.h
         include/tomato/services/InputService.h
         include/tomato/services/InputTypes.h
         include/tomato/services/WindowService.h
@@ -44,7 +43,9 @@ set(ENGINE_HEADERS
         include/tomato/net/rollback/RollbackSlice.h
         include/tomato/net/rollback/RollbackSliceTimeline.h
         include/tomato/ecs/tomato_ecs.h
-        include/tomato/net/rollback/CoreRollback.h)
+        include/tomato/net/rollback/CoreRollback.h
+        include/tomato/containers/Timeline.h
+)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp

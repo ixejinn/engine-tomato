@@ -8,7 +8,6 @@
 namespace tomato
 {
     class System;
-    class PlayerInputTimeline;
 
     enum SystemType : uint8_t
     {

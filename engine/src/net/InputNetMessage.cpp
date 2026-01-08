@@ -31,7 +31,7 @@ namespace tomato
 
     void InputNetMessage::Handler(Engine& engine, SocketAddress& fromAddr)
     {
-        engine.SetInputTimeline(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
+        engine.SetInputData(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
         if (engine.GetLatestTick() > inputRecord.tick)
             engine.SetLatestTick(inputRecord.tick);
 
