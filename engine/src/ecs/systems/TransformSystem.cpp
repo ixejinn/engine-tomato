@@ -15,7 +15,7 @@ namespace tomato
 {
     void TransformSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        auto view = engine.GetWorld().View<PositionComponent, RotationComponent, ScaleComponent, WorldMatrixComponent>();
+        auto view = engine.GetWorld().GetRegistry().view<PositionComponent, RotationComponent, ScaleComponent, WorldMatrixComponent>();
 
         for (auto [e, pos, rot, scl, mat] : view.each())
         {

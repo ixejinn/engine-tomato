@@ -20,7 +20,7 @@ namespace tomato
 		template<typename TTag>
 		static void SetActive(World& world)
 		{
-			auto view = world.View<CameraComponent>();
+			auto view = world.GetRegistry().view<CameraComponent>();
 			for (auto [e, cam] : view.each())
 			{
 				if (world.GetRegistry().any_of<TTag>(e))
@@ -32,12 +32,12 @@ namespace tomato
 
 		void SetActive(World& world, CameraType type);
 		CameraComponent* GetActiveCamera(World& world);
-		entt::entity GetActiveCameraEntity() const { return activeCamera_; }
+		Entity GetActiveCameraEntity() const { return activeCamera_; }
 
 		void Update(Engine& engine, const SimContext& ctx) override;
 	
 	private:
-		entt::entity activeCamera_;
+        Entity activeCamera_;
 		//zoom
 	};
 }

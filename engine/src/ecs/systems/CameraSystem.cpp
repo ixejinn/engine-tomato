@@ -13,7 +13,7 @@ tomato::CameraSystem::CameraSystem() : activeCamera_(entt::null) {}
 
 void tomato::CameraSystem::SetActive(World& world, CameraType type)
 {
-	auto view = world.View<CameraComponent>();
+	auto view = world.GetRegistry().view<CameraComponent>();
 	for (auto [e, cam] : view.each())
 	{
 		bool match = false;
@@ -37,7 +37,7 @@ tomato::CameraComponent* tomato::CameraSystem::GetActiveCamera(World& world)
 
 void tomato::CameraSystem::Update(Engine& engine, const SimContext& ctx)
 {
-	auto view = engine.GetWorld().View<CameraComponent, PositionComponent, RotationComponent>();
+	auto view = engine.GetWorld().GetRegistry().view<CameraComponent, PositionComponent, RotationComponent>();
 	for (auto [e, cam, pos, rot] : view.each())
 	{
 		if (!cam.active) continue;

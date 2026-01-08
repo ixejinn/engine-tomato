@@ -91,7 +91,7 @@ namespace tomato
 	{
 		//TMT_LOG << "const Render Update";
 
-		auto view = engine.GetWorld().View<SpriteComponent, WorldMatrixComponent>();
+		auto view = engine.GetWorld().GetRegistry().view<SpriteComponent, WorldMatrixComponent>();
 		for (auto [e, sprite, mtx] : view.each())
 		{
 			//TMT_LOG << sprite.shader_id << "," << sprite.texture_id;

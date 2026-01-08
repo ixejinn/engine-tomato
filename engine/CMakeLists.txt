@@ -43,7 +43,7 @@ set(ENGINE_HEADERS
         include/tomato/EngineConfig.h
         include/tomato/net/rollback/RollbackSlice.h
         include/tomato/net/rollback/RollbackSliceTimeline.h
-        include/tomato/tomato_types.h
+        include/tomato/ecs/tomato_ecs.h
         include/tomato/net/rollback/CoreRollback.h)
 
 set(ENGINE_SOURCES
