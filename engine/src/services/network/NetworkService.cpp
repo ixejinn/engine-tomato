@@ -64,8 +64,13 @@ namespace tomato
 	
 	bool NetworkService::InitSocket()
 	{
-		socket_ = Socket::CreateSocket();
+		/**
+        * Create UDP socket for game networking.
+        * If this fails, network service cannot start.
+        */
+        socket_ = Socket::CreateSocket();
 
+        // INADDR_ANY allows receiving packets from any Network Interface Controller.
 		uint32_t port = 7777;
 		SocketAddress myAddr((uint32_t)INADDR_ANY, port);
 		socket_->Bind(myAddr);
