@@ -27,6 +27,12 @@ namespace tomato
 	* Emplace : create object directly inside queue memory.
 	*/
 
+
+	/**
+	* NOTE:
+	* 64 bytes is the cache line size on all mainstream x86/ARM CPUs,
+	* so we intentionally fix it for ABI stability.
+	*/
 	inline constexpr std::size_t CACHE_LINE_SIZE = 64;
 
 	template<typename T, std::size_t sizeT>
