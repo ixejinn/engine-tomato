@@ -41,7 +41,7 @@ set(ENGINE_HEADERS
         include/tomato/containers/RingBuffer.h
         include/tomato/EngineConfig.h
         include/tomato/net/rollback/RollbackSlice.h
-        include/tomato/net/rollback/RollbackSliceTimeline.h
+        include/tomato/net/rollback/RollbackManager.h
         include/tomato/ecs/tomato_ecs.h
         include/tomato/net/rollback/CoreRollback.h
         include/tomato/containers/Timeline.h

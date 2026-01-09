@@ -5,6 +5,7 @@
 #include "tomato/services/network/NetworkService.h"
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/systems/System.h"
+#include "tomato/net/rollback/RollbackSlice.h"
 
 #include <thread>
 
@@ -71,20 +72,28 @@ namespace tomato
             network_.ProcessPendingPacket();
 
             // 롤백
-//            while (latestTick_ < tick_)
-//            {
-//                systemManager_.Simulate(*this, SimContext{latestTick_});
-//                latestTick_++;
-//            }
+            if (rollbackManager_)
+            {
+                rollbackManager_->Rollback(*world_, tick_);
+                while (latestTick_ < tick_)
+                {
+                    systemManager_.Simulate(*this, SimContext{latestTick_});
+                    latestTick_++;
+                }
+            }
 
             // 고정 시간 시뮬레이션
             std::chrono::steady_clock::time_point cur = std::chrono::steady_clock::now();
             adder_ += std::chrono::duration<float, std::milli>(cur - start_);
             int simulationNum = std::min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);
             while (simulationNum--) {
-                systemManager_.Simulate(*this, SimContext{++tick_});
+                systemManager_.Simulate(*this, SimContext{tick_});
                 network_.SendPacket(0);
 
+                if (rollbackManager_)
+                    rollbackManager_->Capture(*world_, tick_);
+
+                ++tick_;
                 adder_ -= dt_;
             }
             start_ = cur;

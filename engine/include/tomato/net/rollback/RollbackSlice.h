@@ -16,36 +16,46 @@ namespace tomato
     public:
         void ApplyToWorld(World& world)
         {
-//            for (size_t i = 0; i < entities_.size(); ++i)
-//            {
-//                const auto entity = entities_[i];
-//                std::apply([&](auto&... componentVec)
-//                           {
-//                               (world.Set<Components>(entity, componentVec[i]), ...);
-//                           }, components_);
-//            }
+            auto view = world.GetRegistry().view<Components...>();
+
+            for (int i = 0; i < entities_.size(); i++)
+            {
+                std::apply([&](auto&... componentVec)
+                           {
+                                // 일단 엔티티가 중간에 삭제되지 않는다는 가정
+                               (SetComponent(componentVec[i], view.template get<Components>(entities_[i])), ...);
+                           }, components_);
+            }
         }
 
         void SaveFromWorld(World& world, uint32_t tick)
         {
-//            for (size_t i = 0; i < entities_.size(); ++i)
-//            {
-//                const auto entity = entities_[i];
-//                std::apply([&](auto&... componentVec)
-//                           {
-//                               (SetComponent(world.Get<Components>(entity), componentVec[i]), ...);
-//                           }, components_);
-//            }
-        }
+            tick_ = tick;
 
-        void Clear()
-        {
-//            tick_ = 0;
-//            entities_.clear();
-//            std::apply([](auto&... componentVec)
-//                       {
-//                           (componentVec.clear(), ...);
-//                       }, components_);
+            auto view = world.GetRegistry().view<Components...>();
+
+            int entityCnt = view.size_hint();
+            entities_.resize(entityCnt);
+            std::apply([&](auto&... componentVec)
+                       {
+                           (componentVec.resize(entityCnt), ...);
+                       }, components_);
+
+            int entityIdx = 0;
+            for (auto entity : view)
+            {
+                entities_[entityIdx] = entity;
+
+                std::apply([&](auto&... componentVec)
+                           {
+                               (SetComponent(view.template get<Components>(entity), componentVec[entityIdx]), ...);
+                           }, components_);
+
+                ++entityIdx;
+            }
+
+            if (entityCnt != entityIdx)
+                entities_.resize(entityIdx);
         }
 
     private:
@@ -54,7 +64,7 @@ namespace tomato
 
         uint32_t tick_{0};
 
-        //std::vector<World::Entity> entities_;
+        std::vector<Entity> entities_;
         std::tuple<std::vector<Components>...> components_;
     };
 }

@@ -11,6 +11,8 @@
 #include "tomato/services/network/NetworkService.h" // NetworkService::MAX_PLAYER_NUM
 #include "tomato/ecs/SystemManager.h"               // SystemManager systemManager_
 #include "tomato/EngineConfig.h"
+#include "tomato/net/rollback/RollbackManager.h"
+#include "tomato/net/rollback/RollbackSlice.h"
 
 namespace tomato
 {
@@ -49,6 +51,14 @@ namespace tomato
 
         NetworkService& GetNetworkService() { return network_; }
 
+        template<typename... RollbackSliceT>
+        void SetRollbackManager()
+        {
+            rollbackManager_ = std::make_unique<
+                    RollbackManager<RollbackSliceT...>
+                    >();
+        }
+
     private:
         static constexpr int MAX_SIMULATION_NUM{3};
         static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
@@ -67,6 +77,8 @@ namespace tomato
 
         std::unique_ptr<World> world_{nullptr};
         SystemManager systemManager_;
+
+        std::unique_ptr<RollbackManagerB> rollbackManager_{nullptr};
 
         std::unique_ptr<State> currState_{nullptr};
         std::unique_ptr<State> nextState_{nullptr};
