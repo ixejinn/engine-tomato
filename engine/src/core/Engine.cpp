@@ -69,16 +69,19 @@ namespace tomato
             // 다른 플레이어로부터 들어온 늦은 입력을 히스토리에 저장하고,
             // 롤백 해야 할 틱 번호 찾음
             latestTick_ = tick_;
+            auto realTick = tick_;
             network_.ProcessPendingPacket();
+            tick_ = latestTick_;
 
             // 롤백
-            if (rollbackManager_)
+            if (rollbackManager_ && realTick != tick_)
             {
-                rollbackManager_->Rollback(*world_, tick_);
-                while (latestTick_ < tick_)
+                rollbackManager_->Rollback(*world_, latestTick_);
+                std::cout << "Rollback to " << latestTick_ << "\n";
+                while (tick_ < realTick)
                 {
-                    systemManager_.Simulate(*this, SimContext{latestTick_});
-                    latestTick_++;
+                    systemManager_.Simulate(*this, SimContext{tick_});
+                    tick_++;
                 }
             }
 

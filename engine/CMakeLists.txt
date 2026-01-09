@@ -82,7 +82,7 @@ add_library(engine STATIC
 )
 
 target_compile_definitions(engine
-        PRIVATE
+        PUBLIC
         WIN32_LEAN_AND_MEAN
         NOMINMAX
 )
