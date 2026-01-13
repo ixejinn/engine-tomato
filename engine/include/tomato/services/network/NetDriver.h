@@ -3,19 +3,30 @@
 
 #include "tomato/services/network/Socket.h"
 #include "tomato/services/network/SocketAddress.h"
+#include "tomato/services/network/CoreNetwork.h"
 
 namespace tomato
 {
 	/**
-	* OS 소켓 생성, 초기화, 종료 담당
-	* UDP recv/send를 수행하고 수신 패킷을 
-	* 로컬 환경 기준으로 작성
+	* Handles OS-level socket creation, initialization, and shutdown.
+	* Performs UDP recv/send and passes received packets to the upper layer (NetworkService).
+	* All external network I/O, including communication with the match server, is handled here.
+	* 
+	* This class does not manage threads and only performs network I/O.
+	* It does not access game logic or NetConnection directly.
+	* 
+	* Implemented for local environment.
 	*/
 	class NetDriver
 	{
 	public:
-		bool InitSocket();
+		NetDriver();
+		~NetDriver();
 
+		bool InitSocket();
+		void SendPacket(uint32_t messageType, const SocketAddress&);
+		// Returns true if data was received, false otherwise.
+		bool RecvPacket(RawBuffer*, int, SocketAddress&);
 
 	private:
 		SocketPtr socket_;

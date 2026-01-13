@@ -86,6 +86,22 @@ namespace tomato
 		return true;
 	}
 
+/*
+    void NetworkService::NetThreadLoop()
+    {
+        SocketAddress fromAddr;
+        isNetThreadRunning_ = true;
+        while (isNetThreadRunning_)
+        {
+            RawBuffer* buffer = bufferPool_.Allocate();
+            int receivedBytes;
+            if (driver_->RecvPacket(buffer, receivedBytes, fromAddr))
+                pendingPackets_.Emplace(buffer, receivedBytes, fromAddr);
+            else
+                bufferPool_.Deallocate(buffer);
+        }
+    }
+*/
     // use network thread
     void NetworkService::Dispatch()
     {

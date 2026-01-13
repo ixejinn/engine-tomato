@@ -41,8 +41,10 @@ namespace tomato
 		bool InitSocket();
 
         void Dispatch();
+        //void NetThreadLoop();
         void ProcessPendingPacket();
         void SendPacket(uint32_t messageType);
+        //void SendMessage(uint32_t messageType, const NetConnection& conn);
 
         uint32_t GetPlayerID() const { return playerID_; }
         uint32_t GetPlayerID(SocketAddress& addr)
@@ -51,10 +53,11 @@ namespace tomato
         std::atomic<bool> isNetThreadRunning_{false};
 
 	private:
+        //NetDriver driver_;
         MemoryPool<RawBuffer, 128> bufferPool_;
-
         SPSCQueue<Packet, 128> pendingPackets_;
 
+        //std::unordered_map<uint32_t, NetConnection> conn;
 		std::map<uint32_t, std::string> playerToName;
 		std::map<uint32_t, SocketAddress> playerToSocket;
 		std::unordered_map<SocketAddress, uint32_t> socketToPlayer;

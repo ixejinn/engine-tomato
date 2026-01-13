@@ -26,13 +26,15 @@ set(ENGINE_HEADERS
         include/tomato/services/InputService.h
         include/tomato/services/InputTypes.h
         include/tomato/services/WindowService.h
+        include/tomato/services/network/CoreNetwork.h
         include/tomato/services/network/Socket.h
         include/tomato/services/network/SocketAddress.h
+        include/tomato/services/network/NetConnection.h
+        include/tomato/services/network/NetDriver.h
         include/tomato/services/network/NetworkService.h
         include/tomato/serialization/BitReader.h
         include/tomato/serialization/BitWriter.h
         include/tomato/net/NetBitReader.h
-        include/tomato/services/network/CoreNetwork.h
         include/tomato/net/NetBitWriter.h
         include/tomato/containers/MemoryPool.h
         include/tomato/net/NetMessageRegistry.h
@@ -44,7 +46,6 @@ set(ENGINE_HEADERS
         include/tomato/net/rollback/RollbackSlice.h
         include/tomato/net/rollback/RollbackSliceTimeline.h
         include/tomato/tomato_types.h 
-        include/tomato/services/network/NetDriver.h
 )
 
 set(ENGINE_SOURCES
@@ -61,6 +62,7 @@ set(ENGINE_SOURCES
         src/render/Texture.cpp
         src/services/InputService.cpp
         src/services/WindowService.cpp
+        src/services/network/NetDriver.cpp
         src/services/network/NetworkService.cpp
         src/services/network/Socket.cpp
         src/services/network/SocketAddress.cpp
