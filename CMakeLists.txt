@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 # requires expression (NetBitReader::ReadInt)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(/utf-8)
+if (MSVC)
+    add_compile_options(/utf-8)
+endif()
 
 include(FetchContent)
 
