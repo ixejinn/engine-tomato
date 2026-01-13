@@ -5,6 +5,7 @@
 #include <tuple>
 #include "tomato/containers/RingArray.h"
 #include "tomato/net/rollback/CoreRollback.h"
+#include "tomato/Logger.h"
 
 namespace tomato
 {
@@ -25,9 +26,10 @@ namespace tomato
     public:
         void Rollback(World& world, uint32_t tick) override
         {
-            if (std::get<0>(timelines_)[tick].GetTick() != tick)
+            const auto storedTick = std::get<0>(timelines_)[tick].GetTick();
+            if (storedTick != tick)
             {
-                std::cout << "[RollbackManager::Rollback] OVER ROLLBACK_WINDOW " << std::get<0>(timelines_)[tick].GetTick() << ", " << tick << "\n";
+                TMT_WARN << "Rollback tick mismatch (requested: " << tick << ", stored: " << storedTick << ")";
                 return;
             }
 

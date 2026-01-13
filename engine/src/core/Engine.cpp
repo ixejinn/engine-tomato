@@ -41,7 +41,11 @@ namespace tomato
             currState_->Init(*world_);
         }
 
+        tick_ = 0;
         start_ = std::chrono::steady_clock::now();
+
+        if (rollbackManager_)
+            rollbackManager_->Capture(*world_, 0);
     }
 
     void Engine::SetNextState(std::unique_ptr<State>&& newState) { nextState_ = std::move(newState); }
@@ -80,8 +84,9 @@ namespace tomato
                 while (rollbackTick < tick_)
                 {
                     systemManager_.Simulate(*this, SimContext{rollbackTick});
+                    ++rollbackTick;
+
                     rollbackManager_->Capture(*world_, rollbackTick);
-                    rollbackTick++;
                 }
             }
 
@@ -93,11 +98,11 @@ namespace tomato
                 //std::cout << "current tick: " << tick_ << "\n";
                 systemManager_.Simulate(*this, SimContext{tick_});
                 network_.SendPacket(0);
+                ++tick_;
 
                 if (rollbackManager_)
                     rollbackManager_->Capture(*world_, tick_);
 
-                ++tick_;
                 adder_ -= dt_;
             }
             start_ = cur;

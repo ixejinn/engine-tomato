@@ -38,6 +38,7 @@ private:
 };
 
 #define TMT_LOG Logger(Logger::LOG, __FILE__, __LINE__)
+#define TMT_WARN Logger(Logger::WARN, __FILE__, __LINE__)
 #define TMT_ERR Logger(Logger::ERR, __FILE__, __LINE__)
 
 #endif
