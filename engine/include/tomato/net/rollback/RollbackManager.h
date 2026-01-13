@@ -25,6 +25,12 @@ namespace tomato
     public:
         void Rollback(World& world, uint32_t tick) override
         {
+            if (std::get<0>(timelines_)[tick].GetTick() != tick)
+            {
+                std::cout << "[RollbackManager::Rollback] OVER ROLLBACK_WINDOW " << std::get<0>(timelines_)[tick].GetTick() << ", " << tick << "\n";
+                return;
+            }
+
             std::apply([&](auto&... timeline)
                        {
                            (timeline[tick].ApplyToWorld(world), ...);

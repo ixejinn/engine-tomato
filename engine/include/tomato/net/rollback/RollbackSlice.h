@@ -30,7 +30,7 @@ namespace tomato
 
         void SaveFromWorld(World& world, uint32_t tick)
         {
-            tick_ = tick;
+            currTick_ = tick;
 
             auto view = world.GetRegistry().view<Components...>();
 
@@ -58,11 +58,13 @@ namespace tomato
                 entities_.resize(entityIdx);
         }
 
+        uint32_t GetTick() const { return currTick_; }
+
     private:
         template<typename Component>
         void SetComponent(Component& src, Component& dst) { dst = src; }
 
-        uint32_t tick_{0};
+        uint32_t currTick_{0};
 
         std::vector<Entity> entities_;
         std::tuple<std::vector<Components>...> components_;

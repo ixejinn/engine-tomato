@@ -10,7 +10,7 @@ int main() {
     tmt::WindowService window(1600, 900, "TOMATO");
 
     tmt::Engine engine(window);
-    engine.SetRollbackManager<tmt::RollbackSlice<tmt::PositionComponent, tmt::InputChannelComponent, tmt::MovementComponent>>();
+    engine.SetRollbackManager<tmt::RollbackSlice<tmt::PositionComponent, tmt::MovementComponent>>();
     engine.SetNextState(std::make_unique<TestState>());
     engine.Run();
 }
