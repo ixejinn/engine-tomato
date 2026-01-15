@@ -38,3 +38,4 @@ FetchContent_MakeAvailable(entt)
 
 add_subdirectory(engine)
 add_subdirectory(contents)
+add_subdirectory(matchserver)
