@@ -38,7 +38,6 @@ set(ENGINE_HEADERS
         include/tomato/net/NetMessage.h
         include/tomato/net/InputNetMessage.h
         include/tomato/containers/SPSCQueue.h
-        include/tomato/containers/RingBuffer.h
         include/tomato/EngineConfig.h
         include/tomato/net/rollback/RollbackSlice.h
         include/tomato/net/rollback/RollbackManager.h

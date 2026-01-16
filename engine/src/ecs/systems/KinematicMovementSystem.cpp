@@ -13,7 +13,7 @@ namespace tomato
 {
     void KinematicMovementSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        auto view = engine.GetWorld().GetRegistry().view<PositionComponent, SpeedComponent, InputChannelComponent, MovementComponent>();
+        auto view = engine.GetWorld().GetRegistry().view<PositionComponent, SpeedComponent, InputChannelComponent, JumpComponent>();
         auto inputTimeline = engine.GetInputTimeline();
 
         for (auto [e, pos, speed, ch, move] : view.each())
@@ -47,14 +47,14 @@ namespace tomato
 
             // 점프 처리
             /* !!! for 3D MOVEMENT !!!
-            if (HasAction(keydown, InputAction::JUMP) && move.jumpCount < JUMP_COUNT_MAX)
+            if (HasAction(keydown, InputAction::JUMP) && move.cnt < JUMP_COUNT_MAX)
             {
                 // 점프 시작
-                move.jumpCount++;
+                move.cnt++;
                 move.vy = std::max(move.vy, 0.f) + JUMP_SPEED;
             }
 
-            if (move.jumpCount > 0)
+            if (move.cnt > 0)
             {
                 // 점프 중
                 move.vy += GRAVITY * Engine::FIXED_DELTA_TIME;
@@ -63,7 +63,7 @@ namespace tomato
                 if (pos.position.y <= 0)
                 {
                     // 점프 종료
-                    move.jumpCount = 0;
+                    move.cnt = 0;
                     pos.position.y = 0;
                     move.vy = 0.f;
                 }

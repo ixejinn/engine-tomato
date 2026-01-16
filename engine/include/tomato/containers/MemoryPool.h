@@ -9,6 +9,16 @@
 
 namespace tomato
 {
+    /**
+     * @brief Fixed-size memory pool using a free list for fast allocation and deallocation.
+     * @tparam T Type of elements.
+     * @tparam N Number of elements.
+     *
+     * N개의 T를 저장할 수 있는 큰 메모리 공간 하나를 할당하고, 메모리 청크 크기만큼 자른다.
+     * 메모리 청크의 앞 일부가 다음 메모리 청크의 주소를 가리키는 free-list로 관리한다.
+     *
+     * @see https://en.wikipedia.org/wiki/Free_list
+     */
     template<typename T, std::size_t N = 0>
     class MemoryPool
     {
@@ -16,80 +26,26 @@ namespace tomato
         MemoryPool();
         ~MemoryPool();
 
+        MemoryPool(const MemoryPool&) = delete;
+        MemoryPool& operator=(const MemoryPool&) = delete;
+
+        MemoryPool(MemoryPool&&) = delete;
+        MemoryPool& operator=(MemoryPool&&) = delete;
+
+        /**
+         * @brief Allocates a memory block from the pool and constructs an object of type T.
+         * @param args Arguments to forward to the constructor of the element.
+         * @return Pointer to the constructed object, or nullptr if the pool is exhausted.
+         */
         template<typename... Args>
-        T* Allocate(Args&&... args)
-        {
-            if (free_ == nullptr)
-            {
-                TMT_ERR << "Fulled memory pool - Return nullptr";
-                return nullptr;
-            }
+        T* Allocate(Args&&... args);
 
-            mtx.lock();
-
-            usedSize_++;
-
-            void* cur = free_;
-            // free_에 *free_(free_의 다음 청크 주소값) 복사
-            std::memcpy(&free_, free_, sizeof(void*));
-
-            // 할당 상태 비트 1
-            auto curB = static_cast<std::byte*>(cur);
-            auto beginB = static_cast<std::byte*>(pool_);
-            auto offset = (curB - beginB) / chunkSize_;
-            SetValid(offset);
-
-            mtx.unlock();
-
-            return ::new (cur) T(std::forward<Args>(args)...);
-        }
-
-        bool Deallocate(T* data)
-        {
-            // 범위 확인
-            auto curB = reinterpret_cast<std::byte*>(data);
-            auto beginB = static_cast<std::byte*>(pool_);
-            auto endB = static_cast<std::byte*>(pool_) + N * chunkSize_;
-            if (curB < beginB || curB >= endB)
-            {
-                TMT_LOG << "Not data in memory pool range";
-                return false;
-            }
-
-            // 정렬 확인
-            auto diffB = curB - beginB;
-            if (diffB % chunkSize_ != 0)
-            {
-                TMT_LOG << "Not the starting address of the chunk of memory pool";
-                return false;
-            }
-
-            mtx.lock();
-
-            // 할당 상태 확인
-            auto offset = diffB / chunkSize_;
-            if (!IsValid(offset))
-            {
-                TMT_LOG << "Already returned memory chunk";
-                return false;
-            }
-
-            usedSize_--;
-
-            // 객체 소멸자 호출
-            data->~T();
-
-            // data에 free_(free 청크 첫번째 주소) 복사
-            std::memcpy(data, &free_, sizeof(void*));
-            free_ = data;
-
-            // 할당 상태 비트 0
-            SetInvalid(offset);
-
-            mtx.unlock();
-
-            return true;
-        }
+        /**
+         * @brief Destructs an object and returns its memory block to the pool.
+         * @param data Pointer to an object previously allocated from this pool.
+         * @return true if the object was successfully deallocated, false otherwise.
+         */
+        bool Deallocate(T* data);
 
         size_t UsedSize() const { return usedSize_; }
         size_t FreeSize() const { return size_ - usedSize_; }
@@ -117,12 +73,12 @@ namespace tomato
     inline MemoryPool<T, N>::MemoryPool()
     : size_(N), chunkSize_(std::max(sizeof(void*), sizeof(T)))
     {
-        // 공간 할당 및 정렬
+        // 정렬 조건에 맞게 공간 할당
         pool_ = ::operator new(
                 chunkSize_ * N,
                 std::align_val_t(std::max(alignof(void*), alignof(T))));
 
-        // 청크 체인 연결
+        // 청크들을 링크드 리스트로 연결
         auto base = static_cast<std::byte*>(pool_);
         for (int i = 0; i < N - 1; i++)
         {
@@ -154,6 +110,83 @@ namespace tomato
         // 메모리 해제
         ::operator delete(pool_, std::align_val_t(std::max(alignof(void*), alignof(T))));
         delete[] valid_;
+    }
+
+    template<typename T, std::size_t N>
+    template<typename... Args>
+    inline T* MemoryPool<T, N>::Allocate(Args&&... args)
+    {
+        if (free_ == nullptr)
+        {
+            TMT_ERR << "Fulled memory pool - Return nullptr";
+            return nullptr;
+        }
+
+        mtx.lock();
+
+        usedSize_++;
+
+        void* cur = free_;
+        // free_에 *free_(다음 청크의 시작 주소값) 복사
+        std::memcpy(&free_, free_, sizeof(void*));
+
+        // 할당 상태 비트 ON
+        auto curB = static_cast<std::byte*>(cur);
+        auto beginB = static_cast<std::byte*>(pool_);
+        auto offset = (curB - beginB) / chunkSize_;
+        SetValid(offset);
+
+        mtx.unlock();
+
+        return ::new (cur) T(std::forward<Args>(args)...);
+    }
+
+    template<typename T, std::size_t N>
+    inline bool MemoryPool<T, N>::Deallocate(T* data)
+    {
+        // 범위 확인
+        auto curB = reinterpret_cast<std::byte*>(data);
+        auto beginB = static_cast<std::byte*>(pool_);
+        auto endB = static_cast<std::byte*>(pool_) + N * chunkSize_;
+        if (curB < beginB || curB >= endB)
+        {
+            TMT_LOG << "Not data in memory pool range";
+            return false;
+        }
+
+        // 정렬 확인
+        auto diffB = curB - beginB;
+        if (diffB % chunkSize_ != 0)
+        {
+            TMT_LOG << "Not the starting address of the chunk of memory pool";
+            return false;
+        }
+
+        mtx.lock();
+
+        // 할당 상태 확인
+        auto offset = diffB / chunkSize_;
+        if (!IsValid(offset))
+        {
+            TMT_LOG << "Already returned memory chunk";
+            return false;
+        }
+
+        usedSize_--;
+
+        // 객체 소멸자 호출
+        data->~T();
+
+        // *data에 free_(비어있는 청크로 이루어진 링크드 리스트의 head 주소값) 복사
+        std::memcpy(data, &free_, sizeof(void*));
+        free_ = data;
+
+        // 할당 상태 비트 OFF
+        SetInvalid(offset);
+
+        mtx.unlock();
+
+        return true;
     }
 }
 

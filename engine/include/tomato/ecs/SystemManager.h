@@ -10,8 +10,13 @@ namespace tomato
     class System;
     class World;
     class SimContext;
-    class PlayerInputTimeline;
 
+    /**
+     * @brief Manages lifecycle, execution, and update order of all systems.
+     *
+     * 시스템 객체를 생성하고 소유하며, 각 시스템을 호출해 컴포넌트 갱신을 수행하는 클래스.
+     * 역할(입력, 시뮬레이션, 게임플레이, 렌더링 등)에 따라 묶어 시스템을 호출한다.
+     */
     class SystemManager
     {
     public:

@@ -3,7 +3,7 @@
 #include "tomato/net/NetBitWriter.h"
 #include "tomato/Engine.h"
 #include "tomato/services/network/SocketAddress.h"
-#include "tomato/services/network/NetworkService.h"
+//#include "tomato/services/network/NetworkService.h"
 
 #include <limits>
 
@@ -13,7 +13,7 @@ namespace tomato
     {
         uint32_t tick = engine.GetTick();
         inputRecord = engine.GetInputTimeline()[engine.GetNetworkService().GetPlayerID()][tick];
-        writer.WriteInt(tick, std::numeric_limits<int>::max());
+        writer.WriteInt(tick, std::numeric_limits<uint32_t>::max());
         writer.WriteInt(static_cast<uint16_t>(inputRecord.keydown), static_cast<uint32_t>(InputAction::END));
         writer.WriteInt(static_cast<uint16_t>(inputRecord.keypress), static_cast<uint32_t>(InputAction::END));
     }

@@ -21,7 +21,7 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::SpeedComponent>(me, (float)50.f);
 
     registry.emplace<tomato::InputChannelComponent>(me, (uint8_t)0);
-    registry.emplace<tomato::MovementComponent>(me);
+    registry.emplace<tomato::JumpComponent>(me);
 
     registry.emplace<tomato::SpriteComponent>(me, (uint16_t)0, (uint16_t)0);
 
@@ -35,7 +35,7 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::SpeedComponent>(other, (float)50.f);
 
     registry.emplace<tomato::InputChannelComponent>(other, (uint8_t)1);
-    registry.emplace<tomato::MovementComponent>(other);
+    registry.emplace<tomato::JumpComponent>(other);
 
     registry.emplace<tomato::SpriteComponent>(other, (uint16_t)0, (uint16_t)0);
 }
