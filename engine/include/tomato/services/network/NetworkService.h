@@ -44,7 +44,7 @@ namespace tomato
         //void NetThreadLoop();
         void ProcessPendingPacket();
         void SendPacket(uint32_t messageType);
-        //void SendMessage(uint32_t messageType, const NetConnection& conn);
+        //void SendMessage(uint32_t messageType, const SocketAddress& inToAddress);
 
         uint32_t GetPlayerID() const { return playerID_; }
         uint32_t GetPlayerID(SocketAddress& addr)

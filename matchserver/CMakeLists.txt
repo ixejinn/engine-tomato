@@ -1,7 +1,7 @@
 add_executable(matchserver
         src/main.cpp
         src/MatchServer.cpp
-)
+ "include/NetworkService.h")
 
 target_link_libraries(matchserver
         PRIVATE
