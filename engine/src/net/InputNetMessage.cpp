@@ -20,7 +20,7 @@ namespace tomato
 
     void InputNetMessage::Deserialize(NetBitReader& reader)
     {
-        reader.ReadInt(inputRecord.tick, std::numeric_limits<int>::max());
+        reader.ReadInt(inputRecord.tick, std::numeric_limits<uint32_t>::max());
 
         uint16_t value = 0;
         reader.ReadInt(value, uint32_t(InputAction::END));
