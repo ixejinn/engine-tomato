@@ -8,12 +8,20 @@
 
 namespace tomato
 {
-    // 롤백할 컴포넌트 조합의 컴포넌트 값들을 저장하고,
-    // World에서 해당 컴포넌트 조합을 가지고 있는 엔티티의 컴포넌트 값을 저장된 값으로 롤백
+    /**
+     * @brief Rollback slice responsible for capturing and restoring component state.
+     * @tparam Components Component type to capture and restore.
+     *
+     * 특정 컴포넌트 조합(Components...)을 가진 엔티티들의 컴포넌트 값을 저장하고,
+     * 저장된 값으로 World의 컴포넌트를 복원(rollback)한다.
+     *
+     * @note 현재 구현은 "엔티티가 도중에 삭제되지 않는다"를 가정으로 한다.
+     */
     template<typename... Components>
     class RollbackSlice
     {
     public:
+        /// Applies the stored snapshot values to the World.
         void ApplyToWorld(World& world)
         {
             auto view = world.GetRegistry().view<Components...>();
@@ -28,6 +36,7 @@ namespace tomato
             }
         }
 
+        /// Captures component values from the World for the given tick.
         void SaveFromWorld(World& world, uint32_t tick)
         {
             currTick_ = tick;
@@ -58,6 +67,7 @@ namespace tomato
                 entities_.resize(entityIdx);
         }
 
+        /// Returns the tick associated with the stored snapshot.
         uint32_t GetTick() const { return currTick_; }
 
     private:

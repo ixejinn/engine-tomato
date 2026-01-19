@@ -8,10 +8,26 @@
 
 namespace tomato
 {
+    /**
+     * @brief Bit-level writer for network message serialization.
+     *
+     * buffer_에 최소 비트만 사용하여 비트 단위 직렬화한다.
+     *
+     * @note 현재는 int 계열 기본 타입에 대한 직렬화만 지원하지만,
+     *       향후 메시지 타입이 늘어날 경우, 기본 타입에 대한 비트 단위 처리는 BitWriter로 옮길 수 있다.
+     */
     class NetBitWriter
     {
     public:
+        /**
+         * @param output
+         * @param byteSize
+         */
         NetBitWriter(uint8_t* output, int16_t byteSize);
+
+        /**
+         * @param rawBuffer
+         */
         NetBitWriter(RawBuffer* rawBuffer)
         : buffer_(rawBuffer->data()), byteNum_(MAX_PACKET_SIZE), bitPos_(0) {}
 
@@ -28,7 +44,7 @@ namespace tomato
     private:
         void SerializeInt(uint32_t value, uint32_t maxValue);
 
-        uint8_t* buffer_{nullptr};  // reference
+        uint8_t* buffer_{nullptr};
         int16_t byteNum_;
         int16_t bitPos_{-1};
     };

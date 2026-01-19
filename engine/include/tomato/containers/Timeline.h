@@ -20,7 +20,7 @@ namespace tomato
     class Timeline
     {
     public:
-        const T& operator[](uint32_t tick) { return data_[tick]; }
+        T& operator[](uint32_t tick) { return data_[tick]; }
         const T& operator[](uint32_t tick) const { return data_[tick]; }
 
         void SetData(uint32_t tick, const T& newData) { data_[tick] = newData; }
