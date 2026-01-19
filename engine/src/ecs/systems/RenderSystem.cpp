@@ -5,13 +5,13 @@
 
 #include "tomato/ecs/systems/RenderSystem.h"
 #include "tomato/Engine.h"
-#include "tomato/ecs/World.h"
+#include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Sprite.h"
 #include "tomato/ecs/components/Transform.h"
 //#include "tomato/ecs/components/Camera.h"
 
 #include "tomato/ecs/SystemRegistry.h"
-REGISTER_SYSTEM(tomato::SystemType::RENDER, RenderSystem)
+REGISTER_SYSTEM(tomato::SystemPhase::RENDER, RenderSystem)
 namespace tomato
 {
 	RenderSystem::RenderSystem()

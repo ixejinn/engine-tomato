@@ -44,6 +44,7 @@ set(ENGINE_HEADERS
         include/tomato/ecs/tomato_ecs.h
         include/tomato/net/rollback/CoreRollback.h
         include/tomato/containers/Timeline.h
+        include/tomato/tomato_sim.h
 )
 
 set(ENGINE_SOURCES

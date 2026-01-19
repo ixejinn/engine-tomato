@@ -1,8 +1,10 @@
 #ifndef TOMATO_SYSTEMMANAGER_H
 #define TOMATO_SYSTEMMANAGER_H
 
+#include <array>
 #include <vector>
 #include <memory>
+#include "tomato/tomato_sim.h"
 
 namespace tomato
 {
@@ -27,14 +29,21 @@ namespace tomato
         void Render(const Engine& engine, const SimContext& ctx);
 
     private:
-        std::vector<std::unique_ptr<System>> controllers_;
-        std::vector<std::unique_ptr<System>> integrators_;
-        std::vector<std::unique_ptr<System>> collisions_;
-        std::vector<std::unique_ptr<System>> gameRules_;
-        std::vector<std::unique_ptr<System>> spawners_;
+        using SystemPtr = std::unique_ptr<System>;
 
-        std::vector<std::unique_ptr<System>> renderers_;
-        std::vector<std::unique_ptr<System>> camera_;
+        static constexpr SystemPhase simulationOrder_[] =
+                {
+                SystemPhase::CONTROLLER,
+                SystemPhase::INTEGRATOR
+                };
+
+        static constexpr SystemPhase renderOrder_[] =
+                {
+                SystemPhase::RENDER,
+                SystemPhase::CAMERA
+                };
+
+        std::array<std::vector<SystemPtr>, ToIndex(SystemPhase::COUNT)> systems_{};
     };
 }
 

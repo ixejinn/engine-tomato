@@ -1,13 +1,12 @@
 #include "tomato/ecs/systems/KinematicMovementSystem.h"
 #include "tomato/Engine.h"
-#include "tomato/SimulationContext.h"
-#include "tomato/ecs/World.h"
+#include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
 
 #include "tomato/ecs/SystemRegistry.h"
-REGISTER_SYSTEM(tomato::SystemType::CONTROLLER, KinematicMovementSystem);
+REGISTER_SYSTEM(tomato::SystemPhase::CONTROLLER, KinematicMovementSystem);
 
 namespace tomato
 {

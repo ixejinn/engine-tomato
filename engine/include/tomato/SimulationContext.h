@@ -5,10 +5,10 @@
 
 namespace tomato
 {
-    struct SimContext
-    {
-        uint32_t tick{0};
-    };
+//    struct SimContext
+//    {
+//        uint32_t tick{0};
+//    };
 }
 
 #endif //TOMATO_SIMULATIONCONTEXT_H
