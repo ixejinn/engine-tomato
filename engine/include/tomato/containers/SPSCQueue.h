@@ -129,7 +129,14 @@ namespace tomato
 		}
 
 		bool Empty() const { return write_.load(std::memory_order_acquire) == read_.load(std::memory_order_acquire); }
-		const std::size_t GetSize() const { return sizeT; }
+		const std::size_t Capacity() const { return sizeT; }
+		const std::size_t Size() const
+		{ 
+			const auto write = write_.load(std::memory_order_relaxed);
+			auto read = read_.load(std::memory_order_acquire);
+
+			return write - read;
+		}
 	
 	#ifdef _DEBUG
 		const T* DebugReadValue() const
