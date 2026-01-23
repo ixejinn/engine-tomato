@@ -62,6 +62,8 @@ namespace tomato
 
 		uint32_t			GetSize()			const { return sizeof(sockaddr); }
 		std::string			ToString()			const;
+		uint32_t			GetIPv4()			const { return ::ntohl(GetAsSockAddrIn()->sin_addr.S_un.S_addr); }
+		uint16_t			GetPort()			const { return ntohs(GetAsSockAddrIn()->sin_port); }
 
 	private:
 		friend class Socket;

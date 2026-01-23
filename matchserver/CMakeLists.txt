@@ -2,7 +2,9 @@ add_executable(matchserver
         src/main.cpp
         src/MatchServer.cpp
         src/Match.cpp
-        src/MatchManager.cpp)
+        src/MatchManager.cpp
+        src/SessionManager.cpp
+  "include/PacketTypes.h")
 
 target_link_libraries(matchserver
         PRIVATE
