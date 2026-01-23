@@ -5,7 +5,9 @@
 
 namespace tomato
 {
-    // 조작 입력을 비트 마스킹
+    /// Bitmask representing player input actions.
+    /// 플레이어의 조작 입력을 비트 플래그 형태로 묶어 하나의 uint16_t 값으로 표현한다.
+    /// 각 비트는 하나의 입력 행동을 의미한다.
     enum class InputAction : uint16_t
     {
         NONE    = 0,
@@ -48,12 +50,19 @@ namespace tomato
         return (x & action) != InputAction::NONE;
     }
 
+    /**
+     * @brief Input state recorded for a single simulation tick.
+     *
+     * 특정 틱에서 한 플레이어의 입력 상태를 나타낸다.
+     */
     struct InputRecord
     {
         uint32_t tick{0};
 
-        InputAction keypress{0};    // 눌러진 상태
-        InputAction keydown{0};     // 누르는 순간
+        /// Key state (held)
+        InputAction key{0};
+        /// Key down edge (up → down)
+        InputAction keydown{0};
     };
 }
 

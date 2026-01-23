@@ -3,36 +3,55 @@
 
 #include <cstdint>
 #include <array>
-#include <GLFW/glfw3.h>
 #include "tomato/services/InputTypes.h"    // InputRecord prev_, curr_
 
 namespace tomato
 {
-    enum Move : uint8_t
+    class WindowService;
+
+    /// Logical input binding slots used as indices into the input binding table.
+    enum class KeyboardBinding : uint16_t
     {
-        UP = 0,
-        DOWN,
+        UP,
         LEFT,
+        DOWN,
         RIGHT,
-        JUMP
+        JUMP,
+        LAST
     };
 
+    /// Struct for binding physical key to input action.
+    struct Binding
+    {
+        int key;
+        InputAction ia;
+    };
+
+    /**
+     * @brief Translates raw device input into engine-level input actions.
+     *
+     * 하드웨어로부터 받은 원시 입력 값을 엔진에서 사용할 수 있도록 의미 있는 입력 값으로 변환한다.
+     */
     class InputService
     {
     public:
-        const InputRecord& GetCurrInputRecord() const { return curr_; }
+        static void BindAction(KeyboardBinding bindAction, int physicalKey);
 
-        // for edge key event pressed & released
+        /// Initializes previous input record to current per frame to detect key down edge.
         void BeginFrame() { prev_ = curr_; }
 
-        void UpdateRecord(GLFWwindow* window, uint32_t tick);
+        /// Updates the current input record from the latest device state.
+        void UpdateRecord(WindowService& window, uint32_t tick);
+
+        const InputRecord& GetCurrInputRecord() const { return curr_; }
 
     private:
-        static constexpr std::array<int, 5> MOVE_KEYS{GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_SPACE};
+        static bool IsPressed(WindowService& window, int key) ;
 
         InputRecord prev_;
         InputRecord curr_;
     };
 }
+
 
 #endif //TOMATO_INPUTSERVICE_H

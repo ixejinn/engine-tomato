@@ -66,7 +66,7 @@ namespace tomato
             // 입력
             window_.TMP_CheckEscapeKey();
             input_.BeginFrame();
-            input_.UpdateRecord(window_.GetHandle(), tick_);
+            input_.UpdateRecord(window_, tick_);
             inputTimelines_[network_.GetPlayerID()].SetData(tick_, input_.GetCurrInputRecord());
 
             // 네트워크 관련 객체:          

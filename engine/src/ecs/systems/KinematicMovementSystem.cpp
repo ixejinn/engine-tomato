@@ -21,7 +21,7 @@ namespace tomato
             if (inputRec.tick != ctx.tick)
                 continue;
 
-            InputAction keypress{inputRec.keypress};
+            InputAction keypress{inputRec.key};
             InputAction keydown{inputRec.keydown};
 
             // 이동 처리
