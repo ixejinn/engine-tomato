@@ -1,8 +1,11 @@
 ﻿#ifndef TOMATO_SOCKET_UTIL_H
 #define TOMATO_SOCKET_UTIL_H
+#include <vector>
 #include <WinSock2.h>
+#include "tomato/services/network/TCPSocket.h"
 namespace tomato
 {
+	
 	class SocketUtil
 	{
 	public:
@@ -19,7 +22,16 @@ namespace tomato
 		 */
 		static void CleanUp();
 
+		static int Select(	const std::vector<TCPSocketPtr>* inReadSet,
+							std::vector<TCPSocketPtr>* outReadSet,
+							const std::vector<TCPSocketPtr>* inWriteSet,
+							std::vector<TCPSocketPtr>* outWriteSet,
+							const std::vector<TCPSocketPtr>* inExceptSet,
+							std::vector<TCPSocketPtr>* outExceptSet	);
+
 	private:
+		inline static fd_set* FillSetFromVector(fd_set& outSet, const std::vector<TCPSocketPtr>* inSockets, int& ioNaxNfds);
+		inline static void FillVectorFromSet(std::vector<TCPSocketPtr>* outSockets, const std::vector<TCPSocketPtr>* inSockets, const fd_set& inSet);
 	};
 }
 
