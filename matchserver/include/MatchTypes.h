@@ -3,6 +3,7 @@
 
 #include <typeinfo>
 #include <vector>
+#include "ServerTypes.h"
 
 namespace MatchConstants
 {
@@ -10,34 +11,45 @@ namespace MatchConstants
 	constexpr float	CONNECT_TIMEOUT_SEC = 2.0f;
 }
 
+enum class MatchRequestAction : uint8_t
+{
+	NONE,
+	Enqueue,
+	Cancel
+};
+
+struct MatchRequestCommand
+{
+	SessionId sessionId;
+	RequestId requestId;
+	MatchRequestAction action;
+};
+
 struct MatchRequest
 {
-	uint64_t requestId;
-	float enqueueTime;
+	SessionId sessionId;
+	RequestId requestId;
+	ServerTimeMs enqueueTime;
 	int retryCount;
-	//Session session;
 };
 
 enum class MatchState;
 struct MatchContext
 {
-	uint32_t matchId;
+	MatchId matchId;
 	MatchState state;
-	//Session players[MAX_MATCH_PLAYER];
-	//for test
 	MatchRequest players[MatchConstants::MAX_MATCH_PLAYER];
 };
 
 enum class MatchEventType
 {
 	AllReady,
-	TimeOut,
 	Failed,
 };
 
 struct MatchEvent
 {
-	uint32_t matchId;
+	MatchId matchId;
 	MatchEventType type;
 };
 

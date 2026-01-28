@@ -1,4 +1,4 @@
-#include "Match.h"
+ï»¿#include "Match.h"
 #include <iostream>
 
 Match::Match(const MatchContext& ctx) : ctx_(ctx), timer_(0.f) {}
@@ -15,27 +15,29 @@ void Match::Update(float dt)
 		break;
 
 	case MatchState::InfoSent:
-	// °¢ ÇÇ¾îµé¿¡°Ô NetConnection Á¤º¸ Àü¼Û ¿äÃ»
+	// ê° í”¼ì–´ë“¤ì—ê²Œ NetConnection ì •ë³´ ì „ì†¡ ìš”ì²­
 		std::cout << "InfoSent" << '\n';
 		ctx_.state = MatchState::WaitPeerReady;
 		break;
 
 	case MatchState::WaitPeerReady:
-	// ¸ğµç ÇÇ¾îµéÀÇ ÇÇ¾î°£ ¿¬°á ¼º°ø ÆĞÅ¶ÀÌ ´Ù µµÂøÇÒ ¶§±îÁö ´ë±â
-	// ÀÏÁ¤ ½Ã°£ÀÌ Áö³ª¸é timeoutÀ¸·Î Failed Ã³¸®
+	// ëª¨ë“  í”¼ì–´ë“¤ì˜ í”¼ì–´ê°„ ì—°ê²° ì„±ê³µ íŒ¨í‚·ì´ ë‹¤ ë„ì°©í•  ë•Œê¹Œì§€ ëŒ€ê¸°
+	// ì¼ì • ì‹œê°„ì´ ì§€ë‚˜ë©´ timeoutìœ¼ë¡œ Failed ì²˜ë¦¬
 		std::cout << "WaitPeerReady" << '\n';
 		if(timer_ >= MatchConstants::CONNECT_TIMEOUT_SEC)
 			ctx_.state = MatchState::Failed;
 		else
-			ctx_.state = MatchState::Done;
+			ctx_.state = MatchState::AllReady;
 		break;
 
 	case MatchState::Failed:
 		std::cout << "Failed" << '\n';
+		ctx_.state = MatchState::Processing;
 		break;
 
-	case MatchState::Done:
+	case MatchState::AllReady:
 		std::cout << "Done" << '\n';
+		ctx_.state = MatchState::Processing;
 		break;
 	}
 }

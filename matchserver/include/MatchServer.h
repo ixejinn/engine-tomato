@@ -1,9 +1,11 @@
 #ifndef MATCH_SERVER_H
 #define MATCH_SERVER_H
 
-class SessionManager;
-class MatchManager;
-class NetworkService;
+#include "SessionManager.h"
+#include "MatchManager.h"
+#include "NetworkService.h"
+
+#include <tomato/containers/SPSCQueue.h>
 
 class MatchServer
 {
@@ -14,9 +16,12 @@ public:
 private:
 	bool isRunning_{ true };
 
-	SessionManager* sessionMgr_{ nullptr };
-	MatchManager* matchMgr_{ nullptr };
-	NetworkService* networkService_{ nullptr };
+	SessionManager sessionMgr_;
+	MatchManager matchMgr_;
+	NetworkService networkService_;
+
+	tomato::SPSCQueue<uint32_t, 256> NetSendRequestQueue;
+	tomato::SPSCQueue<MatchRequestCommand, 128> MatchRequestQueue;
 };
 
 #endif // !MATCH_SERVER_H

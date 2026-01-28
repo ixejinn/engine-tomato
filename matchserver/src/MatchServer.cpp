@@ -2,7 +2,11 @@
 
 #include <iostream>
 
-MatchServer::MatchServer(){};
+MatchServer::MatchServer()
+	:
+	matchMgr_(MatchRequestQueue, NetSendRequestQueue),
+	networkService_(sessionMgr_, matchMgr_, MatchRequestQueue, NetSendRequestQueue)
+	{};
 
 void MatchServer::Run()
 {

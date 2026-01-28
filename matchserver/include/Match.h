@@ -8,8 +8,9 @@ enum class MatchState
 	Init,
 	InfoSent,
 	WaitPeerReady,
-	Done,
-	Failed
+	AllReady,
+	Failed,
+	Processing,
 };
 
 class Match
@@ -20,7 +21,8 @@ public:
 	void Update(float dt);
 
 	MatchState GetState() const { return ctx_.state; }
-	uint32_t GetMatchId() const { return ctx_.matchId; }
+	MatchId GetMatchId() const { return ctx_.matchId; }
+	const MatchRequest* GetMatchRequest() const { return ctx_.players; }
 private:
 	MatchContext ctx_;
 	float timer_; //check for waiting, timeout

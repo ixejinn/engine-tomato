@@ -3,9 +3,7 @@
 
 #include <typeinfo>
 #include <tomato/services/network/SocketAddress.h>
-
-using SessionId = uint32_t;
-using ServerTimeMs = uint64_t;
+#include "ServerTypes.h"
 
 namespace SessionConstants
 {

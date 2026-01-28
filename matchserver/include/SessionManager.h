@@ -15,6 +15,8 @@ public:
 	bool ValidateSession(const tomato::SocketAddress);
 	bool RemoveSession(SessionId);
 	void UpdateLastRecv(const SessionId);
+
+	SessionId GetSessionId(const tomato::SocketAddress& addr) { return addrToSessionId[addr]; }
 private:
 	SessionId nextId_ = 1;
 

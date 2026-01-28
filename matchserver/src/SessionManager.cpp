@@ -3,7 +3,7 @@
 void SessionManager::Update()
 {
 	ServerTimeMs now = duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	auto it = sessions.begin();
+	
 	for (auto it = sessions.begin(); it != sessions.end();)
 	{
 		if (it->second.IsTimeOut(now))
