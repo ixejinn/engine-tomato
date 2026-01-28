@@ -67,6 +67,7 @@ namespace tomato
 
 	private:
 		friend class Socket;
+		friend class TCPSocket;
 
 		sockaddr sockAddr_;
 		

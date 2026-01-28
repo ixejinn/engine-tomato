@@ -21,14 +21,17 @@ public:
 
 	void Update(float dt);
 
-	bool CheckPopulation();
 	void ProcessMatchRequest();
 	void HandleEnqueue(SessionId sessionId, RequestId reqId);
 	void HandleCancel(SessionId sessionId, RequestId reqId);
+	
+	bool CheckPopulation();
 	bool GetMatchRequestFromPQ(MatchRequest& req);
 	bool CreateMatchContext(MatchContext& ctx);
-	void EmitMatchResult(MatchEvent& evt);
+
+	void ProcessMatchResult(float dt);
 	void ReQueing(MatchId matchId);
+	void EmitMatchResult(MatchEvent& evt); // not use
 
 private:
 	struct Compare {

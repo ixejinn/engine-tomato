@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-
 void NetworkService::Update(float dt)
 {
 	ProcessPendingPacket();
@@ -77,7 +76,22 @@ void NetworkService::ProcessNetSendRequest()
 
 		if (packet)
 		{
-			std::cout << "ProcessNetSendRequest::" << packet << '\n';
+			PacketHeader header = static_cast<PacketHeader>(packet);
+			std::cout << "ProcessNetSendRequest::";
+			switch (header)
+			{
+			case PacketHeader::CS_WELCOME:
+				std::cout << "CS_WELCOME\n";
+				break;
+
+			case PacketHeader::MATCH_INTRO:
+				std::cout << "MATCH_INTRO\n";
+				break;
+
+			case PacketHeader::MATCH_START:
+				std::cout << "MATCH_START\n";
+				break;
+			}
 		}
 	}
 }

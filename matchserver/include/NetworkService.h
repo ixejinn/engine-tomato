@@ -4,8 +4,9 @@
 #include "MatchTypes.h"
 #include "PacketTypes.h"
 #include "SessionManager.h"
-
+#include <tomato/services/network/WinsockContext.h>
 #include <tomato/services/network/NetDriver.h>
+#include <tomato/services/network/TCPNetDriver.h>
 #include <tomato/containers/SPSCQueue.h>
 #include <tomato/net/NetBitReader.h>
 
@@ -36,7 +37,10 @@ public:
 	void NetRecvThreadLoop();
 
 private:
+	tomato::WinsockContext winsock_;
 	tomato::NetDriver driver_;
+	tomato::TCPNetDriver tcpDriver_;
+
 	SessionManager& sessionMgr_;
 	MatchManager& matchMgr_;
 

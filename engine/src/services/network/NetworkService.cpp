@@ -10,7 +10,6 @@ namespace tomato
 	NetworkService::NetworkService(Engine& engine)
     : engine_(engine), playerID_(0)
     {
-        Socket::InitWinsock();
         InitSocket();
 
         playerToName[0] = "yejin";
@@ -28,7 +27,6 @@ namespace tomato
 
     NetworkService::~NetworkService()
     {
-        Socket::CleanUp();
     }
 
     // !!! FOR TEST !!!

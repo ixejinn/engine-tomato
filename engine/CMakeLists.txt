@@ -28,9 +28,11 @@ set(ENGINE_HEADERS
         include/tomato/services/WindowService.h
         include/tomato/services/network/CoreNetwork.h
         include/tomato/services/network/Socket.h
+        include/tomato/services/network/TCPSocket.h
         include/tomato/services/network/SocketAddress.h
         include/tomato/services/network/NetConnection.h
         include/tomato/services/network/NetDriver.h
+        include/tomato/services/network/TCPNetDriver.h
         include/tomato/services/network/NetworkService.h
         include/tomato/serialization/BitReader.h
         include/tomato/serialization/BitWriter.h
@@ -45,8 +47,8 @@ set(ENGINE_HEADERS
         include/tomato/EngineConfig.h
         include/tomato/net/rollback/RollbackSlice.h
         include/tomato/net/rollback/RollbackSliceTimeline.h
-        include/tomato/tomato_types.h 
-)
+        include/tomato/tomato_types.h
+ "include/tomato/services/network/SocketUtil.h" "include/tomato/services/network/WinsockContext.h")
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -63,15 +65,17 @@ set(ENGINE_SOURCES
         src/services/InputService.cpp
         src/services/WindowService.cpp
         src/services/network/NetDriver.cpp
+        src/services/network/TCPNetDriver.cpp
         src/services/network/NetworkService.cpp
         src/services/network/Socket.cpp
+        src/services/network/TCPSocket.cpp
         src/services/network/SocketAddress.cpp
         src/serialization/BitReader.cpp
         src/serialization/BitWriter.cpp
         src/net/NetBitReader.cpp
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
-)
+ "src/services/network/SocketUtil.cpp")
 
 set(EXTERNAL_SOURCES
         external/glad/src/glad.c

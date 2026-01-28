@@ -6,25 +6,6 @@
 
 namespace tomato
 {
-
-	bool Socket::InitWinsock()
-	{
-		WSADATA wsaData;
-		int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-		if (result != NO_ERROR)
-		{
-			TMT_ERR << "Failed to Socket::InitWinsock";
-			return false;
-		}
-		
-		return true;
-	}
-
-	void Socket::CleanUp()
-	{
-		WSACleanup();
-	}
-
 	SocketPtr Socket::CreateSocket()
 	{
 		/**

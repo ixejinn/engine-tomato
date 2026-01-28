@@ -11,15 +11,10 @@ namespace tomato
         InitSocket();
     }
     
-    NetDriver::~NetDriver()
-    {
-        Socket::CleanUp();
-    }
+    NetDriver::~NetDriver(){}
 
     bool NetDriver::InitSocket()
     {
-        Socket::InitWinsock();
-
         /**
         * Create UDP socket for game networking.
         * If this fails, network service cannot start.
@@ -31,7 +26,7 @@ namespace tomato
         SocketAddress myAddr((uint32_t)INADDR_ANY, port);
         socket_->Bind(myAddr);
 
-        TMT_LOG << "Initializing NetworkService at " << myAddr.ToString();
+        TMT_LOG << "Initializing UDP NetDriver at " << myAddr.ToString();
 
         if (socket_ == nullptr)
             return false;

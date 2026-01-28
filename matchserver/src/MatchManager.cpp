@@ -3,13 +3,16 @@
 
 void MatchManager::AddMatchRequestQueue(SessionId sessionId, RequestId reqId)
 {
-	MatchRequestCommand reqCommand;
-	reqCommand.sessionId = sessionId;
-	reqCommand.requestId = reqId;
-	reqCommand.action = MatchRequestAction::Enqueue;
+	MatchRequestCommand reqCommand{
+		.sessionId = sessionId,
+		.requestId = reqId,
+		.action = MatchRequestAction::Enqueue
+	};
 
 	MatchRequestQueue.Emplace(reqCommand);
 }
+/////////////////////////////////////////////////////////////////////////////////
+
 
 void MatchManager::Update(float dt)
 {
@@ -26,41 +29,7 @@ void MatchManager::Update(float dt)
 			std::cout << c.requestId << " ";
 	}
 	
-	// Update the state of all matches (Separating as a function)
-	for (auto it = matches.begin(); it != matches.end();)
-	{
-		it->second.Update(dt);
-
-		switch (it->second.GetState())
-		{
-		case MatchState::AllReady:
-			//SendPacket for game start
-			//then, Remove from matches
-			NetSendRequestQueue.Emplace(static_cast<uint8_t>(PacketHeader::MATCH_START));
-			it = matches.erase(it);
-			break;
-
-		// When peers can't connect or time out
-		case MatchState::Failed:
-			// Remove from matches after ReQueing
-			ReQueing(it->first);
-			it = matches.erase(it);
-
-			std::cout << "ReQueing\n";
-			break;
-
-		default:
-			++it;
-			break;
-		}
-	}	
-}
-
-bool MatchManager::CheckPopulation()
-{
-	if (requests.size() >= MatchConstants::MAX_MATCH_PLAYER)
-		return true;
-	return false;
+	ProcessMatchResult(dt);
 }
 
 void MatchManager::ProcessMatchRequest()
@@ -80,12 +49,13 @@ void MatchManager::ProcessMatchRequest()
 
 void MatchManager::HandleEnqueue(SessionId sessionId, RequestId reqId)
 {
-	MatchRequest mRequest;
-	mRequest.sessionId = sessionId;
-	mRequest.requestId = reqId;
-	mRequest.enqueueTime = 0;
-	//duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	mRequest.retryCount = 0;
+	MatchRequest mRequest{
+		.sessionId = sessionId,
+		.requestId = reqId,
+		.enqueueTime = 0,
+		//duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+		.retryCount = 0,
+	};
 
 	requests.try_emplace(sessionId, mRequest);
 	pq.emplace(mRequest);
@@ -99,6 +69,13 @@ void MatchManager::HandleCancel(SessionId sessionId, RequestId reqId)
 		if(it->second.requestId == reqId)
 			requests.erase(it);
 	}
+}
+
+bool MatchManager::CheckPopulation()
+{
+	if (requests.size() >= MatchConstants::MAX_MATCH_PLAYER)
+		return true;
+	return false;
 }
 
 bool MatchManager::GetMatchRequestFromPQ(MatchRequest& req)
@@ -138,6 +115,38 @@ bool MatchManager::CreateMatchContext(MatchContext& ctx)
 	return true;
 }
 
+void MatchManager::ProcessMatchResult(float dt)
+{
+	// Update the state of all matches (Separating as a function)
+	for (auto it = matches.begin(); it != matches.end();)
+	{
+		it->second.Update(dt);
+
+		switch (it->second.GetState())
+		{
+		case MatchState::AllReady:
+			//SendPacket for game start
+			//then, Remove from matches
+			NetSendRequestQueue.Emplace(static_cast<uint8_t>(PacketHeader::MATCH_START));
+			it = matches.erase(it);
+			break;
+
+			// When peers can't connect or time out
+		case MatchState::Failed:
+			// Remove from matches after ReQueing
+			ReQueing(it->first);
+			it = matches.erase(it);
+
+			std::cout << "ReQueing\n";
+			break;
+
+		default:
+			++it;
+			break;
+		}
+	}
+}
+
 void MatchManager::EmitMatchResult(MatchEvent& evt)
 {
 	switch (evt.type)
@@ -160,17 +169,23 @@ void MatchManager::ReQueing(MatchId matchId)
 		
 		for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
 		{
-			MatchRequest newRequest;
-			newRequest.sessionId = (request + i)->sessionId;
-			newRequest.enqueueTime = duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-			newRequest.requestId = (request + i)->requestId;
-			newRequest.retryCount = (request + i)->retryCount + 1;
+			MatchRequest reRequest
+			{
+				.sessionId = (request + i)->sessionId,
+				.requestId = (request + i)->requestId,
+				.enqueueTime = static_cast<ServerTimeMs>(
+					duration_cast<std::chrono::milliseconds>(
+						std::chrono::steady_clock::now().time_since_epoch()
+					).count()
+				),
+				.retryCount = (request + i)->retryCount + 1,
+			};
 			
-			if (newRequest.retryCount > 3)
+			if (reRequest.retryCount > 3)
 				continue;
-			//HandleEnqueue(newRequest.sessionId, newRequest.requestId);
-			requests.try_emplace(newRequest.sessionId, newRequest.requestId);
-			pq.emplace(newRequest);
+			
+			requests.try_emplace(reRequest.sessionId, reRequest);
+			pq.emplace(reRequest);
 		}
 	}
 }

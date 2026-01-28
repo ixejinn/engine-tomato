@@ -7,6 +7,7 @@
 #include <atomic>
 
 #include "tomato/services/network/CoreNetwork.h"
+#include "tomato/services/network/WinsockContext.h"
 #include "tomato/services/network/Socket.h"         // SocketPtr socket_
 #include "tomato/services/network/SocketAddress.h"  // map<..SocketAddress..> ..
 #include "tomato/containers/MemoryPool.h"
@@ -53,6 +54,7 @@ namespace tomato
         std::atomic<bool> isNetThreadRunning_{false};
 
 	private:
+        WinsockContext winsock_;
         //NetDriver driver_;
         MemoryPool<RawBuffer, 128> bufferPool_;
         SPSCQueue<Packet, 128> pendingPackets_;
