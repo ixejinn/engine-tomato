@@ -4,6 +4,8 @@
 #include <array>
 #include <vector>
 #include <memory>
+
+#include "tomato/containers/EnumArray.h"
 #include "tomato/tomato_sim.h"
 
 namespace tomato
@@ -11,7 +13,6 @@ namespace tomato
     class Engine;
     class System;
     class World;
-    class SimContext;
 
     /**
      * @brief Manages lifecycle, execution, and update order of all systems.
@@ -43,7 +44,8 @@ namespace tomato
                 SystemPhase::CAMERA
                 };
 
-        std::array<std::vector<SystemPtr>, ToIndex(SystemPhase::COUNT)> systems_{};
+        EnumArray<SystemPhase, std::vector<SystemPtr>> systems_;
+        //std::array<std::vector<SystemPtr>, ToIndex(SystemPhase::COUNT)> systems_{};
     };
 }
 

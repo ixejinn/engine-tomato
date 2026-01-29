@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include "tomato/tomato_sim.h"
+#include "tomato/containers/EnumArray.h"
 
 namespace tomato
 {
@@ -38,7 +39,7 @@ namespace tomato
         }
 
     private:
-        std::array<std::vector<Factory>, ToIndex(SystemPhase::COUNT)> factories_{};
+        EnumArray<SystemPhase, std::vector<Factory>> factories_;
     };
 
     /**

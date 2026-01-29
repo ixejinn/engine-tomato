@@ -2,7 +2,6 @@ set(ENGINE_HEADERS
         include/tomato/DefaultState.h
         include/tomato/Engine.h
         include/tomato/Logger.h
-        include/tomato/SimulationContext.h
         include/tomato/State.h
         include/tomato/tomato.h
         include/tomato/ecs/SystemManager.h

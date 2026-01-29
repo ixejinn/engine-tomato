@@ -1,7 +1,10 @@
 #include "tomato/ecs/SystemManager.h"
 #include "tomato/ecs/SystemRegistry.h"
+#include "tomato/Engine.h"
 #include "tomato/ecs/systems/System.h"
 #include "tomato/ecs/systems/RenderSystem.h"
+#include "tomato/ecs/World.h"
+#include "tomato/tomato_sim.h"
 
 namespace tomato
 {
@@ -12,13 +15,13 @@ namespace tomato
         for (SystemPhase phase : simulationOrder_)
         {
             for (const auto& factory : registry.GetFactory(phase))
-                systems_[ToIndex(phase)].emplace_back(factory());
+                systems_[phase].emplace_back(factory());
         }
 
         for (SystemPhase phase : renderOrder_)
         {
             for (const auto& factory : registry.GetFactory(phase))
-                systems_[ToIndex(phase)].emplace_back(factory());
+                systems_[phase].emplace_back(factory());
         }
     }
 
@@ -28,7 +31,7 @@ namespace tomato
     {
         for (SystemPhase phase : simulationOrder_)
         {
-            for (auto& system : systems_[ToIndex(phase)])
+            for (auto& system : systems_[phase])
                 system->Update(engine, ctx);
         }
     }
@@ -40,7 +43,7 @@ namespace tomato
 
         for (SystemPhase phase : renderOrder_)
         {
-            for (auto& system : systems_[ToIndex(phase)])
+            for (auto& system : systems_[phase])
                 system->Update(engine, ctx);
         }
     }
