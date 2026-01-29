@@ -1,7 +1,6 @@
 #ifndef TOMATO_TCP_SOCKET_H
 #define TOMATO_TCP_SOCKET_H
 
-#include "tomato/services/network/SocketUtil.h"
 #include <WinSock2.h>
 #include <memory>
 #include <typeinfo>

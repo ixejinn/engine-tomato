@@ -17,6 +17,7 @@ namespace tomato
 		void SendPacket();
 		bool RecvPacket();
 
+		const TCPSocketPtr GetSocket() const { return socket_; }
 	private:
 		TCPSocketPtr socket_;
 	};

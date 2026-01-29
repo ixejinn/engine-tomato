@@ -128,6 +128,18 @@ namespace tomato
 			return true;
 		}
 
+		const T* Front() const
+		{
+			auto read = read_.load(std::memory_order_acquire);
+			auto write = write_.load(std::memory_order_acquire);
+
+			if (read == write)
+				return nullptr;
+
+			const auto index = read & mask_;
+			return reinterpret_cast<const T*>(cells_[index].buffer_);
+		}
+
 		bool Empty() const { return write_.load(std::memory_order_acquire) == read_.load(std::memory_order_acquire); }
 		const std::size_t Capacity() const { return sizeT; }
 		const std::size_t Size() const

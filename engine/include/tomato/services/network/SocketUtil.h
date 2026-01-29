@@ -1,24 +1,24 @@
-ï»¿#ifndef TOMATO_SOCKET_UTIL_H
+#ifndef TOMATO_SOCKET_UTIL_H
 #define TOMATO_SOCKET_UTIL_H
 #include <vector>
 #include <WinSock2.h>
 #include "tomato/services/network/TCPSocket.h"
+
 namespace tomato
 {
-	
 	class SocketUtil
 	{
 	public:
 		/**
-		 * WinSock ì´ˆê¸°í™”
-		 * í”„ë¡œê·¸ë¨ ì‹œì‘ ì‹œ ë‹¨ í•œ ë²ˆë§Œ í˜¸ì¶œë˜ì–´ì•¼ í•˜ë©°,
-		 * CreateSocket ì´ì „ì— ë°˜ë“œì‹œ ì„ í–‰
+		 * WinSock ÃÊ±âÈ­
+		 * ÇÁ·Î±×·¥ ½ÃÀÛ ½Ã ´Ü ÇÑ ¹ø¸¸ È£ÃâµÇ¾î¾ß ÇÏ¸ç,
+		 * CreateSocket ÀÌÀü¿¡ ¹İµå½Ã ¼±Çà
 		 */
 		static bool InitWinsock();
 
 		/**
-		 * Winsock ì¢…ë£Œ ì²˜ë¦¬
-		 * í”„ë¡œê·¸ë¨ ì¢…ë£Œ ì‹œ í˜¸ì¶œ
+		 * Winsock Á¾·á Ã³¸®
+		 * ÇÁ·Î±×·¥ Á¾·á ½Ã È£Ãâ
 		 */
 		static void CleanUp();
 

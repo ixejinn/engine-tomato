@@ -1,9 +1,33 @@
 #ifndef SESSION_H
 #define SESSION_H
-
-#include <typeinfo>
+#include <vector>
 #include <tomato/services/network/SocketAddress.h>
+#include <tomato/services/network/TCPSocket.h>
 #include "ServerTypes.h"
+
+struct Packet;
+namespace TCP
+{
+	class Session
+	{
+	public:
+		Session(tomato::TCPSocketPtr socket, tomato::SocketAddress addr) : socket(socket), addr(addr) {};
+		
+		void AppendRecvBuffer(const uint8_t* data, int len);
+		bool ParsePacket(std::vector<uint8_t>& outData);
+
+		const tomato::TCPSocketPtr GetSocket() const { return socket; }
+		const tomato::SocketAddress& GetSocketAddress() const { return addr; }
+		std::vector<uint8_t>& GetRecvBuffer() { return recvBuffer; }
+		std::vector<uint8_t>& GetSendBuffer() { return sendBuffer; }
+
+	//private:
+		tomato::TCPSocketPtr socket;
+		tomato::SocketAddress addr;
+		std::vector<uint8_t> recvBuffer;
+		std::vector<uint8_t> sendBuffer;
+	};
+}
 
 namespace SessionConstants
 {

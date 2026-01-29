@@ -3,6 +3,7 @@
 
 #include <typeinfo>
 #include <tomato/services/network/SocketAddress.h>
+#include <tomato/services/network/TCPSocket.h>
 
 struct Packet
 {
@@ -14,6 +15,35 @@ struct Packet
 	Packet(RawBuffer* bufPtr, std::size_t size, tomato::SocketAddress addr)
 		: buffer(bufPtr), size(size), addr(addr) {
 	}
+};
+
+struct TCPPacket
+{
+	std::vector<uint8_t> buffer;
+	tomato::TCPSocketPtr client;
+	
+	TCPPacket() = default;
+	TCPPacket(const uint8_t* data, std::size_t size, tomato::TCPSocketPtr client)
+		: buffer(data, data + size), client(client) {
+	}
+	size_t size() const { return buffer.size(); }
+};
+
+enum class TCPPacketType : uint16_t
+{
+	MATCH_REQUEST,
+	MATCH_CANCEL,
+	MATCH_INTRO,
+	INTRO_RESULT,
+	MATCH_START,
+
+	COUNT
+};
+
+struct TCPHeader
+{
+	uint16_t size; // Total packet size (include header)
+	TCPPacketType type; // Packet type (ex: 1 = MatchRequest, 2 = MatchCancel...)
 };
 
 enum class PacketHeader : uint8_t
