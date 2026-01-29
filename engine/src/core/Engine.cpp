@@ -6,14 +6,18 @@
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/systems/System.h"
 #include "tomato/net/rollback/RollbackSlice.h"
+#include "tomato/input/InputTypes.h"
 
 #include <thread>
+#include <vector>
 
 namespace tomato
 {
     Engine::Engine(WindowService& window)
-    : window_(window), network_(*this), systemManager_(SystemManager{})
+    : window_(window), input_(window), network_(*this), systemManager_(SystemManager{})
     {
+        keyEvents_.reserve(MAX_KEY_EVENTS_NUM);
+
         ChangeState();
     }
 
@@ -63,12 +67,6 @@ namespace tomato
             if (!currState_)
                 isRunning_ = false;
 
-            // 입력
-            window_.TMP_CheckEscapeKey();
-            input_.BeginFrame();
-            input_.UpdateRecord(window_, tick_);
-            inputTimelines_[network_.GetPlayerID()].SetData(tick_, input_.GetCurrInputRecord());
-
             // 네트워크 관련 객체:          
             // 다른 플레이어로부터 들어온 늦은 입력을 히스토리에 저장하고,
             // 롤백 해야 할 틱 번호 찾음
@@ -90,6 +88,12 @@ namespace tomato
                 }
             }
 
+            // 입력
+            window_.TMP_CheckEscapeKey();
+            window_.PollEvents();
+            ProcessKeyEvents();
+            inputTimelines_[network_.GetPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
+
             // 고정 시간 시뮬레이션
             std::chrono::steady_clock::time_point cur = std::chrono::steady_clock::now();
             adder_ += std::chrono::duration<float, std::milli>(cur - start_);
@@ -109,9 +113,7 @@ namespace tomato
 
             // 렌더
             systemManager_.Render(*this, SimContext{tick_});
-
             window_.SwapBuffers();
-            window_.PollEvents();
 
             frameCnt++;
         }
@@ -123,5 +125,13 @@ namespace tomato
     void Engine::SetInputData(uint8_t playerID, const InputRecord &record)
     {
         inputTimelines_[playerID].SetData(record.tick, record);
+    }
+
+    void Engine::ProcessKeyEvents()
+    {
+        keyEvents_.clear();
+        input_.DrainKeyEvents(keyEvents_);
+        // UI가 우선 소비 (소비하면 consumed = true)
+        inputRecorder_.UpdateInputAxis(keyEvents_, tick_);
     }
 }

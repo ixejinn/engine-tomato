@@ -6,13 +6,14 @@
 #include <thread>
 #include <array>
 
-#include "tomato/services/InputService.h"           // InputService input_
+#include "tomato/services/input/InputService.h"           // InputService input_
 #include "tomato/containers/Timeline.h"
 #include "tomato/services/network/NetworkService.h" // NetworkService::MAX_PLAYER_NUM
 #include "tomato/ecs/SystemManager.h"               // SystemManager systemManager_
 #include "tomato/EngineConfig.h"
 #include "tomato/net/rollback/RollbackManager.h"
 #include "tomato/net/rollback/RollbackSlice.h"
+#include "tomato/input/InputRecorder.h"
 
 namespace tomato
 {
@@ -63,9 +64,14 @@ namespace tomato
         static constexpr int MAX_SIMULATION_NUM{3};
         static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
 
+        static constexpr int MAX_KEY_EVENTS_NUM{64};
+        void ProcessKeyEvents();
+
         WindowService& window_;
 
         InputService input_;
+        std::vector<KeyEvent> keyEvents_;
+
         PlayerInputTimelines inputTimelines_;
 
         // 사용하는 경우에만 만들게 하던지..
@@ -77,6 +83,8 @@ namespace tomato
 
         std::unique_ptr<World> world_{nullptr};
         SystemManager systemManager_;
+
+        InputRecorder inputRecorder_;
 
         std::unique_ptr<RollbackManagerB> rollbackManager_{nullptr};
 

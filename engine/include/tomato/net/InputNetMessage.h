@@ -2,7 +2,7 @@
 #define TOMATO_INPUTNETMESSAGE_H
 
 #include "tomato/net/NetMessage.h"
-#include "tomato/services/InputTypes.h"
+#include "tomato/input/InputRecord.h"
 
 namespace tomato
 {

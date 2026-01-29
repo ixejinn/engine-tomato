@@ -22,8 +22,8 @@ set(ENGINE_HEADERS
         include/tomato/render/Mesh.h
         include/tomato/render/Shader.h
         include/tomato/render/Texture.h
-        include/tomato/services/InputService.h
-        include/tomato/services/InputTypes.h
+        include/tomato/services/input/InputService.h
+        include/tomato/input/InputTypes.h
         include/tomato/services/WindowService.h
         include/tomato/services/network/Socket.h
         include/tomato/services/network/SocketAddress.h
@@ -45,6 +45,10 @@ set(ENGINE_HEADERS
         include/tomato/net/rollback/CoreRollback.h
         include/tomato/containers/Timeline.h
         include/tomato/tomato_sim.h
+        include/tomato/input/InputRecorder.h
+        include/tomato/containers/EnumArray.h
+        include/tomato/input/InputConstants.h
+        include/tomato/input/InputRecord.h
 )
 
 set(ENGINE_SOURCES
@@ -59,7 +63,7 @@ set(ENGINE_SOURCES
         src/render/Mesh.cpp
         src/render/Shader.cpp
         src/render/Texture.cpp
-        src/services/InputService.cpp
+        src/services/input/InputService.cpp
         src/services/WindowService.cpp
         src/services/network/NetworkService.cpp
         src/services/network/Socket.cpp
@@ -69,10 +73,12 @@ set(ENGINE_SOURCES
         src/net/NetBitReader.cpp
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
+        src/input/InputManager.cpp
 )
 
 set(EXTERNAL_SOURCES
         external/glad/src/glad.c
+        include/tomato/tomato_math.h
 )
 
 add_library(engine STATIC

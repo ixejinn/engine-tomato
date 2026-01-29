@@ -21,18 +21,18 @@ namespace tomato
             if (inputRec.tick != ctx.tick)
                 continue;
 
-            InputAction keypress{inputRec.key};
-            InputAction keydown{inputRec.keydown};
+            InputIntent keypress{inputRec.held};
+            InputIntent keydown{inputRec.down};
 
             // 이동 처리
             int x = 0, y = 0;
-            if (HasAction(keypress, InputAction::UP))
+            if (HasIntent(keypress, InputIntent::UP))
                 y++;
-            if (HasAction(keypress, InputAction::DOWN))
+            if (HasIntent(keypress, InputIntent::DOWN))
                 y--;
-            if (HasAction(keypress, InputAction::LEFT))
+            if (HasIntent(keypress, InputIntent::LEFT))
                 x--;
-            if (HasAction(keypress, InputAction::RIGHT))
+            if (HasIntent(keypress, InputIntent::RIGHT))
                 x++;
             glm::vec2 dir = glm::vec2{x, y};
             if (glm::length(dir) > 1)
@@ -46,7 +46,7 @@ namespace tomato
 
             // 점프 처리
             /* !!! for 3D MOVEMENT !!!
-            if (HasAction(keydown, InputAction::JUMP) && move.cnt < JUMP_COUNT_MAX)
+            if (HasIntent(down, InputIntent::JUMP) && move.cnt < JUMP_COUNT_MAX)
             {
                 // 점프 시작
                 move.cnt++;
