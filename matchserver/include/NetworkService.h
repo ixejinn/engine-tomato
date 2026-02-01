@@ -19,23 +19,30 @@ class MatchManager;
 class NetworkService
 {
 public:
-	NetworkService(SessionManager& sessionMgr, MatchManager& matchMgr, tomato::SPSCQueue<MatchRequestCommand, 128>& requestQ, tomato::SPSCQueue<uint32_t, 256>& netSendRequestQ)
+	NetworkService(SessionManager& sessionMgr, MatchManager& matchMgr, tomato::SPSCQueue<MatchRequestCommand, 128>& requestQ, tomato::SPSCQueue<SendRequestCommand, 256>& netSendRequestQ)
 		:
 		sessionMgr_(sessionMgr),
 		matchMgr_(matchMgr),
 		MatchRequestQueue(requestQ),
 		NetSendRequestQueue(netSendRequestQ)
 	{};
-	
+
+	/////////////ONLY FOR TEST////////////
+	void AddNetMassage(TCPPacket& packets);
+	//////////////////////////////////////
+
+
 	void Update(float dt);
-	void SendPacket(uint8_t messageType);
 
 	void ProcessPendingPacket();
 	void ProcessPacketMatchReq(tomato::NetBitReader& reader, SessionId sessionId);
 	void OnPacket();
 
-	void ProcessNetSendRequest();
 	void NetRecvThreadLoop();
+
+	//TCP
+	void ProcessNetSendRequest();
+	void ProcessSendPacket();
 
 	void ProcessQueuedPackets();
 	void ProcessPacket(const TCPHeader& header, tomato::NetBitReader& reader, tomato::TCPSocketPtr& client);
@@ -53,7 +60,9 @@ private:
 	tomato::SPSCQueue<TCPPacket, 256> TCPRecvQueue;
 	tomato::SPSCQueue<Packet, 256> NetRecvQueue;
 	tomato::SPSCQueue<MatchRequestCommand, 128>& MatchRequestQueue;
-	tomato::SPSCQueue<uint32_t, 256>& NetSendRequestQueue;
+	tomato::SPSCQueue<SendRequestCommand, 256>& NetSendRequestQueue;
+
+	SessionId testId = 0;
 };
 
 #endif // !NETWORK_SERVICE_H

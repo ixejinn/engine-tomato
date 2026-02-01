@@ -83,3 +83,28 @@ bool SessionManager::AppendRecvBuffer(tomato::TCPSocketPtr client, const uint8_t
 	}
 	return false;
 }
+
+void SessionManager::AppendSendBuffer(tomato::TCPSocketPtr client, const uint8_t* inData, int len)
+{
+	auto it = tcpSessions.find(client);
+	if (it != tcpSessions.end())
+		it->second.AppendSendBuffer(inData, len);
+}
+
+void SessionManager::GetWritableSockets(std::vector<tomato::TCPSocketPtr>& outVector)
+{
+	for (auto& session : tcpSessions)
+	{
+		if (!session.second.sendBuffer.empty())
+			outVector.push_back(session.first);
+	}
+}
+
+TCP::Session* SessionManager::GetSession(const tomato::TCPSocketPtr socket)
+{
+	auto it = tcpSessions.find(socket);
+	if (it != tcpSessions.end())
+		return &it->second;
+	
+	return nullptr;
+}

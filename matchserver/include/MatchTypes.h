@@ -3,6 +3,7 @@
 
 #include <typeinfo>
 #include <vector>
+#include <tomato/services/network/TCPSocket.h>
 #include "ServerTypes.h"
 
 namespace MatchConstants
@@ -20,13 +21,21 @@ enum class MatchRequestAction : uint8_t
 
 struct MatchRequestCommand
 {
+	tomato::TCPSocketPtr socket;
 	SessionId sessionId;
 	RequestId requestId;
 	MatchRequestAction action;
 };
 
+struct SendRequestCommand
+{
+	tomato::TCPSocketPtr socket;
+	uint8_t data;
+};
+
 struct MatchRequest
 {
+	tomato::TCPSocketPtr socket;
 	SessionId sessionId;
 	RequestId requestId;
 	ServerTimeMs enqueueTime;

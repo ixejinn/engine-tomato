@@ -26,7 +26,7 @@ namespace tomato
 		int Send(const void* inData, int inLen);
 		int Receive(void* inBuffer, int inLen);
 
-
+		int GetSocketAddress(TCPSocketPtr socket, SocketAddress& inFromAddress, int inLen);
 	private:
 		friend class SocketUtil;
 		TCPSocket(SOCKET inSocket) : socket_(inSocket) {};

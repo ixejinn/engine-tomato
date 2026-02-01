@@ -11,14 +11,18 @@ namespace tomato
 	{
 	public:
 		TCPNetDriver();
+		TCPNetDriver(SocketAddress& inAddress);
 		~TCPNetDriver();
 
 		bool InitTCPSocket();
-		void SendPacket();
-		bool RecvPacket();
 
+		int SendPacket(uint8_t* buffer, int size);
+		int RecvPacket(uint8_t* buffer, int size);
+
+		//int GetSocketAddress();
 		const TCPSocketPtr GetSocket() const { return socket_; }
 	private:
+
 		TCPSocketPtr socket_;
 	};
 

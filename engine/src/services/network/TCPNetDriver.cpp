@@ -11,6 +11,15 @@ namespace tomato
 	{
 		InitTCPSocket();
 	}
+
+	TCPNetDriver::TCPNetDriver(SocketAddress& inAddress)
+	{
+		if (inAddress.GetIPv4() == (uint32_t)INADDR_ANY)
+			InitTCPSocket();
+		else
+			socket_->Accept(inAddress);
+	}
+
 	TCPNetDriver::~TCPNetDriver()
 	{	
 	}
@@ -22,6 +31,7 @@ namespace tomato
 		uint32_t port = 7777;
 		SocketAddress myAddr((uint32_t)INADDR_ANY, port);
 		socket_->Bind(myAddr);
+		
 		if (socket_ == nullptr)
 		{
 			TMT_LOG << "Failed to Initialize TCP NetDriver";
@@ -32,6 +42,16 @@ namespace tomato
 		socket_->Listen();
 		TMT_LOG << "START TO LISTEN....";
 		return true;
+	}
+
+	int TCPNetDriver::SendPacket(uint8_t* buffer, int size)
+	{
+		return socket_->Send(buffer, size);
+	}
+
+	int TCPNetDriver::RecvPacket(uint8_t* buffer, int size)
+	{
+		return socket_->Receive(buffer, size);
 	}
 
 }

@@ -40,11 +40,13 @@ enum class TCPPacketType : uint16_t
 	COUNT
 };
 
+#pragma pack(push, 1)
 struct TCPHeader
 {
 	uint16_t size; // Total packet size (include header)
 	TCPPacketType type; // Packet type (ex: 1 = MatchRequest, 2 = MatchCancel...)
 };
+#pragma pack(pop)
 
 enum class PacketHeader : uint8_t
 {

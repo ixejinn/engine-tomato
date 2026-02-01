@@ -99,4 +99,16 @@ namespace tomato
 
 		return bytesReceivedCount;
 	}
+
+	int TCPSocket::GetSocketAddress(TCPSocketPtr socket, SocketAddress& inFromAddress, int inLen)
+	{
+		int error = getpeername(socket->socket_, &inFromAddress.sockAddr_, &inLen);
+		if (error != SOCKET_ERROR)
+			return error;
+		else
+		{
+			TMT_ERR << "Failed to TCPSocket::GetSocketAddress";
+			return WSAGetLastError();
+		}
+	}
 }

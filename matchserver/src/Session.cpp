@@ -8,6 +8,11 @@ namespace TCP
 		recvBuffer.insert(recvBuffer.end(), data, data + len);
 	}
 
+	void Session::AppendSendBuffer(const uint8_t* data, int len)
+	{
+		sendBuffer.insert(sendBuffer.end(), data, data + len);
+	}
+
 	bool Session::ParsePacket(std::vector<uint8_t>& outData)
 	{
 		if (recvBuffer.size() >= sizeof(TCPHeader))
@@ -25,5 +30,10 @@ namespace TCP
 		}
 		
 		return false;
+	}
+
+	void Session::ConsumeSendBuffer(int len)
+	{
+		sendBuffer.erase(sendBuffer.begin(), sendBuffer.begin() + len);
 	}
 }

@@ -15,6 +15,10 @@ public:
 	bool ValidateSession(const tomato::TCPSocketPtr client);
 	bool RemoveSession(const tomato::TCPSocketPtr client);
 	bool AppendRecvBuffer(tomato::TCPSocketPtr client, const uint8_t* inData, int len, std::vector<uint8_t>& outData);
+	void AppendSendBuffer(tomato::TCPSocketPtr client, const uint8_t* inData, int len);
+
+	void GetWritableSockets(std::vector<tomato::TCPSocketPtr>& outVector);
+	TCP::Session* GetSession(const tomato::TCPSocketPtr socket);
 
 	// For UDP
 	void GenerateSession(const tomato::SocketAddress&); 

@@ -26,7 +26,7 @@ void MatchManager::Update(float dt)
 		matches.try_emplace(ctx.matchId, ctx);
 
 		for (const auto& c : ctx.players)
-			std::cout << c.requestId << " ";
+			std::cout << c.sessionId << " ";
 	}
 	
 	ProcessMatchResult(dt);
@@ -40,16 +40,17 @@ void MatchManager::ProcessMatchRequest()
 		MatchRequestQueue.Dequeue(reqCommand);
 
 		if (reqCommand.action == MatchRequestAction::Enqueue)
-			HandleEnqueue(reqCommand.sessionId, reqCommand.requestId);
+			HandleEnqueue(reqCommand.socket, reqCommand.sessionId, reqCommand.requestId);
 		
 		if (reqCommand.action == MatchRequestAction::Cancel)
-			HandleCancel(reqCommand.sessionId, reqCommand.requestId);
+			HandleCancel(reqCommand.socket, reqCommand.sessionId, reqCommand.requestId);
 	}
 }
 
-void MatchManager::HandleEnqueue(SessionId sessionId, RequestId reqId)
+void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client, SessionId sessionId, RequestId reqId)
 {
 	MatchRequest mRequest{
+		.socket = client,
 		.sessionId = sessionId,
 		.requestId = reqId,
 		.enqueueTime = 0,
@@ -57,13 +58,13 @@ void MatchManager::HandleEnqueue(SessionId sessionId, RequestId reqId)
 		.retryCount = 0,
 	};
 
-	requests.try_emplace(sessionId, mRequest);
+	requests.try_emplace(client, mRequest);
 	pq.emplace(mRequest);
 }
 
-void MatchManager::HandleCancel(SessionId sessionId, RequestId reqId)
+void MatchManager::HandleCancel(tomato::TCPSocketPtr client, SessionId sessionId, RequestId reqId)
 {
-	auto it = requests.find(sessionId);
+	auto it = requests.find(client);
 	if (it != requests.end())
 	{
 		if(it->second.requestId == reqId)
@@ -85,7 +86,7 @@ bool MatchManager::GetMatchRequestFromPQ(MatchRequest& req)
 		MatchRequest item = pq.top();
 		pq.pop();
 
-		if (!requests.contains(item.sessionId))
+		if (!requests.contains(item.socket))
 			continue; // lazy deletion
 
 		else
@@ -108,7 +109,7 @@ bool MatchManager::CreateMatchContext(MatchContext& ctx)
 		if (GetMatchRequestFromPQ(out))
 		{
 			ctx.players[i] = out;
-			requests.erase(out.sessionId);
+			requests.erase(out.socket);
 		}
 	}
 
@@ -127,7 +128,12 @@ void MatchManager::ProcessMatchResult(float dt)
 		case MatchState::AllReady:
 			//SendPacket for game start
 			//then, Remove from matches
-			NetSendRequestQueue.Emplace(static_cast<uint8_t>(PacketHeader::MATCH_START));
+			const MatchRequest* req = it->second.GetMatchRequest();
+			for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
+			{
+				SendRequestCommand sendCmd{ (req + i)->socket, static_cast<uint8_t>(TCPPacketType::MATCH_START) };
+				NetSendRequestQueue.Emplace(sendCmd);
+			}
 			it = matches.erase(it);
 			break;
 
@@ -184,7 +190,7 @@ void MatchManager::ReQueing(MatchId matchId)
 			if (reRequest.retryCount > 3)
 				continue;
 			
-			requests.try_emplace(reRequest.sessionId, reRequest);
+			requests.try_emplace(reRequest.socket, reRequest);
 			pq.emplace(reRequest);
 		}
 	}
