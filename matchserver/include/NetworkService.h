@@ -62,7 +62,7 @@ private:
 	tomato::SPSCQueue<MatchRequestCommand, 128>& MatchRequestQueue;
 	tomato::SPSCQueue<SendRequestCommand, 256>& NetSendRequestQueue;
 
-	SessionId testId = 0;
+	MatchId testMatchId = 0;
 };
 
 #endif // !NETWORK_SERVICE_H

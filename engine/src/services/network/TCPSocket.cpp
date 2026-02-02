@@ -100,9 +100,9 @@ namespace tomato
 		return bytesReceivedCount;
 	}
 
-	int TCPSocket::GetSocketAddress(TCPSocketPtr socket, SocketAddress& inFromAddress, int inLen)
+	int TCPSocket::GetSocketAddress(SocketAddress& inFromAddress, int inLen)
 	{
-		int error = getpeername(socket->socket_, &inFromAddress.sockAddr_, &inLen);
+		int error = getpeername(socket_, &inFromAddress.sockAddr_, &inLen);
 		if (error != SOCKET_ERROR)
 			return error;
 		else

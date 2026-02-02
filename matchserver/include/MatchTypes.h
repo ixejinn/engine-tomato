@@ -5,6 +5,7 @@
 #include <vector>
 #include <tomato/services/network/TCPSocket.h>
 #include "ServerTypes.h"
+#include "PacketTypes.h"
 
 namespace MatchConstants
 {
@@ -16,20 +17,24 @@ enum class MatchRequestAction : uint8_t
 {
 	NONE,
 	Enqueue,
-	Cancel
+	Cancel,
+	Success,
+	Failed,
+
+	Count
 };
 
 struct MatchRequestCommand
 {
 	tomato::TCPSocketPtr socket;
-	SessionId sessionId;
-	RequestId requestId;
+	MatchId matchId;
 	MatchRequestAction action;
 };
 
 struct SendRequestCommand
 {
 	tomato::TCPSocketPtr socket;
+	TCPHeader header;
 	uint8_t data;
 };
 
@@ -50,16 +55,13 @@ struct MatchContext
 	MatchRequest players[MatchConstants::MAX_MATCH_PLAYER];
 };
 
-enum class MatchEventType
+enum class MatchUpdateResult
 {
-	AllReady,
+	None,
+	ReadyToStart,
 	Failed,
-};
 
-struct MatchEvent
-{
-	MatchId matchId;
-	MatchEventType type;
+	Count
 };
 
 #endif // !MATCH_TYPES_H

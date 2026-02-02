@@ -19,89 +19,89 @@ void NetworkService::Update(float dt)
 	//ProcessPendingPacket();
 	//ProcessNetSendRequest();
 }
-
-void NetworkService::ProcessPendingPacket()
-{
-	//seperate later
-	Packet packet;
-	PacketHeader messageType = PacketHeader::NONE;
-	SessionId sessionId = -1;
-
-	while (!NetRecvQueue.Empty())
-	{
-		NetRecvQueue.Dequeue(packet);
-		tomato::NetBitReader reader(packet.buffer->data(), packet.size);
-
-		//Check Session
-		//@TODO : Add session discrimination logic for first and subsequent packets
-		//		  Assume there is no session information now
-		if (sessionMgr_.ValidateSession(packet.addr))
-		{
-			sessionId = sessionMgr_.GetSessionId(packet.addr);
-			sessionMgr_.UpdateLastRecv(sessionId);
-		}
-		else
-			sessionMgr_.GenerateSession(packet.addr);
-
-		uint16_t header = -1;
-		reader.ReadInt(header, static_cast<uint32_t>(PacketHeader::COUNT)); //Modify after adding a function for enum
-		messageType = static_cast<PacketHeader>(header); //Modify after adding a function for enum
-		
-		switch (messageType)
-		{
-		case PacketHeader::MATCH_REQUEST:
-			ProcessPacketMatchReq(reader, sessionId);
-			break;
-		}
-	}
-}
-
-void NetworkService::ProcessSendPacket()
-{
-	//if sendBuffer have data, Send it
-	std::vector<tomato::TCPSocketPtr> writeCandidates;
-	std::vector<tomato::TCPSocketPtr> writableSockets;
-
-	sessionMgr_.GetWritableSockets(writeCandidates);
-
-	if (writeCandidates.empty())
-		return;
-
-	if (!tomato::SocketUtil::Select(nullptr, nullptr,
-		&writeCandidates, &writableSockets, nullptr, nullptr))
-		return;
-
-	for (const tomato::TCPSocketPtr& socket : writableSockets)
-	{
-		if (!sessionMgr_.ValidateSession(socket))
-			continue;
-
-		TCP::Session* session = sessionMgr_.GetSession(socket);
-		if (session->sendBuffer.empty())
-			continue;
-
-		int sent = socket->Send(session->sendBuffer.data(), session->sendBuffer.size());
-		if(sent > 0)
-			session->ConsumeSendBuffer(sent);
-		else //disconnected or error
-			sessionMgr_.RemoveSession(socket);
-	}
-}
-
-
-void NetworkService::ProcessPacketMatchReq(tomato::NetBitReader& reader, SessionId sessionId)
-{
-	RequestId reqId = -1;
-	uint8_t tAction = -1;
-	MatchRequestAction action = MatchRequestAction::NONE;
-
-	reader.ReadInt(reqId, static_cast<uint32_t>(reqId));
-	reader.ReadInt(tAction, static_cast<uint32_t>(tAction));
-	action = static_cast<MatchRequestAction>(tAction);
-
-	MatchRequestCommand reqCommand{ sessionId, reqId, action };
-	MatchRequestQueue.Emplace(reqCommand);
-}
+//
+//void NetworkService::ProcessPendingPacket()
+//{
+//	//seperate later
+//	Packet packet;
+//	PacketHeader messageType = PacketHeader::NONE;
+//	SessionId sessionId = -1;
+//
+//	while (!NetRecvQueue.Empty())
+//	{
+//		NetRecvQueue.Dequeue(packet);
+//		tomato::NetBitReader reader(packet.buffer->data(), packet.size);
+//
+//		//Check Session
+//		//@TODO : Add session discrimination logic for first and subsequent packets
+//		//		  Assume there is no session information now
+//		if (sessionMgr_.ValidateSession(packet.addr))
+//		{
+//			sessionId = sessionMgr_.GetSessionId(packet.addr);
+//			sessionMgr_.UpdateLastRecv(sessionId);
+//		}
+//		else
+//			sessionMgr_.GenerateSession(packet.addr);
+//
+//		uint16_t header = -1;
+//		reader.ReadInt(header, static_cast<uint32_t>(PacketHeader::COUNT)); //Modify after adding a function for enum
+//		messageType = static_cast<PacketHeader>(header); //Modify after adding a function for enum
+//		
+//		switch (messageType)
+//		{
+//		case PacketHeader::MATCH_REQUEST:
+//			ProcessPacketMatchReq(reader, sessionId);
+//			break;
+//		}
+//	}
+//}
+//
+//void NetworkService::ProcessSendPacket()
+//{
+//	//if sendBuffer have data, Send it
+//	std::vector<tomato::TCPSocketPtr> writeCandidates;
+//	std::vector<tomato::TCPSocketPtr> writableSockets;
+//
+//	sessionMgr_.GetWritableSockets(writeCandidates);
+//
+//	if (writeCandidates.empty())
+//		return;
+//
+//	if (!tomato::SocketUtil::Select(nullptr, nullptr,
+//		&writeCandidates, &writableSockets, nullptr, nullptr))
+//		return;
+//
+//	for (const tomato::TCPSocketPtr& socket : writableSockets)
+//	{
+//		if (!sessionMgr_.ValidateSession(socket))
+//			continue;
+//
+//		TCP::Session* session = sessionMgr_.GetSession(socket);
+//		if (session->sendBuffer.empty())
+//			continue;
+//
+//		int sent = socket->Send(session->sendBuffer.data(), session->sendBuffer.size());
+//		if(sent > 0)
+//			session->ConsumeSendBuffer(sent);
+//		else //disconnected or error
+//			sessionMgr_.RemoveSession(socket);
+//	}
+//}
+//
+//
+//void NetworkService::ProcessPacketMatchReq(tomato::NetBitReader& reader, SessionId sessionId)
+//{
+//	RequestId reqId = -1;
+//	uint8_t tAction = -1;
+//	MatchRequestAction action = MatchRequestAction::NONE;
+//
+//	reader.ReadInt(reqId, static_cast<uint32_t>(reqId));
+//	reader.ReadInt(tAction, static_cast<uint32_t>(tAction));
+//	action = static_cast<MatchRequestAction>(tAction);
+//
+//	MatchRequestCommand reqCommand{ sessionId, reqId, action };
+//	MatchRequestQueue.Emplace(reqCommand);
+//}
 
 
 void NetworkService::ProcessNetSendRequest()
@@ -120,6 +120,8 @@ void NetworkService::ProcessPacket(const TCPHeader& header, tomato::NetBitReader
 	switch (header.type)
 	{
 	case TCPPacketType::MATCH_REQUEST:
+	case TCPPacketType::MATCH_CANCEL:
+	case TCPPacketType::INTRO_RESULT :
 		std::cout << "MATCH_REQUEST::";
 		ProcessPacketRequest(reader, client);
 		break;
@@ -135,7 +137,7 @@ void NetworkService::ProcessPacketRequest(tomato::NetBitReader& reader, tomato::
 	reader.ReadInt(tAction, 8);
 	action = static_cast<MatchRequestAction>(tAction);
 	std::cout << int(tAction) << '\n';
-	MatchRequestCommand reqCommand{ testId++, 0, action }; // 0, 0 -> client
+	MatchRequestCommand reqCommand{ client, testMatchId, action }; // 0, 0 -> client
 	MatchRequestQueue.Emplace(reqCommand);
 }
 

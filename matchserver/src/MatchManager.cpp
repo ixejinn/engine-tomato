@@ -4,8 +4,7 @@
 void MatchManager::AddMatchRequestQueue(SessionId sessionId, RequestId reqId)
 {
 	MatchRequestCommand reqCommand{
-		.sessionId = sessionId,
-		.requestId = reqId,
+		.matchId = 0,
 		.action = MatchRequestAction::Enqueue
 	};
 
@@ -40,19 +39,25 @@ void MatchManager::ProcessMatchRequest()
 		MatchRequestQueue.Dequeue(reqCommand);
 
 		if (reqCommand.action == MatchRequestAction::Enqueue)
-			HandleEnqueue(reqCommand.socket, reqCommand.sessionId, reqCommand.requestId);
+			HandleEnqueue(reqCommand.socket, reqCommand.matchId);
 		
 		if (reqCommand.action == MatchRequestAction::Cancel)
-			HandleCancel(reqCommand.socket, reqCommand.sessionId, reqCommand.requestId);
+			HandleCancel(reqCommand.socket);
+
+		if (reqCommand.action == MatchRequestAction::Success)
+			HandleIntroResult(reqCommand.socket, reqCommand.matchId, 1);
+
+		if (reqCommand.action == MatchRequestAction::Failed)
+			HandleIntroResult(reqCommand.socket, reqCommand.matchId, 0);
 	}
 }
 
-void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client, SessionId sessionId, RequestId reqId)
+void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client, MatchId matchId)
 {
 	MatchRequest mRequest{
 		.socket = client,
-		.sessionId = sessionId,
-		.requestId = reqId,
+		.sessionId = 0,
+		.requestId = 0,
 		.enqueueTime = 0,
 		//duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 		.retryCount = 0,
@@ -62,13 +67,20 @@ void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client, SessionId sessionI
 	pq.emplace(mRequest);
 }
 
-void MatchManager::HandleCancel(tomato::TCPSocketPtr client, SessionId sessionId, RequestId reqId)
+void MatchManager::HandleCancel(tomato::TCPSocketPtr client)
 {
 	auto it = requests.find(client);
 	if (it != requests.end())
+		requests.erase(it);
+}
+
+void MatchManager::HandleIntroResult(tomato::TCPSocketPtr client, MatchId matchId, int set)
+{
+	auto it = matches.find(matchId);
+	if (it != matches.end())
 	{
-		if(it->second.requestId == reqId)
-			requests.erase(it);
+		int idx = it->second.GetPlayerId(client);
+		it->second.SetPeerAck(idx, set);
 	}
 }
 
@@ -116,55 +128,76 @@ bool MatchManager::CreateMatchContext(MatchContext& ctx)
 	return true;
 }
 
+void HandleSendRequest(tomato::TCPSocketPtr socket, uint8_t* inData)
+{
+
+}
+
 void MatchManager::ProcessMatchResult(float dt)
 {
 	// Update the state of all matches (Separating as a function)
 	for (auto it = matches.begin(); it != matches.end();)
 	{
-		it->second.Update(dt);
+		MatchUpdateResult res = it->second.Update(dt, NetSendRequestQueue);
 
-		switch (it->second.GetState())
+		switch (res)
 		{
-		case MatchState::AllReady:
+		case MatchUpdateResult::None:
+		{
+			++it;
+			break;
+			//const MatchRequest* req = it->second.GetMatchRequest();
+			//const tomato::NetConnection* conn = it->second.GetNetConnection();
+			//for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
+			//{
+			//	SendRequestCommand sendCmd{ (req + i)->socket, static_cast<uint8_t>(TCPPacketType::MATCH_INTRO) };
+			//	NetSendRequestQueue.Emplace(sendCmd);
+			//}
+			//break;
+		}
+
+		case MatchUpdateResult::ReadyToStart:
+		{
 			//SendPacket for game start
 			//then, Remove from matches
 			const MatchRequest* req = it->second.GetMatchRequest();
+			TCPHeader header{ 0, TCPPacketType::MATCH_START };
+			uint8_t* data = nullptr; //////////////
 			for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
 			{
-				SendRequestCommand sendCmd{ (req + i)->socket, static_cast<uint8_t>(TCPPacketType::MATCH_START) };
+				SendRequestCommand sendCmd{ (req + i)->socket, header, *data };
 				NetSendRequestQueue.Emplace(sendCmd);
 			}
 			it = matches.erase(it);
 			break;
+		}
 
 			// When peers can't connect or time out
-		case MatchState::Failed:
+		case MatchUpdateResult::Failed:
+		{
 			// Remove from matches after ReQueing
 			ReQueing(it->first);
 			it = matches.erase(it);
 
 			std::cout << "ReQueing\n";
 			break;
-
-		default:
-			++it;
-			break;
+		}
 		}
 	}
 }
 
-void MatchManager::EmitMatchResult(MatchEvent& evt)
-{
-	switch (evt.type)
-	{
-	case MatchEventType::Failed:
-		MatchResultQueue.Emplace(evt);
-		break;
-	case MatchEventType::AllReady:
-		MatchResultQueue.Emplace(evt);
-		break;
-	}
-}
+//void MatchManager::EmitMatchResult(MatchEvent& evt)
+//{
+//	switch (evt.type)
+//	{
+//	case MatchEventType::Failed:
+//		MatchResultQueue.Emplace(evt);
+//		break;
+//	case MatchEventType::AllReady:
+//		MatchResultQueue.Emplace(evt);
+//		break;
+//	}
+//}
 
 void MatchManager::ReQueing(MatchId matchId)
 {

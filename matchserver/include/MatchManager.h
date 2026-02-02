@@ -22,16 +22,18 @@ public:
 	void Update(float dt);
 
 	void ProcessMatchRequest();
-	void HandleEnqueue(tomato::TCPSocketPtr client, SessionId sessionId, RequestId reqId);
-	void HandleCancel(tomato::TCPSocketPtr client, SessionId sessionId, RequestId reqId);
-	
+	void HandleEnqueue(tomato::TCPSocketPtr client, MatchId matchId);
+	void HandleCancel(tomato::TCPSocketPtr client);
+	void HandleIntroResult(tomato::TCPSocketPtr client, MatchId matchId, int set);
+
 	bool CheckPopulation();
 	bool GetMatchRequestFromPQ(MatchRequest& req);
 	bool CreateMatchContext(MatchContext& ctx);
 
+	void HandleSendRequest(tomato::TCPSocketPtr socket, uint8_t* inData);
 	void ProcessMatchResult(float dt);
 	void ReQueing(MatchId matchId);
-	void EmitMatchResult(MatchEvent& evt); // not use
+	//void EmitMatchResult(MatchEvent& evt); // not use
 
 private:
 	struct Compare {
@@ -48,8 +50,6 @@ private:
 
 	tomato::SPSCQueue<SendRequestCommand, 256>& NetSendRequestQueue;
 	tomato::SPSCQueue<MatchRequestCommand, 128>& MatchRequestQueue;
-
-	tomato::SPSCQueue<MatchEvent, 128> MatchResultQueue;
 
 	std::unordered_map<tomato::TCPSocketPtr, MatchRequest> requests;
 	std::priority_queue<MatchRequest, std::vector<MatchRequest>, Compare> pq;
