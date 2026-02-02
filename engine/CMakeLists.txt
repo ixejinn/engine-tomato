@@ -72,7 +72,7 @@ set(ENGINE_SOURCES
         src/net/NetBitReader.cpp
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
-        src/input/InputManager.cpp
+        src/input/InputRecorder.cpp
 )
 
 set(EXTERNAL_SOURCES

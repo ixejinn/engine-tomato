@@ -39,7 +39,7 @@ namespace tomato
         }
 
     private:
-        EnumArray<SystemPhase, std::vector<Factory>> factories_;
+        EnumArray<SystemPhase, std::vector<Factory>> factories_{};
     };
 
     /**

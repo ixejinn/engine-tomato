@@ -3,12 +3,12 @@
 
 namespace tomato
 {
-	class BitWriter
-	{
-	public:
-
-
-	private:
-	};
+//	class BitWriter
+//	{
+//	public:
+//
+//
+//	private:
+//	};
 }
 #endif // !TOMATO_BITWRITER_H

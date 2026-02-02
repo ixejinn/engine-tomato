@@ -7,6 +7,7 @@
 #include "tomato/ecs/systems/System.h"
 #include "tomato/net/rollback/RollbackSlice.h"
 #include "tomato/input/InputTypes.h"
+#include "tomato/Logger.h"
 
 #include <thread>
 #include <vector>

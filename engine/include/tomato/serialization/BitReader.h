@@ -3,12 +3,12 @@
 
 namespace tomato
 {
-	class BitReader
-	{
-	public:
-
-
-	private:
-	};
+//	class BitReader
+//	{
+//	public:
+//
+//
+//	private:
+//	};
 }
 #endif // !TOMATO_BITREADER_H

@@ -8,7 +8,7 @@ namespace tomato
     WindowService::WindowService(int width, int height, const char* title)
             : width_(width), height_(height)
         {
-        // GLFW: initialize and configure
+        // [GLFW] initialize and configure
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -23,11 +23,14 @@ namespace tomato
         }
         glfwMakeContextCurrent(handle_);
 
+        // VSync ON
+        //glfwSwapInterval(1);
+
         glfwSetFramebufferSizeCallback(handle_, OnFramebufferSizeChanged);
 
         glfwSetWindowUserPointer(handle_, this);
 
-        // GLAD: load all OpenGL function pointers
+        // [GLAD] load all OpenGL function pointers
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
             glfwDestroyWindow(handle_);

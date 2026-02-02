@@ -45,7 +45,6 @@ namespace tomato
                 };
 
         EnumArray<SystemPhase, std::vector<SystemPtr>> systems_;
-        //std::array<std::vector<SystemPtr>, ToIndex(SystemPhase::COUNT)> systems_{};
     };
 }
 

@@ -6,6 +6,9 @@ namespace tomato
     class Engine;
     struct SimContext;
 
+    /**
+     * @brief Base interface for systems.
+     */
     class System
     {
     private:
@@ -16,7 +19,9 @@ namespace tomato
 
         virtual void Update(Engine& engine, const SimContext& ctx) = 0;
 
-        // !!! FOR RENDERING ONLY - FUNCTION OVERLOADING !!!
+        /**
+         * @note Render system only
+         */
         virtual void Update(const Engine& engine, const SimContext& ctx) {}
     };
 }

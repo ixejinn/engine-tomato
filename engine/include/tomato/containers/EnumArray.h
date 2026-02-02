@@ -16,11 +16,16 @@ namespace tomato
     class EnumArray
     {
     public:
+        EnumArray() : data_() {}
+
         T& operator[](E enumIdx) { return data_[static_cast<std::size_t>(enumIdx)]; }
         const T& operator[](E enumIdx) const { return data_[static_cast<std::size_t>(enumIdx)]; }
 
+        auto begin() { return data_.begin(); }
+        auto end() { return data_.end(); }
+
     private:
-        std::array<T, static_cast<std::size_t>(E::COUNT)> data_{};
+        std::array<T, static_cast<std::size_t>(E::COUNT)> data_;
     };
 }
 
