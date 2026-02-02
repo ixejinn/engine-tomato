@@ -10,16 +10,17 @@ namespace tomato
     class WindowService;
 
     /**
-     * @brief Translates raw device input into engine-level input actions.
+     * @brief Translates raw platform input into engine-level input actions.
      *
-     * 하드웨어로부터 받은 원시 입력 값을 엔진에서 사용할 수 있도록 의미 있는 입력 값으로 변환한다.
+     * 플랫폼 레이어에서 전달된 원시 입력 값을 엔진이 사용하는 의미 있는 입력 값으로 변환한다.
      */
     class InputService
     {
     public:
         explicit InputService(WindowService& window);
 
-        static Key ConvertGLFWtoTomato(int glfwKey);
+        static Key ConvertKeyGLFW(int glfwKey);
+        static KeyAction ConvertActionGLFW(int glfwAction);
 
         void DrainKeyEvents(std::vector<KeyEvent>& out);
 

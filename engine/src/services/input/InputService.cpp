@@ -5,7 +5,7 @@
 
 namespace tomato
 {
-    Key InputService::ConvertGLFWtoTomato(int glfwKey)
+    Key InputService::ConvertKeyGLFW(int glfwKey)
     {
         switch (glfwKey)
         {
@@ -86,6 +86,19 @@ namespace tomato
         }
     }
 
+    KeyAction InputService::ConvertActionGLFW(int glfwAction)
+    {
+        switch (glfwAction)
+        {
+            case GLFW_RELEASE:
+                return KeyAction::RELEASE;
+            case GLFW_PRESS:
+                return KeyAction::PRESS;
+            default:
+                return KeyAction::COUNT;
+        }
+    }
+
     InputService::InputService(WindowService& window)
     {
         SetCallback(window);
@@ -106,8 +119,14 @@ namespace tomato
 
         glfwSetKeyCallback(window.GetHandle(), [](GLFWwindow* w, int key, int scancode, int action, int mods)
         {
+            Key k = ConvertKeyGLFW(key);
+            KeyAction a = ConvertActionGLFW(action);
+
+            if (a >= KeyAction::COUNT)
+                return;
+
             auto* input = static_cast<InputService*>(glfwGetWindowUserPointer(w));
-            input->keyEvents_.emplace(ConvertGLFWtoTomato(key), action);
+            input->keyEvents_.emplace(k, a);
         });
     }
 }

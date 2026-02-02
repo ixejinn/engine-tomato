@@ -19,12 +19,12 @@ namespace tomato
             if (event.consumed)
                 continue;
 
-            if (event.action == 0)  // RELEASE
+            if (event.action == KeyAction::RELEASE)
             {
                 keyStates_[event.key].value = 0;
                 curr_.held &= ~keyIntents_[event.key];
             }
-            else
+            else             // KeyAction::PRESS
             {
                 keyStates_[event.key].value = 1;
                 curr_.held |= keyIntents_[event.key];

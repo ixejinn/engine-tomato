@@ -68,6 +68,13 @@ namespace tomato
 
     inline bool IsButton(Key key) { return key < Key::AXIS_BEGIN; }
 
+    enum class KeyAction
+    {
+        RELEASE,
+        PRESS,
+        COUNT
+    };
+
     /**
      * @brief Bitmask for logical player intents for a single simulation tick.
      */

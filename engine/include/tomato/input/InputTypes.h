@@ -16,10 +16,10 @@ namespace tomato
      */
     struct KeyEvent
     {
-        KeyEvent(Key k, int a) : key(k), action(a) {}
+        KeyEvent(Key k, KeyAction a) : key(k), action(a) {}
 
         Key key;
-        int action;
+        KeyAction action;
 
         /// Indicates whether this event has been consumed by the UI layer.
         bool consumed{false};

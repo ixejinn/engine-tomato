@@ -90,8 +90,6 @@ namespace tomato
             }
 
             // 입력
-            window_.TMP_CheckEscapeKey();
-            window_.PollEvents();
             ProcessKeyEvents();
             inputTimelines_[network_.GetPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
 
@@ -131,6 +129,9 @@ namespace tomato
     void Engine::ProcessKeyEvents()
     {
         keyEvents_.clear();
+
+        window_.TMP_CheckEscapeKey();   //TODO: !!! 나중에 지울 것 !!!
+        window_.PollEvents();
         input_.DrainKeyEvents(keyEvents_);
         // UI가 우선 소비 (소비하면 consumed = true)
         inputRecorder_.UpdateInputAxis(keyEvents_, tick_);

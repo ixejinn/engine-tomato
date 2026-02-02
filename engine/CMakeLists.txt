@@ -48,6 +48,7 @@ set(ENGINE_HEADERS
         include/tomato/containers/EnumArray.h
         include/tomato/input/InputConstants.h
         include/tomato/input/InputRecord.h
+        include/tomato/tomato_math.h
 )
 
 set(ENGINE_SOURCES
@@ -77,7 +78,6 @@ set(ENGINE_SOURCES
 
 set(EXTERNAL_SOURCES
         external/glad/src/glad.c
-        include/tomato/tomato_math.h
 )
 
 add_library(engine STATIC
