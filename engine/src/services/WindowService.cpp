@@ -13,7 +13,7 @@ namespace tomato
 
         glViewport(0, 0, width, height);
     }
-    
+
     WindowService::WindowService(int width, int height, const char* title)
             : width_(width), height_(height)
         {

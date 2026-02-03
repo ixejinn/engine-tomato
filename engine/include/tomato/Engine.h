@@ -21,6 +21,7 @@ namespace tomato
     class World;
     class State;
 
+    // TODO: NetworkService 사용 여부에 따라 생성?
     class Engine
     {
     public:
@@ -32,7 +33,6 @@ namespace tomato
         explicit Engine(WindowService& window);
         ~Engine();
 
-        void ChangeState();
         void SetNextState(std::unique_ptr<State>&& newState);
 
         void Run();
@@ -48,7 +48,7 @@ namespace tomato
         uint32_t GetTick() const { return tick_; }
 
         uint32_t GetLatestTick() const { return latestTick_; }
-        void SetLatestTick(uint32_t newTick) { latestTick_ = newTick; }
+        void SetLatestTick(uint32_t newTick) { latestTick_ = std::min(latestTick_, newTick); }
 
         NetworkService& GetNetworkService() { return network_; }
 
@@ -65,7 +65,16 @@ namespace tomato
         static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
 
         static constexpr int MAX_KEY_EVENTS_NUM{64};
+
+        void ChangeState();
+        void ResetTick();
+
         void ProcessKeyEvents();
+        void Simulate();
+        void Render();
+
+        void ProcessNetPackets();
+        void Rollback();
 
         WindowService& window_;
 

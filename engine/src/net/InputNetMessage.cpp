@@ -3,7 +3,6 @@
 #include "tomato/net/NetBitWriter.h"
 #include "tomato/Engine.h"
 #include "tomato/services/network/SocketAddress.h"
-//#include "tomato/services/network/NetworkService.h"
 
 #include <limits>
 
@@ -14,8 +13,8 @@ namespace tomato
         uint32_t tick = engine.GetTick();
         inputRecord = engine.GetInputTimeline()[engine.GetNetworkService().GetPlayerID()][tick];
         writer.WriteInt(tick, std::numeric_limits<uint32_t>::max());
-        writer.WriteInt(static_cast<uint16_t>(inputRecord.down), static_cast<uint32_t>(InputIntent::COUNT));
-        writer.WriteInt(static_cast<uint16_t>(inputRecord.held), static_cast<uint32_t>(InputIntent::COUNT));
+        writer.WriteInt(static_cast<uint16_t>(inputRecord.down), static_cast<uint16_t>(InputIntent::COUNT));
+        writer.WriteInt(static_cast<uint16_t>(inputRecord.held), static_cast<uint16_t>(InputIntent::COUNT));
     }
 
     void InputNetMessage::Deserialize(NetBitReader& reader)
@@ -23,19 +22,15 @@ namespace tomato
         reader.ReadInt(inputRecord.tick, std::numeric_limits<uint32_t>::max());
 
         uint16_t value = 0;
-        reader.ReadInt(value, uint32_t(InputIntent::COUNT));
+        reader.ReadInt(value, uint16_t(InputIntent::COUNT));
         inputRecord.down = static_cast<InputIntent>(value);
-        reader.ReadInt(value, uint32_t(InputIntent::COUNT));
+        reader.ReadInt(value, uint16_t(InputIntent::COUNT));
         inputRecord.held = static_cast<InputIntent>(value);
     }
 
     void InputNetMessage::Handler(Engine& engine, SocketAddress& fromAddr)
     {
         engine.SetInputData(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
-        if (engine.GetLatestTick() > inputRecord.tick)
-            engine.SetLatestTick(inputRecord.tick);
-
-        //auto tmp = static_cast<uint16_t>(inputRecord.key);
-        //std::cout << "InputNetMessage::Handler [" << engine.GetNetworkService().GetPlayerID(fromAddr) << "] " << inputRecord.tick << " : " << tmp << "\n";
+        engine.SetLatestTick(inputRecord.tick);
     }
 }
