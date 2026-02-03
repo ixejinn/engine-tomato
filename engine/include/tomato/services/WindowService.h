@@ -1,10 +1,23 @@
 #ifndef TOMATO_WINDOWSERVICE_H
 #define TOMATO_WINDOWSERVICE_H
 
+#include <memory>
+
 struct GLFWwindow;
 
 namespace tomato
 {
+    class WindowService;
+    class InputService;
+
+    struct WindowData
+    {
+        WindowService* window;
+        InputService* input;
+
+        WindowData(WindowService* w, InputService* i) : window(w), input(i) {}
+    };
+
     /**
      * @brief Service responsible for window creation and OS-level event handling.
      *
@@ -23,6 +36,8 @@ namespace tomato
 
         [[nodiscard]] bool ShouldClose() const;
         void RequestClose();
+
+        void SetWindowUserPointer(InputService* input);
 
         /**
          * @brief Swaps the front and back buffers.
@@ -50,6 +65,8 @@ namespace tomato
         static void OnFramebufferSizeChanged(GLFWwindow* window, int width, int height);
 
         GLFWwindow* handle_{nullptr};
+
+        std::unique_ptr<WindowData> data_{nullptr};
 
         int width_;
         int height_;

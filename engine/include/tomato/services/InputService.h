@@ -5,6 +5,8 @@
 #include <vector>
 #include "tomato/input/InputTypes.h"    // KeyEvent
 
+struct GLFWwindow;
+
 namespace tomato
 {
     class WindowService;
@@ -25,7 +27,7 @@ namespace tomato
         void DrainKeyEvents(std::vector<KeyEvent>& out);
 
     private:
-        void SetCallback(WindowService& window);
+        static void EnqueueKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
 
         std::queue<KeyEvent> keyEvents_;
     };

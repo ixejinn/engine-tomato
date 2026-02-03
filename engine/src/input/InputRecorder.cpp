@@ -1,5 +1,5 @@
 #include "tomato/input/InputRecorder.h"
-#include "tomato/services/input/InputService.h" // KeyEvent
+#include "tomato/services/InputService.h" // KeyEvent
 #include "tomato/tomato_math.h"
 
 namespace tomato

@@ -17,6 +17,7 @@ namespace tomato
     Engine::Engine(WindowService& window)
     : window_(window), input_(window), network_(*this), systemManager_(SystemManager{})
     {
+        window_.SetWindowUserPointer(&input_);
         keyEvents_.reserve(MAX_KEY_EVENTS_NUM);
 
         ChangeState();

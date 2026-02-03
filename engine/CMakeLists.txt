@@ -21,7 +21,7 @@ set(ENGINE_HEADERS
         include/tomato/render/Mesh.h
         include/tomato/render/Shader.h
         include/tomato/render/Texture.h
-        include/tomato/services/input/InputService.h
+        include/tomato/services/InputService.h
         include/tomato/input/InputTypes.h
         include/tomato/services/WindowService.h
         include/tomato/services/network/Socket.h
@@ -63,7 +63,7 @@ set(ENGINE_SOURCES
         src/render/Mesh.cpp
         src/render/Shader.cpp
         src/render/Texture.cpp
-        src/services/input/InputService.cpp
+        src/services/InputService.cpp
         src/services/WindowService.cpp
         src/services/network/NetworkService.cpp
         src/services/network/Socket.cpp

@@ -6,7 +6,7 @@
 #include <thread>
 #include <array>
 
-#include "tomato/services/input/InputService.h"           // InputService input_
+#include "tomato/services/InputService.h"           // InputService input_
 #include "tomato/containers/Timeline.h"
 #include "tomato/services/network/NetworkService.h" // NetworkService::MAX_PLAYER_NUM
 #include "tomato/ecs/SystemManager.h"               // SystemManager systemManager_

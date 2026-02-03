@@ -5,6 +5,15 @@
 
 namespace tomato
 {
+    void WindowService::OnFramebufferSizeChanged(GLFWwindow* window, int width, int height)
+    {
+        auto* self = static_cast<WindowData*>(glfwGetWindowUserPointer(window))->window;
+        self->width_ = width;
+        self->height_ = height;
+
+        glViewport(0, 0, width, height);
+    }
+    
     WindowService::WindowService(int width, int height, const char* title)
             : width_(width), height_(height)
         {
@@ -28,8 +37,6 @@ namespace tomato
 
         glfwSetFramebufferSizeCallback(handle_, OnFramebufferSizeChanged);
 
-        glfwSetWindowUserPointer(handle_, this);
-
         // [GLAD] load all OpenGL function pointers
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
@@ -49,18 +56,14 @@ namespace tomato
     bool WindowService::ShouldClose() const { return glfwWindowShouldClose(handle_); }
     void WindowService::RequestClose() { glfwSetWindowShouldClose(handle_, GLFW_TRUE); }
 
+    void WindowService::SetWindowUserPointer(InputService* input)
+    {
+        data_ = std::make_unique<WindowData>(this, input);
+        glfwSetWindowUserPointer(handle_, data_.get());
+    }
+
     void WindowService::SwapBuffers() { glfwSwapBuffers(handle_); }
     void WindowService::PollEvents() { glfwPollEvents(); }
-
-    // !!! STATIC !!!
-    void WindowService::OnFramebufferSizeChanged(GLFWwindow* window, int width, int height)
-    {
-        auto* self = static_cast<WindowService*>(glfwGetWindowUserPointer(window));
-        self->width_ = width;
-        self->height_ = height;
-
-        glViewport(0, 0, width, height);
-    }
 
     // !!! TEMPORAL FUNCTION !!!
     void WindowService::TMP_CheckEscapeKey()

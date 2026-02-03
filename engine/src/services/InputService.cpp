@@ -1,4 +1,4 @@
-#include "tomato/services/input/InputService.h"
+#include "tomato/services/InputService.h"
 #include "tomato/services/WindowService.h"
 
 #include <GLFW/glfw3.h>
@@ -99,9 +99,21 @@ namespace tomato
         }
     }
 
+    void InputService::EnqueueKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods)
+    {
+        Key k = ConvertKeyGLFW(key);
+        KeyAction a = ConvertActionGLFW(action);
+
+        if (a >= KeyAction::COUNT)
+            return;
+
+        auto* input = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->input;
+        input->keyEvents_.emplace(k, a);
+    }
+
     InputService::InputService(WindowService& window)
     {
-        SetCallback(window);
+        glfwSetKeyCallback(window.GetHandle(), EnqueueKeyEvent);
     }
 
     void InputService::DrainKeyEvents(std::vector<KeyEvent>& out)
@@ -111,22 +123,5 @@ namespace tomato
             out.push_back(keyEvents_.front());
             keyEvents_.pop();
         }
-    }
-
-    void InputService::SetCallback(WindowService& window)
-    {
-        glfwSetWindowUserPointer(window.GetHandle(), this);
-
-        glfwSetKeyCallback(window.GetHandle(), [](GLFWwindow* w, int key, int scancode, int action, int mods)
-        {
-            Key k = ConvertKeyGLFW(key);
-            KeyAction a = ConvertActionGLFW(action);
-
-            if (a >= KeyAction::COUNT)
-                return;
-
-            auto* input = static_cast<InputService*>(glfwGetWindowUserPointer(w));
-            input->keyEvents_.emplace(k, a);
-        });
     }
 }
