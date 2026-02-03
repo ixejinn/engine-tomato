@@ -12,7 +12,7 @@ namespace TCP
 	{
 	public:
 		//Session(tomato::SocketAddress& addr) : driver(tomato::TCPNetDriver(addr)) {};
-		Session(tomato::TCPSocketPtr socket, tomato::SocketAddress& addr) : socket(socket), addr(addr) {};
+		Session(const tomato::TCPSocketPtr socket, const tomato::SocketAddress& addr) : socket(socket), addr(addr) {};
 		
 		void AppendRecvBuffer(const uint8_t* data, int len);
 		void AppendSendBuffer(const uint8_t* data, int len);

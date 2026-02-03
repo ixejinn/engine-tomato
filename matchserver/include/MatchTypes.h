@@ -9,8 +9,9 @@
 
 namespace MatchConstants
 {
-	constexpr int	MAX_MATCH_PLAYER = 4;
-	constexpr float	CONNECT_TIMEOUT_SEC = 2.0f;
+	constexpr int			MAX_MATCH_PLAYER = 4;
+	constexpr float			CONNECT_TIMEOUT_SEC = 2.0f;
+	constexpr ServerTimeMs	START_SERVER_TIME = 10000;
 }
 
 enum class MatchRequestAction : uint8_t
@@ -21,7 +22,7 @@ enum class MatchRequestAction : uint8_t
 	Success,
 	Failed,
 
-	Count
+	COUNT
 };
 
 struct MatchRequestCommand

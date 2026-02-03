@@ -2,15 +2,15 @@
 
 void SessionManager::Update()
 {
-	ServerTimeMs now = duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	
-	for (auto it = sessions.begin(); it != sessions.end();)
-	{
-		if (it->second.IsTimeOut(now))
-			it = sessions.erase(it);
-		else
-			++it;
-	}
+	//ServerTimeMs now = duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+	//
+	//for (auto it = sessions.begin(); it != sessions.end();)
+	//{
+	//	if (it->second.IsTimeOut(now))
+	//		it = sessions.erase(it);
+	//	else
+	//		++it;
+	//}
 }
 
 void SessionManager::GenerateSession(const tomato::SocketAddress& addr)

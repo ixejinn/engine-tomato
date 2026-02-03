@@ -34,7 +34,9 @@ enum class TCPPacketType : uint16_t
 	MATCH_REQUEST,
 	MATCH_CANCEL,
 	MATCH_INTRO,
-	INTRO_RESULT,
+	TIME_SYNC_REQ,
+	TIME_SYNC_RES,
+	READY_ACK,
 	MATCH_START,
 
 	COUNT
@@ -48,6 +50,8 @@ struct TCPHeader
 };
 #pragma pack(pop)
 
+
+///////////////////////////////////////
 enum class PacketHeader : uint8_t
 {
 	NONE,

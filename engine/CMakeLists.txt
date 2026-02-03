@@ -48,7 +48,9 @@ set(ENGINE_HEADERS
         include/tomato/net/rollback/RollbackSlice.h
         include/tomato/net/rollback/RollbackSliceTimeline.h
         include/tomato/tomato_types.h
- "include/tomato/services/network/SocketUtil.h" "include/tomato/services/network/WinsockContext.h")
+        include/tomato/services/network/SocketUtil.h
+        include/tomato/services/network/WinsockContext.h
+        include/tomato/tomato_packet_types.h)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -70,12 +72,13 @@ set(ENGINE_SOURCES
         src/services/network/Socket.cpp
         src/services/network/TCPSocket.cpp
         src/services/network/SocketAddress.cpp
+        src/services/network/SocketUtil.cpp
         src/serialization/BitReader.cpp
         src/serialization/BitWriter.cpp
         src/net/NetBitReader.cpp
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
- "src/services/network/SocketUtil.cpp")
+)
 
 set(EXTERNAL_SOURCES
         external/glad/src/glad.c

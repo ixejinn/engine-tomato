@@ -6,6 +6,7 @@
 #include <string>
 #include <atomic>
 
+#include "tomato/tomato_packet_types.h"
 #include "tomato/services/network/CoreNetwork.h"
 #include "tomato/services/network/WinsockContext.h"
 #include "tomato/services/network/Socket.h"         // SocketPtr socket_

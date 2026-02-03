@@ -31,10 +31,13 @@ MatchUpdateResult Match::Update(float dt, tomato::SPSCQueue<SendRequestCommand, 
 		std::cout << "WaitPeerReady" << '\n';
 		if (peerAck.all())
 		{
-
+			ctx_.state = MatchState::AllReady;
+			return MatchUpdateResult::ReadyToStart;
 		}
+
 		if (timer_ >= MatchConstants::CONNECT_TIMEOUT_SEC)
 		{
+			peerAck.reset();
 			ctx_.state = MatchState::Failed;
 			return MatchUpdateResult::Failed;
 		}
@@ -102,7 +105,7 @@ MatchState Match::ProcessIntroResult(tomato::SPSCQueue<MatchRequestCommand, 128>
 	return MatchState();
 }
 
-int Match::GetPlayerId(tomato::TCPSocketPtr client)
+const int Match::GetPlayerId(tomato::TCPSocketPtr client) const
 {
 	int len{};
 	tomato::SocketAddress addr{};

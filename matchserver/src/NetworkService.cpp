@@ -111,7 +111,8 @@ void NetworkService::ProcessNetSendRequest()
 		SendRequestCommand packet;
 		NetSendRequestQueue.Dequeue(packet);
 
-		sessionMgr_.AppendSendBuffer(packet.socket, &packet.data, sizeof(packet.data));
+		uint8_t* pData; // header + data
+		sessionMgr_.AppendSendBuffer(packet.socket, pData, sizeof(packet.data));
 	}
 }
 void NetworkService::ProcessPacket(const TCPHeader& header, tomato::NetBitReader& reader, tomato::TCPSocketPtr& client)
@@ -121,10 +122,25 @@ void NetworkService::ProcessPacket(const TCPHeader& header, tomato::NetBitReader
 	{
 	case TCPPacketType::MATCH_REQUEST:
 	case TCPPacketType::MATCH_CANCEL:
-	case TCPPacketType::INTRO_RESULT :
+	case TCPPacketType::READY_ACK:
 		std::cout << "MATCH_REQUEST::";
 		ProcessPacketRequest(reader, client);
 		break;
+
+	case TCPPacketType::TIME_SYNC_REQ:
+	{
+		ServerTimeMs serverSteadyNow = duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+		TCPHeader timeSyncResHeader{
+			.size = sizeof(TCPHeader) + sizeof(ServerTimeMs),
+			.type = TCPPacketType::TIME_SYNC_RES
+		};
+		SendRequestCommand packet{
+			.socket = client,
+			.header = timeSyncResHeader,
+			.data = static_cast<uint8_t>(serverSteadyNow)
+		};
+		NetSendRequestQueue.Emplace(packet);
+	}
 	}
 }
 

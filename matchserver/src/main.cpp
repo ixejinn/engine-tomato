@@ -9,6 +9,10 @@
 #include <tomato/net/NetBitReader.h>
 
 #include <iostream>
+#include <limits>
+
+using namespace std;
+
 int main()
 {
 	//MatchServer server;
@@ -64,7 +68,7 @@ int main()
 		ns.Update(0.016f);
 	}
 
-#elif 1
+#elif 0
 	tomato::TCPSocketPtr sockets[4];
 	TCPPacket fakePacket[4];
 
@@ -122,6 +126,17 @@ int main()
 		mm.Update(0.016f);
 	}
 	
+#elif 1
+	//cout << sizeof(TCPHeader);
+	TCPHeader header{ sizeof(TCPHeader) + sizeof(MatchRequestAction), TCPPacketType::MATCH_REQUEST };
+	MatchRequestAction action = MatchRequestAction::Enqueue;
+
+	std::vector<uint8_t> vec;
+	RawBuffer buf{};
+	tomato::NetBitWriter wr{ &buf };
+	wr.WriteInt(static_cast<uint8_t>(TCPPacketType::MATCH_REQUEST), 2);
+	wr.WriteInt(static_cast<uint8_t>(MatchRequestAction::Enqueue), static_cast<uint8_t>(MatchRequestAction::COUNT));
+	cout << int(buf[0]);
 #endif // 0
 
 	

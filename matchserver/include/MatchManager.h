@@ -22,7 +22,7 @@ public:
 	void Update(float dt);
 
 	void ProcessMatchRequest();
-	void HandleEnqueue(tomato::TCPSocketPtr client, MatchId matchId);
+	void HandleEnqueue(tomato::TCPSocketPtr client);
 	void HandleCancel(tomato::TCPSocketPtr client);
 	void HandleIntroResult(tomato::TCPSocketPtr client, MatchId matchId, int set);
 
@@ -33,7 +33,6 @@ public:
 	void HandleSendRequest(tomato::TCPSocketPtr socket, uint8_t* inData);
 	void ProcessMatchResult(float dt);
 	void ReQueing(MatchId matchId);
-	//void EmitMatchResult(MatchEvent& evt); // not use
 
 private:
 	struct Compare {

@@ -29,7 +29,7 @@ public:
 
 	void SetPeerAck(int idx, int set);
 	
-	int GetPlayerId(tomato::TCPSocketPtr client);
+	const int GetPlayerId(tomato::TCPSocketPtr client) const;
 	MatchState GetState() const { return ctx_.state; }
 	MatchId GetMatchId() const { return ctx_.matchId; }
 	const MatchRequest* GetMatchRequest() const { return ctx_.players; }

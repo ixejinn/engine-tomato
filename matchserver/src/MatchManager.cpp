@@ -39,7 +39,7 @@ void MatchManager::ProcessMatchRequest()
 		MatchRequestQueue.Dequeue(reqCommand);
 
 		if (reqCommand.action == MatchRequestAction::Enqueue)
-			HandleEnqueue(reqCommand.socket, reqCommand.matchId);
+			HandleEnqueue(reqCommand.socket);
 		
 		if (reqCommand.action == MatchRequestAction::Cancel)
 			HandleCancel(reqCommand.socket);
@@ -52,7 +52,7 @@ void MatchManager::ProcessMatchRequest()
 	}
 }
 
-void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client, MatchId matchId)
+void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client)
 {
 	MatchRequest mRequest{
 		.socket = client,
@@ -69,9 +69,17 @@ void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client, MatchId matchId)
 
 void MatchManager::HandleCancel(tomato::TCPSocketPtr client)
 {
+	/* @TODO:
+	* Match cancellation during active matching is not fully handled.
+	* For now, we only remove the request from the map.
+	* Proper cancellation logic is needed when a match is already being created.
+	*/
+
 	auto it = requests.find(client);
 	if (it != requests.end())
+	{
 		requests.erase(it);
+	}
 }
 
 void MatchManager::HandleIntroResult(tomato::TCPSocketPtr client, MatchId matchId, int set)
@@ -80,6 +88,7 @@ void MatchManager::HandleIntroResult(tomato::TCPSocketPtr client, MatchId matchI
 	if (it != matches.end())
 	{
 		int idx = it->second.GetPlayerId(client);
+		if (idx < 0) return;
 		it->second.SetPeerAck(idx, set);
 	}
 }
@@ -160,12 +169,15 @@ void MatchManager::ProcessMatchResult(float dt)
 		{
 			//SendPacket for game start
 			//then, Remove from matches
+			ServerTimeMs startServerTime = MatchConstants::START_SERVER_TIME;
+
 			const MatchRequest* req = it->second.GetMatchRequest();
-			TCPHeader header{ 0, TCPPacketType::MATCH_START };
-			uint8_t* data = nullptr; //////////////
+			TCPHeader header{ sizeof(TCPHeader), TCPPacketType::MATCH_START};
+			uint8_t data = static_cast<uint8_t>(startServerTime);
+
 			for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
 			{
-				SendRequestCommand sendCmd{ (req + i)->socket, header, *data };
+				SendRequestCommand sendCmd{ (req + i)->socket, header, data };
 				NetSendRequestQueue.Emplace(sendCmd);
 			}
 			it = matches.erase(it);
@@ -185,19 +197,6 @@ void MatchManager::ProcessMatchResult(float dt)
 		}
 	}
 }
-
-//void MatchManager::EmitMatchResult(MatchEvent& evt)
-//{
-//	switch (evt.type)
-//	{
-//	case MatchEventType::Failed:
-//		MatchResultQueue.Emplace(evt);
-//		break;
-//	case MatchEventType::AllReady:
-//		MatchResultQueue.Emplace(evt);
-//		break;
-//	}
-//}
 
 void MatchManager::ReQueing(MatchId matchId)
 {
