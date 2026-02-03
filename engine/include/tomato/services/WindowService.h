@@ -29,6 +29,13 @@ namespace tomato
         WindowService(int width, int height, const char* title);
         ~WindowService();
 
+        /**
+         * @brief Polls window and input events from the OS.
+         *
+         * 키보드/마우스 콜백 등의 이벤트가 처리된다.
+         */
+        static void PollEvents();
+
         GLFWwindow* GetHandle() { return handle_; }
 
         int GetWidth() const { return width_; }
@@ -46,13 +53,6 @@ namespace tomato
          * VSync 설정 여부에 따라 블로킹이 발생할 수 있다.
          */
         void SwapBuffers();
-
-        /**
-         * @brief Polls window and input events from the OS.
-         *
-         * 키보드/마우스 콜백 등의 이벤트가 처리된다.
-         */
-        void PollEvents();
 
         /**
          * @brief Temporary escape-key handling helper.

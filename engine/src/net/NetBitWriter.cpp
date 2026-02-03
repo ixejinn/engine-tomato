@@ -11,6 +11,8 @@ namespace tomato
             byteNum_ = byteSize;
             bitPos_ = 0;
         }
+        else
+            TMT_ERR << "byteSize exceeds MAX_PACKET_SIZE";
     }
 
     void NetBitWriter::SerializeInt(const uint32_t value, const uint32_t maxValue)

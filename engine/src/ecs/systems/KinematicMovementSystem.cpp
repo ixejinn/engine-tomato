@@ -24,7 +24,7 @@ namespace tomato
             InputIntent keypress{inputRec.held};
             InputIntent keydown{inputRec.down};
 
-            // 이동 처리
+            // Move
             int x = 0, y = 0;
             if (HasIntent(keypress, InputIntent::UP))
                 y++;
@@ -39,29 +39,29 @@ namespace tomato
                 dir = glm::normalize(dir);
 
             pos.position.x += dir.x * speed.speed * Engine::FIXED_DELTA_TIME;
+            // !!! for 2D MOVEMENT !!!
             pos.position.y += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
-
             // !!! for 3D MOVEMENT !!!
             //pos.position.z += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
 
-            // 점프 처리
+            // Jump
             /* !!! for 3D MOVEMENT !!!
             if (HasIntent(down, InputIntent::JUMP) && move.cnt < JUMP_COUNT_MAX)
             {
-                // 점프 시작
+                // Start jump
                 move.cnt++;
                 move.vy = std::max(move.vy, 0.f) + JUMP_SPEED;
             }
 
             if (move.cnt > 0)
             {
-                // 점프 중
+                // Jumping
                 move.vy += GRAVITY * Engine::FIXED_DELTA_TIME;
                 pos.position.y += move.vy * Engine::FIXED_DELTA_TIME;
 
                 if (pos.position.y <= 0)
                 {
-                    // 점프 종료
+                    // End jump
                     move.cnt = 0;
                     pos.position.y = 0;
                     move.vy = 0.f;

@@ -1,5 +1,6 @@
 #include "tomato/services/InputService.h"
 #include "tomato/services/WindowService.h"
+#include "tomato/Logger.h"
 
 #include <GLFW/glfw3.h>
 
@@ -105,7 +106,10 @@ namespace tomato
         KeyAction a = ConvertActionGLFW(action);
 
         if (a >= KeyAction::COUNT)
+        {
+            TMT_WARN << "Invalid KeyAction " << static_cast<int>(a);
             return;
+        }
 
         auto* input = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->input;
         input->keyEvents_.emplace(k, a);

@@ -38,7 +38,7 @@ namespace tomato
 
     void SystemManager::Render(const Engine& engine, const SimContext& ctx)
     {
-        // !!!!!!!!!!!!! 나중에 빼기 !!!!!!!!!!!!!!!!
+        // TODO: 나중에 빼기!!!!!
         glClear(GL_COLOR_BUFFER_BIT);
 
         for (SystemPhase phase : renderOrder_)

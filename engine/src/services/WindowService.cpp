@@ -14,9 +14,11 @@ namespace tomato
         glViewport(0, 0, width, height);
     }
 
+    void WindowService::PollEvents() { glfwPollEvents(); }
+
     WindowService::WindowService(int width, int height, const char* title)
-            : width_(width), height_(height)
-        {
+    : width_(width), height_(height)
+    {
         // [GLFW] initialize and configure
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -63,7 +65,6 @@ namespace tomato
     }
 
     void WindowService::SwapBuffers() { glfwSwapBuffers(handle_); }
-    void WindowService::PollEvents() { glfwPollEvents(); }
 
     // !!! TEMPORAL FUNCTION !!!
     void WindowService::TMP_CheckEscapeKey()
