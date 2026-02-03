@@ -3,11 +3,11 @@
 
 namespace tomato
 {
-    NetBitWriter::NetBitWriter(uint8_t* const buffer, const int16_t byteSize)
+    NetBitWriter::NetBitWriter(uint8_t* const out, const int16_t byteSize)
     {
         if (byteSize <= MAX_PACKET_SIZE)
         {
-            buffer_ = buffer;
+            buffer_ = out;
             byteNum_ = byteSize;
             bitPos_ = 0;
         }

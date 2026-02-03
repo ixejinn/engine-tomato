@@ -20,18 +20,27 @@ namespace tomato
     {
     public:
         /**
-         * @param output
-         * @param byteSize
+         * @param out Pointer of raw byte buffer to be sent to the network.
+         * @param byteSize Size of the valid data in bytes. Must not exceed MAX_PACKET_SIZE
          */
-        NetBitWriter(uint8_t* output, int16_t byteSize);
+        NetBitWriter(uint8_t* out, int16_t byteSize);
 
         /**
-         * @param rawBuffer
+         * @param out Pointer of raw byte buffer to be sent to the network.
          */
-        NetBitWriter(RawBuffer* rawBuffer)
-        : buffer_(rawBuffer->data()), byteNum_(MAX_PACKET_SIZE), bitPos_(0) {}
+        explicit NetBitWriter(RawBuffer* out)
+        : buffer_(out->data()), byteNum_(MAX_PACKET_SIZE), bitPos_(0) {}
 
-        // inValue < maxValue
+        /**
+         * @brief Writes an integer value with the range [0, maxValue) to buffer.
+         * @tparam T Unsigned integer (uint8_t/uint16_t/uint32_t)
+         * @param inValue Input variable to encode.
+         * @param maxValue Exclusive upper bound of the value range.
+         *
+         * [0, maxValue) 범위 내의 inValue 직렬화를 수행한다.
+         *
+         * @note inValue \< maxValue
+         */
         template<typename T>
         requires std::same_as<T, uint8_t>
               || std::same_as<T, uint16_t>
