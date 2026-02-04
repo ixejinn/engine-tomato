@@ -11,11 +11,11 @@ public:
 	void Update();
 
 	// For TCP
-	void GenerateSession(const tomato::TCPSocketPtr client, const tomato::SocketAddress& inAddr); 
-	bool ValidateSession(const tomato::TCPSocketPtr client);
-	bool RemoveSession(const tomato::TCPSocketPtr client);
-	bool AppendRecvBuffer(tomato::TCPSocketPtr client, const uint8_t* inData, int len, std::vector<uint8_t>& outData);
-	void AppendSendBuffer(tomato::TCPSocketPtr client, const uint8_t* inData, int len);
+	void GenerateSession(const tomato::TCPSocketPtr& client, const tomato::SocketAddress& inAddr); 
+	bool ValidateSession(const tomato::TCPSocketPtr& client);
+	bool RemoveSession(const tomato::TCPSocketPtr& client);
+	bool AppendRecvBuffer(const tomato::TCPSocketPtr& client, const uint8_t* inData, const int& len, std::vector<uint8_t>& outData);
+	void AppendSendBuffer(const tomato::TCPSocketPtr& client, const uint8_t* inData, const int& len);
 
 	void GetWritableSockets(std::vector<tomato::TCPSocketPtr>& outVector);
 	TCP::Session* GetSession(const tomato::TCPSocketPtr socket);

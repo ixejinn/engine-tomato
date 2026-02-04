@@ -47,7 +47,7 @@ public:
 	void ProcessQueuedPackets();
 	void ProcessPacket(const TCPHeader& header, tomato::NetBitReader& reader, tomato::TCPSocketPtr& client);
 	void ProcessPacketRequest(tomato::NetBitReader& reader, tomato::TCPSocketPtr& client);
-	void ProcessDataFromClient(const tomato::TCPSocketPtr socket, const uint8_t* data, const int len);
+	void ProcessDataFromClient(const tomato::TCPSocketPtr& socket, const uint8_t* data, const int len);
 	void TCPRecvThreadLoop();
 private:
 	tomato::WinsockContext winsock_;

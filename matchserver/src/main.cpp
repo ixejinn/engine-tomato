@@ -131,12 +131,15 @@ int main()
 	TCPHeader header{ sizeof(TCPHeader) + sizeof(MatchRequestAction), TCPPacketType::MATCH_REQUEST };
 	MatchRequestAction action = MatchRequestAction::Enqueue;
 
-	std::vector<uint8_t> vec;
-	RawBuffer buf{};
-	tomato::NetBitWriter wr{ &buf };
-	wr.WriteInt(static_cast<uint8_t>(TCPPacketType::MATCH_REQUEST), 2);
+	tomato::MemoryPool<RawBuffer, 128> bufferPool;
+	RawBuffer* rb = bufferPool.Allocate();
+
+	tomato::NetBitWriter wr{ rb };
+	wr.WriteInt(static_cast<uint8_t>(TCPPacketType::MATCH_REQUEST), 7);
 	wr.WriteInt(static_cast<uint8_t>(MatchRequestAction::Enqueue), static_cast<uint8_t>(MatchRequestAction::COUNT));
-	cout << int(buf[0]);
+	cout << int(rb->data()[0]);
+
+
 #endif // 0
 
 	

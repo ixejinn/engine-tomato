@@ -62,7 +62,7 @@ enum class MatchUpdateResult
 	ReadyToStart,
 	Failed,
 
-	Count
+	COUNT
 };
 
 #endif // !MATCH_TYPES_H

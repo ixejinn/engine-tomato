@@ -20,7 +20,7 @@ void SessionManager::GenerateSession(const tomato::SocketAddress& addr)
 	addrToSessionId[addr] = newId;
 }
 
-void SessionManager::GenerateSession(const tomato::TCPSocketPtr client, const tomato::SocketAddress& inAddr)
+void SessionManager::GenerateSession(const tomato::TCPSocketPtr& client, const tomato::SocketAddress& inAddr)
 {
 	if (tcpSessions.find(client) == tcpSessions.end())
 		tcpSessions.try_emplace(client, client, inAddr);
@@ -36,7 +36,7 @@ bool SessionManager::ValidateSession(const SessionId id)
 	return sessions.find(id) != sessions.end();
 }
 
-bool SessionManager::ValidateSession(const tomato::TCPSocketPtr client)
+bool SessionManager::ValidateSession(const tomato::TCPSocketPtr& client)
 {
 	return tcpSessions.find(client) != tcpSessions.end();
 }
@@ -53,7 +53,7 @@ bool SessionManager::RemoveSession(SessionId id)
 	return true;
 }
 
-bool SessionManager::RemoveSession(const tomato::TCPSocketPtr client)
+bool SessionManager::RemoveSession(const tomato::TCPSocketPtr& client)
 {
 	auto it = tcpSessions.find(client);
 	if(it == tcpSessions.end())
@@ -73,7 +73,7 @@ void SessionManager::UpdateLastRecv(const SessionId id)
 	it->second.UpdateLastRecv(now);
 }
 
-bool SessionManager::AppendRecvBuffer(tomato::TCPSocketPtr client, const uint8_t* inData, int len, std::vector<uint8_t>& outData)
+bool SessionManager::AppendRecvBuffer(const tomato::TCPSocketPtr& client, const uint8_t* inData, const int& len, std::vector<uint8_t>& outData)
 {
 	auto it = tcpSessions.find(client);
 	if (it != tcpSessions.end())
@@ -84,7 +84,7 @@ bool SessionManager::AppendRecvBuffer(tomato::TCPSocketPtr client, const uint8_t
 	return false;
 }
 
-void SessionManager::AppendSendBuffer(tomato::TCPSocketPtr client, const uint8_t* inData, int len)
+void SessionManager::AppendSendBuffer(const tomato::TCPSocketPtr& client, const uint8_t* inData, const int& len)
 {
 	auto it = tcpSessions.find(client);
 	if (it != tcpSessions.end())

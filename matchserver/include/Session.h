@@ -14,8 +14,8 @@ namespace TCP
 		//Session(tomato::SocketAddress& addr) : driver(tomato::TCPNetDriver(addr)) {};
 		Session(const tomato::TCPSocketPtr socket, const tomato::SocketAddress& addr) : socket(socket), addr(addr) {};
 		
-		void AppendRecvBuffer(const uint8_t* data, int len);
-		void AppendSendBuffer(const uint8_t* data, int len);
+		void AppendRecvBuffer(const uint8_t* data, const int& len);
+		void AppendSendBuffer(const uint8_t* data, const int& len);
 		bool ParsePacket(std::vector<uint8_t>& outData);
 		void ConsumeSendBuffer(int len);
 

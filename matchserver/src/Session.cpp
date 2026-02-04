@@ -3,12 +3,12 @@
 
 namespace TCP
 {
-	void Session::AppendRecvBuffer(const uint8_t* data, int len)
+	void Session::AppendRecvBuffer(const uint8_t* data, const int& len)
 	{
 		recvBuffer.insert(recvBuffer.end(), data, data + len);
 	}
 
-	void Session::AppendSendBuffer(const uint8_t* data, int len)
+	void Session::AppendSendBuffer(const uint8_t* data, const int& len)
 	{
 		sendBuffer.insert(sendBuffer.end(), data, data + len);
 	}

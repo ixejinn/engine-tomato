@@ -25,6 +25,8 @@ namespace tomato
             SerializeInt(inValue, maxValue);
         }
 
+        int16_t GetBitPos() const { return bitPos_; }
+
     private:
         void SerializeInt(uint32_t value, uint32_t maxValue);
 

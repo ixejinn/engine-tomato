@@ -1,8 +1,10 @@
-﻿#include "NetworkService.h"
+﻿#define NOMINMAX
+#include "NetworkService.h"
 #include "PacketTypes.h"
 
 #include <iostream>
 #include <vector>
+#include <limits>
 
 void NetworkService::AddNetMassage(TCPPacket& packets)
 {
@@ -111,8 +113,8 @@ void NetworkService::ProcessNetSendRequest()
 		SendRequestCommand packet;
 		NetSendRequestQueue.Dequeue(packet);
 
-		uint8_t* pData; // header + data
-		sessionMgr_.AppendSendBuffer(packet.socket, pData, sizeof(packet.data));
+		uint8_t* pData ; // header + data
+		sessionMgr_.AppendSendBuffer(packet.socket, pData, packet.header.size);
 	}
 }
 void NetworkService::ProcessPacket(const TCPHeader& header, tomato::NetBitReader& reader, tomato::TCPSocketPtr& client)
@@ -129,7 +131,11 @@ void NetworkService::ProcessPacket(const TCPHeader& header, tomato::NetBitReader
 
 	case TCPPacketType::TIME_SYNC_REQ:
 	{
-		ServerTimeMs serverSteadyNow = duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+		ServerTimeMs serverSteadyNow = static_cast<ServerTimeMs>(
+			duration_cast<std::chrono::milliseconds>(
+				std::chrono::steady_clock::now().time_since_epoch()).count());
+
+		uint16_t len;
 		TCPHeader timeSyncResHeader{
 			.size = sizeof(TCPHeader) + sizeof(ServerTimeMs),
 			.type = TCPPacketType::TIME_SYNC_RES
@@ -150,9 +156,9 @@ void NetworkService::ProcessPacketRequest(tomato::NetBitReader& reader, tomato::
 	uint8_t tAction = -1;
 	MatchRequestAction action = MatchRequestAction::NONE;
 
-	reader.ReadInt(tAction, 8);
+	reader.ReadInt(tAction, static_cast<uint8_t>(MatchRequestAction::COUNT));
 	action = static_cast<MatchRequestAction>(tAction);
-	std::cout << int(tAction) << '\n';
+	//std::cout << int(tAction) << '\n';
 	MatchRequestCommand reqCommand{ client, testMatchId, action }; // 0, 0 -> client
 	MatchRequestQueue.Emplace(reqCommand);
 }
@@ -162,26 +168,26 @@ void NetworkService::ProcessQueuedPackets()
 	//패킷 헤더 해석 및 처리 / 패킷 헤더에 따라 패킷 처리 후 pop
 	while (!TCPRecvQueue.Empty())
 	{
-		std::cout << __FUNCTION__ << '\n';
+		//std::cout << __FUNCTION__ << '\n';
 		TCPPacket nextPacket;
 		TCPRecvQueue.Dequeue(nextPacket);
 
 		TCPHeader header;
-		uint8_t sz, type;
+		uint16_t packetLen, type;
 		tomato::NetBitReader reader(nextPacket.buffer.data(), nextPacket.size());
 
-		reader.ReadInt(sz, 8);
-		reader.ReadInt(type, 8);
+		reader.ReadInt(packetLen, std::numeric_limits<uint16_t>::max());
+		reader.ReadInt(type, static_cast<uint16_t>(TCPPacketType::COUNT));
 
-		header.size = static_cast<uint16_t>(sz);
+		header.size = packetLen;
 		header.type = static_cast<TCPPacketType>(type);
-		std::cout << int(sz) << ", " << int(type) << '\n';
+		std::cout << int(packetLen) << ", " << int(type) << '\n';
 
 		ProcessPacket(header, reader, nextPacket.client);
 	}
 }
 
-void NetworkService::ProcessDataFromClient(const tomato::TCPSocketPtr client, const uint8_t* data, const int len)
+void NetworkService::ProcessDataFromClient(const tomato::TCPSocketPtr& client, const uint8_t* data, const int len)
 {
 	//socket에 따라 세션에 지정된 vector에 데이터스트림 추가
 	if (!sessionMgr_.ValidateSession(client))
