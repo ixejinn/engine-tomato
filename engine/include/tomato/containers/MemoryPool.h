@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cstdint>
 #include <mutex>
+#include <typeinfo>
 #include "tomato/Logger.h"
 
 namespace tomato
@@ -66,7 +67,7 @@ namespace tomato
 
         std::size_t chunkSize_{0};
 
-        std::mutex mtx;
+        std::mutex mtx_;
     };
 
     template<typename T, std::size_t N>
@@ -75,22 +76,22 @@ namespace tomato
     {
         // 정렬 조건에 맞게 공간 할당
         pool_ = ::operator new(
-                chunkSize_ * N,
+                chunkSize_ * size_,
                 std::align_val_t(std::max(alignof(void*), alignof(T))));
 
         // 청크들을 링크드 리스트로 연결
         auto base = static_cast<std::byte*>(pool_);
-        for (int i = 0; i < N - 1; i++)
+        for (int i = 0; i < size_ - 1; i++)
         {
             void* next = base + (i + 1) * chunkSize_;
             std::memcpy(base + i * chunkSize_, &next, sizeof(void*));
         }
         void* tmp = nullptr;
-        std::memcpy(base + (N - 1) * chunkSize_, &tmp, sizeof(void*));
+        std::memcpy(base + (size_ - 1) * chunkSize_, &tmp, sizeof(void*));
         free_ = pool_;
 
         // 할당 상태 배열 할당 및 초기화
-        valid_ = new uint8_t[((N - 1) >> 3) + 1]();
+        valid_ = new uint8_t[((size_ - 1) >> 3) + 1]();
     }
 
     template<typename T, std::size_t N>
@@ -98,7 +99,7 @@ namespace tomato
     {
         // 반납되지 않은 객체 소멸자 호출
         auto base = static_cast<std::byte*>(pool_);
-        for (int i = 0; i < N; i++)
+        for (int i = 0; i < size_; i++)
         {
             if (IsValid(i))
             {
@@ -116,13 +117,13 @@ namespace tomato
     template<typename... Args>
     inline T* MemoryPool<T, N>::Allocate(Args&&... args)
     {
+        std::scoped_lock<std::mutex> lock(mtx_);
+
         if (free_ == nullptr)
         {
             TMT_ERR << "Fulled memory pool - Return nullptr";
             return nullptr;
         }
-
-        mtx.lock();
 
         usedSize_++;
 
@@ -135,8 +136,6 @@ namespace tomato
         auto beginB = static_cast<std::byte*>(pool_);
         auto offset = (curB - beginB) / chunkSize_;
         SetValid(offset);
-
-        mtx.unlock();
 
         return ::new (cur) T(std::forward<Args>(args)...);
     }
@@ -162,7 +161,7 @@ namespace tomato
             return false;
         }
 
-        mtx.lock();
+        std::scoped_lock<std::mutex> lock(mtx_);
 
         // 할당 상태 확인
         auto offset = diffB / chunkSize_;
@@ -183,8 +182,6 @@ namespace tomato
 
         // 할당 상태 비트 OFF
         SetInvalid(offset);
-
-        mtx.unlock();
 
         return true;
     }

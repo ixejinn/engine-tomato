@@ -24,6 +24,7 @@ namespace tomato
                 keyStates_[event.key].value = 0;
                 curr_.held &= ~keyIntents_[event.key];
             }
+
             else             // KeyAction::PRESS
             {
                 keyStates_[event.key].value = 1;

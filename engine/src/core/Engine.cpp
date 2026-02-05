@@ -99,7 +99,7 @@ namespace tomato
 
     void Engine::Simulate()
     {
-        std::chrono::steady_clock::time_point cur = std::chrono::steady_clock::now();
+        std::chrono::steady_clock::time_point cur = std::chrono::steady_clock::now();   // TODO: system_clock과 차이점 확인
         adder_ += std::chrono::duration<float, std::milli>(cur - start_);
 
         int simLimit = std::min(static_cast<int>(adder_ / dt_), MAX_SIMULATION_NUM);

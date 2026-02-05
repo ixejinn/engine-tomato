@@ -94,6 +94,7 @@ namespace tomato
             case GLFW_RELEASE:
                 return KeyAction::RELEASE;
             case GLFW_PRESS:
+            case GLFW_REPEAT:
                 return KeyAction::PRESS;
             default:
                 return KeyAction::COUNT;
@@ -107,7 +108,7 @@ namespace tomato
 
         if (a >= KeyAction::COUNT)
         {
-            TMT_WARN << "Invalid KeyAction " << static_cast<int>(a);
+            TMT_WARN << "Invalid KeyAction " << action;
             return;
         }
 

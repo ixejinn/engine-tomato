@@ -1,16 +1,18 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef TOMATO_LOGGER_H
+#define TOMATO_LOGGER_H
 
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <source_location>
 
 class Logger
 {
 public:
 	enum Level { LOG, WARN, ERR };
 
-	Logger(Level level, const char* file, int line) : level_(level), file_(file), line_(line) {}
+	Logger(Level level, std::source_location loc = std::source_location::current())
+    : level_(level), location_(loc) {}
 
 	template<typename T>
 	Logger& operator<<(const T& msg)
@@ -21,24 +23,35 @@ public:
 
 	~Logger()
 	{
-		switch (level_)
-		{
-			case LOG: std::cout << "[LOG] "; break;
-			case WARN: std::cout << "[WARN] " << "(" << file_ << " : " << line_ << ")"; break;
-			case ERR: std::cout << "[ERR] " << "(" << file_ << " : " << line_ << ")"; break;
-		}
-		std::cout << buffer_.str() << std::endl;
+        std::cout << Prefix(level_) << buffer_.str();
+
+        if (level_ > Level::LOG)
+            std::cout << "\n"
+            << location_.file_name() << ":" << location_.line()
+            << ": " << location_.function_name();
+        std::cout << "\n";
 	}
 
 private:
+    static const char* Prefix(Level lv)
+    {
+        switch (lv)
+        {
+            case Level::LOG:  return "[LOG] ";
+            case Level::WARN: return "[WARN] ";
+            case Level::ERR:  return "[ERR] ";
+        }
+        return "";
+    }
+
 	Level level_;
-	const char* file_;
-	int line_;
+    std::source_location location_;
+
 	std::ostringstream buffer_;
 };
 
-#define TMT_LOG Logger(Logger::LOG, __FILE__, __LINE__)
-#define TMT_WARN Logger(Logger::WARN, __FILE__, __LINE__)
-#define TMT_ERR Logger(Logger::ERR, __FILE__, __LINE__)
+#define TMT_LOG  Logger(Logger::LOG)
+#define TMT_WARN Logger(Logger::WARN)
+#define TMT_ERR  Logger(Logger::ERR)
 
-#endif
+#endif //TOMATO_LOGGER_H

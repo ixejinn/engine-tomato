@@ -4,7 +4,7 @@ project(tomato
 )
 
 set(CMAKE_CXX_STANDARD 20)
-# requires expression (NetBitReader::ReadInt)
+# requires expression (NetBitReader::ReadInt), std::source_location (Logger)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (MSVC)

@@ -132,7 +132,7 @@ namespace tomato
 	//		matProj = cam.projection;
 	//	}
 
-	//	for (auto [e, sprite, mtx] : view.each())
+	//	for (auto [e, sprite, mtx_] : view.each())
 	//	{
 	//		//TMT_LOG << sprite.shader_id << "," << sprite.texture_id;
 
@@ -141,7 +141,7 @@ namespace tomato
 	//		//std::cout << "Matrix:" << std::endl;
 	//		//for (int i = 0; i < 4; i++) {
 	//		//	for (int j = 0; j < 4; j++) {
-	//		//		std::cout << mtx.matrix[i][j] << " ";
+	//		//		std::cout << mtx_.matrix[i][j] << " ";
 	//		//	}
 	//		//	std::cout << std::endl;
 	//		//}
@@ -160,7 +160,7 @@ namespace tomato
 
 	//			GLint uniform_var_loc1 = glGetUniformLocation(shader->GetID(), "model");
 	//			if (uniform_var_loc1 >= 0)
-	//				glUniformMatrix4fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mtx.matrix));
+	//				glUniformMatrix4fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mtx_.matrix));
 	//			else
 	//				TMT_ERR << "Uniform variable doesn't exist";
 
