@@ -19,7 +19,7 @@ int main()
 	//server.Run();
 
 	tomato::SPSCQueue<MatchRequestCommand, 128> MatchRequestQueue;
-	tomato::SPSCQueue<SendRequestCommand, 256> NetSendRequest;
+	tomato::SPSCQueue<SendCommandPtr, 256> NetSendRequest;
 	MatchManager mm(MatchRequestQueue, NetSendRequest);
 	SessionManager sm;
 	NetworkService ns(sm, mm, MatchRequestQueue, NetSendRequest);
@@ -127,17 +127,34 @@ int main()
 	}
 	
 #elif 1
-	//cout << sizeof(TCPHeader);
-	TCPHeader header{ sizeof(TCPHeader) + sizeof(MatchRequestAction), TCPPacketType::MATCH_REQUEST };
-	MatchRequestAction action = MatchRequestAction::Enqueue;
+	ServerTimeMs serverSteadyNow = static_cast<ServerTimeMs>(
+		duration_cast<std::chrono::milliseconds>(
+			std::chrono::steady_clock::now().time_since_epoch()).count());
 
-	tomato::MemoryPool<RawBuffer, 128> bufferPool;
-	RawBuffer* rb = bufferPool.Allocate();
+	RawBuffer rb{};
+	tomato::NetBitWriter wr{ &rb };
+	wr.WriteInt(static_cast<uint16_t>(0), std::numeric_limits<uint16_t>::max());
+	wr.WriteInt(static_cast<uint16_t>(TCPPacketType::TIME_SYNC_RES), static_cast<uint16_t>(TCPPacketType::COUNT));
+	wr.WriteInt(static_cast<uint32_t>(serverSteadyNow), std::numeric_limits<ServerTimeMs>::max());
 
-	tomato::NetBitWriter wr{ rb };
-	wr.WriteInt(static_cast<uint8_t>(TCPPacketType::MATCH_REQUEST), 7);
-	wr.WriteInt(static_cast<uint8_t>(MatchRequestAction::Enqueue), static_cast<uint8_t>(MatchRequestAction::COUNT));
-	cout << int(rb->data()[0]);
+	uint16_t size = wr.GetByteSize();
+	std::memcpy(rb.data(), &size, sizeof(uint16_t));
+
+	tomato::NetBitReader rd{ rb.data(), static_cast<int16_t>(size)};
+	uint16_t readSize{ 0 }, readType{ 0 };
+	ServerTimeMs readTime{ 0 };
+
+	rd.ReadInt(readSize, std::numeric_limits<uint16_t>::max());
+	rd.ReadInt(readType, static_cast<uint16_t>(TCPPacketType::COUNT));
+	rd.ReadInt(readTime, std::numeric_limits<ServerTimeMs>::max());
+
+	for (int i = 0; i < size; i++)
+		cout << int(rb.data()[i]) << " ";
+	cout << '\n';
+
+	cout << int(readSize) << ", " << int(readType) << ", " << int(serverSteadyNow) << " : " << int(readTime);
+
+	//cout << int(rb->data()[0]);
 
 
 #endif // 0

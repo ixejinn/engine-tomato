@@ -20,7 +20,7 @@ private:
 	MatchManager matchMgr_;
 	NetworkService networkService_;
 
-	tomato::SPSCQueue<SendRequestCommand, 256> NetSendRequestQueue;
+	tomato::SPSCQueue<SendCommandPtr, 256> NetSendRequestQueue;
 	tomato::SPSCQueue<MatchRequestCommand, 128> MatchRequestQueue;
 };
 

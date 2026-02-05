@@ -1,9 +1,13 @@
 #ifndef SESSION_H
 #define SESSION_H
+
 #include <vector>
+#include <memory>
+
 #include <tomato/services/network/SocketAddress.h>
 #include <tomato/services/network/TCPNetDriver.h>
 #include "ServerTypes.h"
+#include "PacketTypes.h"
 
 struct Packet;
 namespace TCP
@@ -12,21 +16,21 @@ namespace TCP
 	{
 	public:
 		//Session(tomato::SocketAddress& addr) : driver(tomato::TCPNetDriver(addr)) {};
-		Session(const tomato::TCPSocketPtr socket, const tomato::SocketAddress& addr) : socket(socket), addr(addr) {};
+		Session(SessionId id, const tomato::TCPSocketPtr& socket, const tomato::SocketAddress& addr) : id(id), socket(socket), addr(addr) {};
 		
 		void AppendRecvBuffer(const uint8_t* data, const int& len);
 		void AppendSendBuffer(const uint8_t* data, const int& len);
-		bool ParsePacket(std::vector<uint8_t>& outData);
+		std::unique_ptr<TCPPacket> ParsePacket();
 		void ConsumeSendBuffer(int len);
 
-		const tomato::TCPSocketPtr GetSocket() const { return socket; }
+		const tomato::TCPSocketPtr& GetSocket() const { return socket; }
 		const tomato::SocketAddress& GetSocketAddress() const { return addr; }
 		std::vector<uint8_t>& GetRecvBuffer() { return recvBuffer; }
 		std::vector<uint8_t>& GetSendBuffer() { return sendBuffer; }
 
 	//private:
 		//tomato::TCPNetDriver driver;
-
+		SessionId id;
 		tomato::TCPSocketPtr socket;
 		tomato::SocketAddress addr;
 		std::vector<uint8_t> recvBuffer;

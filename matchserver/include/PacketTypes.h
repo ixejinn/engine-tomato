@@ -20,14 +20,22 @@ struct Packet
 struct TCPPacket
 {
 	std::vector<uint8_t> buffer;
-	tomato::TCPSocketPtr client;
-	
-	TCPPacket() = default;
-	TCPPacket(const uint8_t* data, std::size_t size, tomato::TCPSocketPtr client)
-		: buffer(data, data + size), client(client) {
-	}
+	SessionId sessionId;
+
+	explicit TCPPacket(std::size_t size, SessionId client)
+		: buffer(size), sessionId(client) {}
+
+	//Not allow to copy, only move
+	TCPPacket(const TCPPacket&) = delete;
+	TCPPacket& operator= (const TCPPacket&) = delete;
+
+	TCPPacket(TCPPacket&&) = default;
+	TCPPacket& operator=(TCPPacket&&) = default;
+
 	size_t size() const { return buffer.size(); }
 };
+
+using PacketPtr = std::unique_ptr<TCPPacket>;
 
 enum class TCPPacketType : uint16_t
 {
@@ -36,6 +44,8 @@ enum class TCPPacketType : uint16_t
 	MATCH_INTRO,
 	TIME_SYNC_REQ,
 	TIME_SYNC_RES,
+	MATCH_INTRO_SUCCESS,
+	MATCH_INTRO_FAILED,
 	READY_ACK,
 	MATCH_START,
 
@@ -45,7 +55,7 @@ enum class TCPPacketType : uint16_t
 #pragma pack(push, 1)
 struct TCPHeader
 {
-	uint16_t size; // Total packet length (following data length)
+	uint16_t size; // Total packet length (following data length) byte
 	TCPPacketType type; // Packet type (ex: 1 = MatchRequest, 2 = MatchCancel...)
 };
 #pragma pack(pop)

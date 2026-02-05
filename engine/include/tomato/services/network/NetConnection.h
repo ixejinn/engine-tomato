@@ -21,7 +21,9 @@ namespace tomato
 
 	struct NetConnection
 	{
-		uint32_t matchId;
+		uint32_t sessionId; 
+
+		uint16_t matchId;
 		uint8_t playerId;
 		std::string name;
 		SocketAddress addr;

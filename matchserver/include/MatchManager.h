@@ -12,7 +12,7 @@
 class MatchManager
 {
 public:
-	MatchManager(tomato::SPSCQueue<MatchRequestCommand, 128>& requestQ, tomato::SPSCQueue<SendRequestCommand, 256>& netSendRequestQ)
+	MatchManager(tomato::SPSCQueue<MatchRequestCommand, 128>& requestQ, tomato::SPSCQueue<SendCommandPtr, 256>& netSendRequestQ)
 		: MatchRequestQueue(requestQ), NetSendRequestQueue(netSendRequestQ) {};
 
 	/////////////ONLY FOR TEST////////////
@@ -22,17 +22,17 @@ public:
 	void Update(float dt);
 
 	void ProcessMatchRequest();
-	void HandleEnqueue(tomato::TCPSocketPtr client);
-	void HandleCancel(tomato::TCPSocketPtr client);
-	void HandleIntroResult(tomato::TCPSocketPtr client, MatchId matchId, int set);
+	void HandleEnqueue(const SessionId& client);
+	void HandleCancel(const SessionId& client);
+	void HandleIntroResult(const SessionId&, MatchId& matchId, const int& set);
 
 	bool CheckPopulation();
 	bool GetMatchRequestFromPQ(MatchRequest& req);
 	bool CreateMatchContext(MatchContext& ctx);
 
-	void HandleSendRequest(tomato::TCPSocketPtr socket, uint8_t* inData);
+	void HandleSendRequest(tomato::TCPSocketPtr& socket, uint8_t* inData);
 	void ProcessMatchResult(float dt);
-	void ReQueing(MatchId matchId);
+	void ReQueing(const MatchId& matchId);
 
 private:
 	struct Compare {
@@ -45,12 +45,12 @@ private:
 	};
 
 private:
-	int nextMatchID_ = 1;
+	MatchId nextMatchID_ = 1;
 
-	tomato::SPSCQueue<SendRequestCommand, 256>& NetSendRequestQueue;
+	tomato::SPSCQueue<SendCommandPtr, 256>& NetSendRequestQueue;
 	tomato::SPSCQueue<MatchRequestCommand, 128>& MatchRequestQueue;
 
-	std::unordered_map<tomato::TCPSocketPtr, MatchRequest> requests;
+	std::unordered_map<SessionId, MatchRequest> requests;
 	std::priority_queue<MatchRequest, std::vector<MatchRequest>, Compare> pq;
 	std::unordered_map<MatchId, Match> matches;
 };

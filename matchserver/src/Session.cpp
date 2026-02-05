@@ -13,23 +13,25 @@ namespace TCP
 		sendBuffer.insert(sendBuffer.end(), data, data + len);
 	}
 
-	bool Session::ParsePacket(std::vector<uint8_t>& outData)
+	std::unique_ptr<TCPPacket> Session::ParsePacket()
 	{
-		if (recvBuffer.size() >= sizeof(TCPHeader))
-		{
-			TCPHeader* header = reinterpret_cast<TCPHeader*>(recvBuffer.data());
-			if (recvBuffer.size() < header->size)
-				return false;
-
-			outData.resize(header->size);
-			std::memcpy(outData.data(), recvBuffer.data(), header->size);
-			
-			recvBuffer.erase(recvBuffer.begin(), recvBuffer.begin() + header->size);
-
-			return true;
-		}
+		if (recvBuffer.size() < sizeof(uint16_t))
+			return nullptr;
 		
-		return false;
+		uint16_t size;
+		std::memcpy(&size, recvBuffer.data(), sizeof(size));
+
+		const std::size_t totalSize = sizeof(uint16_t) + size;
+
+		if (recvBuffer.size() < totalSize)
+			return nullptr;
+
+		auto packet = std::make_unique<TCPPacket>(size, id);
+		std::memcpy(packet->buffer.data(), recvBuffer.data() + sizeof(uint16_t), size);
+			
+		recvBuffer.erase(recvBuffer.begin(), recvBuffer.begin() + totalSize);
+
+		return packet;
 	}
 
 	void Session::ConsumeSendBuffer(int len)

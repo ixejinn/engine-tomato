@@ -21,15 +21,15 @@ class Match
 public:
 	explicit Match(const MatchContext& ctx);
 
-	MatchUpdateResult Update(float dt, tomato::SPSCQueue<SendRequestCommand, 256>& sendRequestQ);
+	MatchUpdateResult Update(float dt, tomato::SPSCQueue<SendCommandPtr, 256>& sendRequestQ);
 
 	MatchState CollectNetConnection(const MatchRequest* matchRequest);
-	MatchState RequestToSendNetConnection(tomato::SPSCQueue<SendRequestCommand, 256>& sendRequestQ, const MatchRequest* matchRequest);
+	MatchState RequestToSendNetConnection(tomato::SPSCQueue<SendCommandPtr, 256>& sendRequestQ, const MatchRequest* matchRequest);
 	MatchState ProcessIntroResult(tomato::SPSCQueue<MatchRequestCommand, 128>& MatchRequestQ);
 
 	void SetPeerAck(int idx, int set);
 	
-	const int GetPlayerId(tomato::TCPSocketPtr client) const;
+	const int GetPlayerId(const SessionId& client) const;
 	MatchState GetState() const { return ctx_.state; }
 	MatchId GetMatchId() const { return ctx_.matchId; }
 	const MatchRequest* GetMatchRequest() const { return ctx_.players; }

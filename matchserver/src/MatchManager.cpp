@@ -1,5 +1,7 @@
+#define NOMINMAX
 #include "MatchManager.h"
 #include <chrono>
+#include <tomato/net/NetBitWriter.h>
 
 void MatchManager::AddMatchRequestQueue(SessionId sessionId, RequestId reqId)
 {
@@ -39,24 +41,24 @@ void MatchManager::ProcessMatchRequest()
 		MatchRequestQueue.Dequeue(reqCommand);
 
 		if (reqCommand.action == MatchRequestAction::Enqueue)
-			HandleEnqueue(reqCommand.socket);
+			HandleEnqueue(reqCommand.sessionId);
 		
 		if (reqCommand.action == MatchRequestAction::Cancel)
-			HandleCancel(reqCommand.socket);
+			HandleCancel(reqCommand.sessionId);
 
 		if (reqCommand.action == MatchRequestAction::Success)
-			HandleIntroResult(reqCommand.socket, reqCommand.matchId, 1);
+			HandleIntroResult(reqCommand.sessionId, reqCommand.matchId, 1);
 
 		if (reqCommand.action == MatchRequestAction::Failed)
-			HandleIntroResult(reqCommand.socket, reqCommand.matchId, 0);
+			HandleIntroResult(reqCommand.sessionId, reqCommand.matchId, 0);
 	}
 }
 
-void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client)
+void MatchManager::HandleEnqueue(const SessionId& client)
 {
 	MatchRequest mRequest{
-		.socket = client,
-		.sessionId = 0,
+		.socket = nullptr,
+		.sessionId = client,
 		.requestId = 0,
 		.enqueueTime = 0,
 		//duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -67,7 +69,7 @@ void MatchManager::HandleEnqueue(tomato::TCPSocketPtr client)
 	pq.emplace(mRequest);
 }
 
-void MatchManager::HandleCancel(tomato::TCPSocketPtr client)
+void MatchManager::HandleCancel(const SessionId& client)
 {
 	/* @TODO:
 	* Match cancellation during active matching is not fully handled.
@@ -77,12 +79,10 @@ void MatchManager::HandleCancel(tomato::TCPSocketPtr client)
 
 	auto it = requests.find(client);
 	if (it != requests.end())
-	{
 		requests.erase(it);
-	}
 }
 
-void MatchManager::HandleIntroResult(tomato::TCPSocketPtr client, MatchId matchId, int set)
+void MatchManager::HandleIntroResult(const SessionId& client, MatchId& matchId, const int& set)
 {
 	auto it = matches.find(matchId);
 	if (it != matches.end())
@@ -104,15 +104,15 @@ bool MatchManager::GetMatchRequestFromPQ(MatchRequest& req)
 {
 	while (!pq.empty())
 	{
-		MatchRequest item = pq.top();
+		MatchRequest pReq = pq.top();
 		pq.pop();
 
-		if (!requests.contains(item.socket))
+		if (!requests.contains(pReq.sessionId))
 			continue; // lazy deletion
 
 		else
 		{
-			req = item;
+			req = pReq;
 			return true;
 		}
 	}
@@ -130,7 +130,7 @@ bool MatchManager::CreateMatchContext(MatchContext& ctx)
 		if (GetMatchRequestFromPQ(out))
 		{
 			ctx.players[i] = out;
-			requests.erase(out.socket);
+			requests.erase(out.sessionId);
 		}
 	}
 
@@ -155,31 +155,38 @@ void MatchManager::ProcessMatchResult(float dt)
 		{
 			++it;
 			break;
-			//const MatchRequest* req = it->second.GetMatchRequest();
-			//const tomato::NetConnection* conn = it->second.GetNetConnection();
-			//for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
-			//{
-			//	SendRequestCommand sendCmd{ (req + i)->socket, static_cast<uint8_t>(TCPPacketType::MATCH_INTRO) };
-			//	NetSendRequestQueue.Emplace(sendCmd);
-			//}
-			//break;
 		}
 
 		case MatchUpdateResult::ReadyToStart:
 		{
 			//SendPacket for game start
 			//then, Remove from matches
-			ServerTimeMs startServerTime = MatchConstants::START_SERVER_TIME;
+
+			ServerTimeMs serverSteadyTime = static_cast<ServerTimeMs>(
+				duration_cast<std::chrono::milliseconds>(
+					std::chrono::steady_clock::now().time_since_epoch()
+				).count());
+			ServerTimeMs startServerTime = serverSteadyTime + MatchConstants::START_SERVER_TIME;
 
 			const MatchRequest* req = it->second.GetMatchRequest();
-			TCPHeader header{ sizeof(TCPHeader), TCPPacketType::MATCH_START};
-			uint8_t data = static_cast<uint8_t>(startServerTime);
+	
+			RawBuffer buf{};
+			tomato::NetBitWriter writer{ &buf };
+			writer.WriteInt(static_cast<uint16_t>(0), std::numeric_limits<uint16_t>::max());
+			writer.WriteInt(static_cast<uint16_t>(TCPPacketType::MATCH_START), static_cast<uint16_t>(TCPPacketType::COUNT));
+			writer.WriteInt(startServerTime, std::numeric_limits<ServerTimeMs>::max());
+			uint16_t size = writer.GetByteSize();
+
+			memcpy(buf.data(), &size, sizeof(uint16_t));
 
 			for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
 			{
-				SendRequestCommand sendCmd{ (req + i)->socket, header, data };
-				NetSendRequestQueue.Emplace(sendCmd);
+				auto sendCmd = std::make_unique<SendRequestCommand>((req + i)->sessionId, size);
+				std::memcpy(sendCmd.get()->data.data(), buf.data(), size);
+
+				NetSendRequestQueue.Emplace(std::move(sendCmd));
 			}
+
 			it = matches.erase(it);
 			break;
 		}
@@ -198,7 +205,7 @@ void MatchManager::ProcessMatchResult(float dt)
 	}
 }
 
-void MatchManager::ReQueing(MatchId matchId)
+void MatchManager::ReQueing(const MatchId& matchId)
 {
 	auto it = matches.find(matchId);
 	if (it != matches.end())
@@ -222,7 +229,7 @@ void MatchManager::ReQueing(MatchId matchId)
 			if (reRequest.retryCount > 3)
 				continue;
 			
-			requests.try_emplace(reRequest.socket, reRequest);
+			requests.try_emplace(reRequest.sessionId, reRequest);
 			pq.emplace(reRequest);
 		}
 	}

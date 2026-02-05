@@ -27,21 +27,25 @@ enum class MatchRequestAction : uint8_t
 
 struct MatchRequestCommand
 {
-	tomato::TCPSocketPtr socket;
+	SessionId sessionId;
 	MatchId matchId;
 	MatchRequestAction action;
 };
 
 struct SendRequestCommand
 {
-	tomato::TCPSocketPtr socket;
-	TCPHeader header;
-	uint8_t data;
+	SessionId sessionId;
+	uint16_t size;
+	std::vector<uint8_t> data;
+
+	explicit SendRequestCommand(SessionId id, uint16_t size)
+		: sessionId(id), size(size), data(size) {}
 };
+using SendCommandPtr = std::unique_ptr<SendRequestCommand>;
 
 struct MatchRequest
 {
-	tomato::TCPSocketPtr socket;
+	tomato::TCPSocketPtr socket = nullptr;
 	SessionId sessionId;
 	RequestId requestId;
 	ServerTimeMs enqueueTime;

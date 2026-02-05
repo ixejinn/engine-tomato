@@ -6,9 +6,9 @@
 #include <vector>
 #include <limits>
 
-void NetworkService::AddNetMassage(TCPPacket& packets)
+void NetworkService::AddNetMassage(PacketPtr& packets)
 {
-	TCPRecvQueue.Emplace(packets);
+	TCPRecvQueue.Emplace(std::move(packets));
 }
 
 void NetworkService::Update(float dt)
@@ -57,7 +57,21 @@ void NetworkService::Update(float dt)
 //		}
 //	}
 //}
+// 
+//void NetworkService::ProcessPacketMatchReq(tomato::NetBitReader& reader, SessionId sessionId)
+//{
+//	RequestId reqId = -1;
+//	uint8_t tAction = -1;
+//	MatchRequestAction action = MatchRequestAction::NONE;
 //
+//	reader.ReadInt(reqId, static_cast<uint32_t>(reqId));
+//	reader.ReadInt(tAction, static_cast<uint32_t>(tAction));
+//	action = static_cast<MatchRequestAction>(tAction);
+//
+//	MatchRequestCommand reqCommand{ sessionId, reqId, action };
+//	MatchRequestQueue.Emplace(reqCommand);
+//}
+
 //void NetworkService::ProcessSendPacket()
 //{
 //	//if sendBuffer have data, Send it
@@ -89,78 +103,84 @@ void NetworkService::Update(float dt)
 //			sessionMgr_.RemoveSession(socket);
 //	}
 //}
-//
-//
-//void NetworkService::ProcessPacketMatchReq(tomato::NetBitReader& reader, SessionId sessionId)
-//{
-//	RequestId reqId = -1;
-//	uint8_t tAction = -1;
-//	MatchRequestAction action = MatchRequestAction::NONE;
-//
-//	reader.ReadInt(reqId, static_cast<uint32_t>(reqId));
-//	reader.ReadInt(tAction, static_cast<uint32_t>(tAction));
-//	action = static_cast<MatchRequestAction>(tAction);
-//
-//	MatchRequestCommand reqCommand{ sessionId, reqId, action };
-//	MatchRequestQueue.Emplace(reqCommand);
-//}
-
 
 void NetworkService::ProcessNetSendRequest()
 {
 	while (!NetSendRequestQueue.Empty())
 	{
-		SendRequestCommand packet;
-		NetSendRequestQueue.Dequeue(packet);
+		SendCommandPtr sendCommand;
+		NetSendRequestQueue.Dequeue(sendCommand);
 
-		uint8_t* pData ; // header + data
-		sessionMgr_.AppendSendBuffer(packet.socket, pData, packet.header.size);
+		sessionMgr_.AppendSendBuffer(sendCommand->sessionId, sendCommand->data.data(), sendCommand->size);
 	}
 }
-void NetworkService::ProcessPacket(const TCPHeader& header, tomato::NetBitReader& reader, tomato::TCPSocketPtr& client)
+void NetworkService::ProcessPacket(const TCPPacketType& header, tomato::NetBitReader& reader, SessionId& client)
 {
 	std::cout << __FUNCTION__ << '\n';
-	switch (header.type)
+	switch (header)
 	{
 	case TCPPacketType::MATCH_REQUEST:
 	case TCPPacketType::MATCH_CANCEL:
-	case TCPPacketType::READY_ACK:
-		std::cout << "MATCH_REQUEST::";
-		ProcessPacketRequest(reader, client);
+	case TCPPacketType::MATCH_INTRO_SUCCESS:
+	case TCPPacketType::MATCH_INTRO_FAILED:
+		std::cout << "MATCH_REQUEST_PACKET::";
+		HandlePacketRequest(header, reader, client);
 		break;
 
+	case TCPPacketType::TIME_SYNC_REQ:
+		HandlePacketTimeSync(header, reader, client);
+		break;
+	}
+}
+
+void NetworkService::HandlePacketRequest(const TCPPacketType& header, tomato::NetBitReader& reader, SessionId& client)
+{
+	//패킷 읽어서 해석 x 그냥 리퀘스트 커맨드 구조체로 큐에 넣어줌
+	switch (header)
+	{
+	case TCPPacketType::MATCH_REQUEST:
+		MatchRequestQueue.Emplace(client, 0, MatchRequestAction::Enqueue);
+		break;
+
+	case TCPPacketType::MATCH_CANCEL:
+	case TCPPacketType::MATCH_INTRO_SUCCESS:
+	case TCPPacketType::MATCH_INTRO_FAILED:
+	{
+		MatchId matchId;
+		reader.ReadInt(matchId, std::numeric_limits<MatchId>::max());
+		MatchRequestQueue.Emplace(client, matchId, MatchRequestAction::Cancel);
+		break;
+	}
+	}
+}
+
+void NetworkService::HandlePacketTimeSync(const TCPPacketType& header, tomato::NetBitReader& reader, SessionId& client)
+{
+	switch (header)
+	{
 	case TCPPacketType::TIME_SYNC_REQ:
 	{
 		ServerTimeMs serverSteadyNow = static_cast<ServerTimeMs>(
 			duration_cast<std::chrono::milliseconds>(
 				std::chrono::steady_clock::now().time_since_epoch()).count());
 
-		uint16_t len;
-		TCPHeader timeSyncResHeader{
-			.size = sizeof(TCPHeader) + sizeof(ServerTimeMs),
-			.type = TCPPacketType::TIME_SYNC_RES
-		};
-		SendRequestCommand packet{
-			.socket = client,
-			.header = timeSyncResHeader,
-			.data = static_cast<uint8_t>(serverSteadyNow)
-		};
-		NetSendRequestQueue.Emplace(packet);
+		RawBuffer buf{};
+		tomato::NetBitWriter writer{ &buf };
+		writer.WriteInt(static_cast<uint16_t>(0), std::numeric_limits<uint16_t>::max());
+		writer.WriteInt(static_cast<uint16_t>(TCPPacketType::TIME_SYNC_RES), static_cast<uint16_t>(TCPPacketType::COUNT));
+		writer.WriteInt(static_cast<uint32_t>(serverSteadyNow), std::numeric_limits<ServerTimeMs>::max());
+
+		uint16_t size = writer.GetByteSize();
+		// WARNING:
+		// Packet size must be the first field in the buffer.
+		// Overwriting this value may behave differently depending on platform/endianness.
+		memcpy(buf.data(), &size, sizeof(uint16_t));
+	
+		sessionMgr_.AppendSendBuffer(client, buf.data(), size);
+
+		break;
 	}
 	}
-}
-
-void NetworkService::ProcessPacketRequest(tomato::NetBitReader& reader, tomato::TCPSocketPtr& client)
-{
-	//패킷 읽어서 해석 x 그냥 리퀘스트 커맨드 구조체로 큐에 넣어줌
-	uint8_t tAction = -1;
-	MatchRequestAction action = MatchRequestAction::NONE;
-
-	reader.ReadInt(tAction, static_cast<uint8_t>(MatchRequestAction::COUNT));
-	action = static_cast<MatchRequestAction>(tAction);
-	//std::cout << int(tAction) << '\n';
-	MatchRequestCommand reqCommand{ client, testMatchId, action }; // 0, 0 -> client
-	MatchRequestQueue.Emplace(reqCommand);
 }
 
 void NetworkService::ProcessQueuedPackets()
@@ -169,37 +189,31 @@ void NetworkService::ProcessQueuedPackets()
 	while (!TCPRecvQueue.Empty())
 	{
 		//std::cout << __FUNCTION__ << '\n';
-		TCPPacket nextPacket;
+		PacketPtr nextPacket;
 		TCPRecvQueue.Dequeue(nextPacket);
 
-		TCPHeader header;
-		uint16_t packetLen, type;
-		tomato::NetBitReader reader(nextPacket.buffer.data(), nextPacket.size());
+		uint16_t type;
+		tomato::NetBitReader reader(nextPacket->buffer.data(), nextPacket->size());
 
-		reader.ReadInt(packetLen, std::numeric_limits<uint16_t>::max());
 		reader.ReadInt(type, static_cast<uint16_t>(TCPPacketType::COUNT));
+		std::cout << int(type) << '\n';
 
-		header.size = packetLen;
-		header.type = static_cast<TCPPacketType>(type);
-		std::cout << int(packetLen) << ", " << int(type) << '\n';
-
-		ProcessPacket(header, reader, nextPacket.client);
+		ProcessPacket(static_cast<TCPPacketType>(type), reader, nextPacket->sessionId);
 	}
 }
 
-void NetworkService::ProcessDataFromClient(const tomato::TCPSocketPtr& client, const uint8_t* data, const int len)
+void NetworkService::ProcessDataFromClient(const SessionId& sessionId, const uint8_t* data, const int len)
 {
 	//socket에 따라 세션에 지정된 vector에 데이터스트림 추가
-	if (!sessionMgr_.ValidateSession(client))
+	if (!sessionMgr_.ValidateSession(sessionId))
 		return;
 	
 	//client buffer에 데이터스트림 누적 후, 추출할 사이즈만큼 쌓이면 추출 후 큐에 emplace
-	std::vector<uint8_t> buf;
-	if (sessionMgr_.AppendRecvBuffer(client, data, len, buf))
-	{
-		//TCPPacket packet{ buf.data(), len, client};
-		TCPRecvQueue.Emplace(buf.data(), len, client);
-	}
+	auto packet = sessionMgr_.AppendRecvBuffer(sessionId, data, len);
+	if (packet == nullptr)
+		return;
+
+	TCPRecvQueue.Emplace(std::move(packet));
 }
 
 void NetworkService::TCPRecvThreadLoop()
@@ -230,11 +244,12 @@ void NetworkService::TCPRecvThreadLoop()
 			}
 			else
 			{
+				SessionId id = sessionMgr_.GetSessionId(socket);
 				uint8_t segment[MAX_PACKET_SIZE];
 				int dataReceived = socket->Receive(segment, MAX_PACKET_SIZE);
 
 				if (dataReceived > 0)
-					ProcessDataFromClient(socket, segment, dataReceived);
+					ProcessDataFromClient(id, segment, dataReceived);
 			}
 		}
 	}
