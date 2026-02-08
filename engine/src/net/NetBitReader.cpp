@@ -4,11 +4,11 @@
 
 namespace tomato
 {
-    NetBitReader::NetBitReader(uint8_t* const buffer, const int16_t byteSize)
+    NetBitReader::NetBitReader(uint8_t* const in, const int16_t byteSize)
     {
         if (byteSize <= MAX_PACKET_SIZE)
         {
-            buffer_ = buffer;
+            buffer_ = in;
             byteNum_ = byteSize;
             bitPos_ = 0;
         }

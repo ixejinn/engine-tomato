@@ -20,11 +20,11 @@ namespace tomato
     {
     public:
         /**
-         * @param buffer Pointer to a raw byte buffer received from the network.
+         * @param in Pointer of raw byte buffer received from the network.
          * @param byteSize Size of the valid data in bytes. Must not exceed MAX_PACKET_SIZE
          * @note MAX_PACKET_SIZE is defined in tomato/services/network/CoreNetwork.h
          */
-        NetBitReader(uint8_t* buffer, int16_t byteSize);
+        NetBitReader(uint8_t* in, int16_t byteSize);
 
         /**
          * @brief Reads an integer value encoded with the range [0, maxValue)
