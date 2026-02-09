@@ -5,17 +5,17 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "tomato/Engine.h"
-#include "tomato/ecs/World.h"
+#include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Transform.h"
 
 #include "tomato/ecs/SystemRegistry.h"
-REGISTER_SYSTEM(tomato::SystemType::INTEGRATOR, TransformSystem)
+REGISTER_SYSTEM(tomato::SystemPhase::INTEGRATOR, TransformSystem)
 
 namespace tomato
 {
     void TransformSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        auto view = engine.GetWorld().View<PositionComponent, RotationComponent, ScaleComponent, WorldMatrixComponent>();
+        auto view = engine.GetWorld().GetRegistry().view<PositionComponent, RotationComponent, ScaleComponent, WorldMatrixComponent>();
 
         for (auto [e, pos, rot, scl, mat] : view.each())
         {

@@ -1,35 +1,43 @@
 #include "TestState.h"
+#include "tomato/tomato.h"
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
 #include "tomato/ecs/components/Sprite.h"
-#include "tomato/containers/RingArray.h"
 #include <iostream>
 
 void TestState::Init(tomato::World& world)
 {
-    const auto entity = world.Create();
+    tmt::Registry& registry = world.GetRegistry();
 
-    world.Emplace<tomato::PositionComponent>(entity);
-    world.Emplace<tomato::RotationComponent>(entity);
-    world.Emplace<tomato::ScaleComponent>(entity, (glm::vec3{ 190.f, 191.f, 1.f }));
-    world.Emplace<tomato::WorldMatrixComponent>(entity);
+    const auto me = world.CreateEntity();
 
-    world.Emplace<tomato::SpeedComponent>(entity, (float)50.f);
+    registry.emplace<tomato::PositionComponent>(me);
+    registry.emplace<tomato::RotationComponent>(me);
+    registry.emplace<tomato::ScaleComponent>(me, (glm::vec3{190.f, 191.f, 1.f }));
+    registry.emplace<tomato::WorldMatrixComponent>(me);
 
-    world.Emplace<tomato::InputChannelComponent>(entity, (uint8_t)1);
-    world.Emplace<tomato::MovementComponent>(entity);
+    registry.emplace<tomato::SpeedComponent>(me, (float)50.f);
 
-    world.Emplace<tomato::SpriteComponent>(entity, (uint16_t)0, (uint16_t)0);
+    registry.emplace<tomato::InputChannelComponent>(me, (uint8_t)0);
+    registry.emplace<tomato::JumpComponent>(me);
 
-    //RingArray Test code
-    //tomato::RingArray<int, 4> testRing;
-    //for (int i = 0; i < 10; i++)
-    //{
-    //    testRing[i] = i;
-    //    std::cout << testRing[i] << std::endl;
-    //}
+    registry.emplace<tomato::SpriteComponent>(me, (uint16_t)0, (uint16_t)0);
+
+    const auto other = world.CreateEntity();
+
+    registry.emplace<tomato::PositionComponent>(other);
+    registry.emplace<tomato::RotationComponent>(other);
+    registry.emplace<tomato::ScaleComponent>(other, (glm::vec3{190.f, 191.f, 1.f }));
+    registry.emplace<tomato::WorldMatrixComponent>(other);
+
+    registry.emplace<tomato::SpeedComponent>(other, (float)50.f);
+
+    registry.emplace<tomato::InputChannelComponent>(other, (uint8_t)1);
+    registry.emplace<tomato::JumpComponent>(other);
+
+    registry.emplace<tomato::SpriteComponent>(other, (uint16_t)0, (uint16_t)0);
 }
 
 void TestState::Exit() {}

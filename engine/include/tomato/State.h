@@ -5,6 +5,9 @@ namespace tomato
 {
     class World;
 
+    /**
+     * @brief Base interface for states.
+     */
     class State
     {
     public:

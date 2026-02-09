@@ -5,13 +5,13 @@
 
 #include "tomato/ecs/systems/RenderSystem.h"
 #include "tomato/Engine.h"
-#include "tomato/ecs/World.h"
+#include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Sprite.h"
 #include "tomato/ecs/components/Transform.h"
 //#include "tomato/ecs/components/Camera.h"
 
 #include "tomato/ecs/SystemRegistry.h"
-REGISTER_SYSTEM(tomato::SystemType::RENDER, RenderSystem)
+REGISTER_SYSTEM(tomato::SystemPhase::RENDER, RenderSystem)
 namespace tomato
 {
 	RenderSystem::RenderSystem()
@@ -91,7 +91,7 @@ namespace tomato
 	{
 		//TMT_LOG << "const Render Update";
 
-		auto view = engine.GetWorld().View<SpriteComponent, WorldMatrixComponent>();
+		auto view = engine.GetWorld().GetRegistry().view<SpriteComponent, WorldMatrixComponent>();
 		for (auto [e, sprite, mtx] : view.each())
 		{
 			//TMT_LOG << sprite.shader_id << "," << sprite.texture_id;
@@ -132,7 +132,7 @@ namespace tomato
 	//		matProj = cam.projection;
 	//	}
 
-	//	for (auto [e, sprite, mtx] : view.each())
+	//	for (auto [e, sprite, mtx_] : view.each())
 	//	{
 	//		//TMT_LOG << sprite.shader_id << "," << sprite.texture_id;
 
@@ -141,7 +141,7 @@ namespace tomato
 	//		//std::cout << "Matrix:" << std::endl;
 	//		//for (int i = 0; i < 4; i++) {
 	//		//	for (int j = 0; j < 4; j++) {
-	//		//		std::cout << mtx.matrix[i][j] << " ";
+	//		//		std::cout << mtx_.matrix[i][j] << " ";
 	//		//	}
 	//		//	std::cout << std::endl;
 	//		//}
@@ -160,7 +160,7 @@ namespace tomato
 
 	//			GLint uniform_var_loc1 = glGetUniformLocation(shader->GetID(), "model");
 	//			if (uniform_var_loc1 >= 0)
-	//				glUniformMatrix4fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mtx.matrix));
+	//				glUniformMatrix4fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mtx_.matrix));
 	//			else
 	//				TMT_ERR << "Uniform variable doesn't exist";
 

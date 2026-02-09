@@ -2,7 +2,6 @@ set(ENGINE_HEADERS
         include/tomato/DefaultState.h
         include/tomato/Engine.h
         include/tomato/Logger.h
-        include/tomato/SimulationContext.h
         include/tomato/State.h
         include/tomato/tomato.h
         include/tomato/ecs/SystemManager.h
@@ -22,9 +21,8 @@ set(ENGINE_HEADERS
         include/tomato/render/Mesh.h
         include/tomato/render/Shader.h
         include/tomato/render/Texture.h
-        include/tomato/services/PlayerInputTimeline.h
         include/tomato/services/InputService.h
-        include/tomato/services/InputTypes.h
+        include/tomato/input/InputTypes.h
         include/tomato/services/WindowService.h
         include/tomato/services/network/CoreNetwork.h
         include/tomato/services/network/Socket.h
@@ -43,14 +41,22 @@ set(ENGINE_HEADERS
         include/tomato/net/NetMessage.h
         include/tomato/net/InputNetMessage.h
         include/tomato/containers/SPSCQueue.h
-        include/tomato/containers/RingBuffer.h
         include/tomato/EngineConfig.h
         include/tomato/net/rollback/RollbackSlice.h
-        include/tomato/net/rollback/RollbackSliceTimeline.h
-        include/tomato/tomato_types.h
+        include/tomato/net/rollback/RollbackManager.h
+        include/tomato/ecs/tomato_ecs.h
+        include/tomato/net/rollback/CoreRollback.h
+        include/tomato/containers/Timeline.h
+        include/tomato/tomato_sim.h
+        include/tomato/input/InputRecorder.h
+        include/tomato/containers/EnumArray.h
+        include/tomato/input/InputConstants.h
+        include/tomato/input/InputRecord.h
+        include/tomato/tomato_math.h
         include/tomato/services/network/SocketUtil.h
         include/tomato/services/network/WinsockContext.h
-        include/tomato/tomato_packet_types.h)
+        include/tomato/tomato_packet_types.h
+)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -78,6 +84,7 @@ set(ENGINE_SOURCES
         src/net/NetBitReader.cpp
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
+        src/input/InputRecorder.cpp
 )
 
 set(EXTERNAL_SOURCES
@@ -90,7 +97,11 @@ add_library(engine STATIC
         ${EXTERNAL_SOURCES}
 )
 
-target_compile_definitions(engine PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_definitions(engine
+        PUBLIC
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+)
 
 target_include_directories(engine
         PUBLIC

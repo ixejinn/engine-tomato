@@ -5,6 +5,7 @@
 
 namespace tomato
 {
+    /// Empty state.
     class DefaultState : public State
     {
     public:

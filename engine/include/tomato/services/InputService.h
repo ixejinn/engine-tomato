@@ -1,38 +1,37 @@
 #ifndef TOMATO_INPUTSERVICE_H
 #define TOMATO_INPUTSERVICE_H
 
-#include <cstdint>
-#include <array>
-#include <GLFW/glfw3.h>
-#include "tomato/services/InputTypes.h"    // InputRecord prev_, curr_
+#include <queue>
+#include <vector>
+#include "tomato/input/InputTypes.h"    // KeyEvent
+
+struct GLFWwindow;
 
 namespace tomato
 {
-    enum Move : uint8_t
-    {
-        UP = 0,
-        DOWN,
-        LEFT,
-        RIGHT,
-        JUMP
-    };
+    class WindowService;
 
+    /**
+     * @brief Translates raw platform input into engine-level input actions.
+     *
+     * 플랫폼 레이어에서 전달된 원시 입력 값을 엔진이 사용하는 의미 있는 입력 값으로 변환한다.
+     */
     class InputService
     {
     public:
-        const InputRecord& GetCurrInputRecord() const { return curr_; }
+        explicit InputService(WindowService& window);
 
-        // for edge key event pressed & released
-        void BeginFrame() { prev_ = curr_; }
+        static Key ConvertKeyGLFW(int glfwKey);
+        static KeyAction ConvertActionGLFW(int glfwAction);
 
-        void UpdateRecord(GLFWwindow* window, uint32_t tick);
+        void DrainKeyEvents(std::vector<KeyEvent>& out);
 
     private:
-        static constexpr std::array<int, 5> MOVE_KEYS{GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D, GLFW_KEY_SPACE};
+        static void EnqueueKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
 
-        InputRecord prev_;
-        InputRecord curr_;
+        std::queue<KeyEvent> keyEvents_;
     };
 }
+
 
 #endif //TOMATO_INPUTSERVICE_H

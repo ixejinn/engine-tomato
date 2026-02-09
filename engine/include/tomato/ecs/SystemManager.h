@@ -1,17 +1,25 @@
 #ifndef TOMATO_SYSTEMMANAGER_H
 #define TOMATO_SYSTEMMANAGER_H
 
+#include <array>
 #include <vector>
 #include <memory>
+
+#include "tomato/containers/EnumArray.h"
+#include "tomato/tomato_sim.h"
 
 namespace tomato
 {
     class Engine;
     class System;
     class World;
-    class SimContext;
-    class PlayerInputTimeline;
 
+    /**
+     * @brief Manages lifecycle, execution, and update order of all systems.
+     *
+     * 시스템 객체를 생성하고 소유하며, 각 시스템의 업데이트 함수를 호출해 컴포넌트 갱신을 수행하는 클래스.
+     * 시스템의 업데이트 순서를 결정한다.
+     */
     class SystemManager
     {
     public:
@@ -22,14 +30,21 @@ namespace tomato
         void Render(const Engine& engine, const SimContext& ctx);
 
     private:
-        std::vector<std::unique_ptr<System>> controllers_;
-        std::vector<std::unique_ptr<System>> integrators_;
-        std::vector<std::unique_ptr<System>> collisions_;
-        std::vector<std::unique_ptr<System>> gameRules_;
-        std::vector<std::unique_ptr<System>> spawners_;
+        using SystemPtr = std::unique_ptr<System>;
 
-        std::vector<std::unique_ptr<System>> renderers_;
-        std::vector<std::unique_ptr<System>> camera_;
+        static constexpr SystemPhase simulationOrder_[] =
+                {
+                SystemPhase::CONTROLLER,
+                SystemPhase::INTEGRATOR
+                };
+
+        static constexpr SystemPhase renderOrder_[] =
+                {
+                SystemPhase::RENDER,
+                SystemPhase::CAMERA
+                };
+
+        EnumArray<SystemPhase, std::vector<SystemPtr>> systems_;
     };
 }
 

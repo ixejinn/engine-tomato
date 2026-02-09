@@ -4,20 +4,21 @@
 
 namespace tomato
 {
-    NetBitReader::NetBitReader(uint8_t* const buffer, const int16_t byteSize)
+    NetBitReader::NetBitReader(uint8_t* const in, const int16_t byteSize)
     {
         if (byteSize <= MAX_PACKET_SIZE)
         {
-            buffer_ = buffer;
+            buffer_ = in;
             byteNum_ = byteSize;
             bitPos_ = 0;
         }
+        else
+            TMT_ERR << "byteSize exceeds MAX_PACKET_SIZE";
     }
 
     uint32_t NetBitReader::DeserializeInt(const uint32_t maxValue)
     {
         if (bitPos_ < 0)
-
         {
             TMT_ERR << "Invalid BitReader";
             return 0;
