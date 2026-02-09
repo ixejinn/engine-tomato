@@ -11,12 +11,30 @@
 
 namespace tomato
 {
-#ifdef __cpp_lib_hardware_interference_size
-	constexpr std::size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
-#else
-	constexpr std::size_t CACHE_LINE_SIZE = 64;
-#endif
-	
+	/**
+	* Single Producer Singlce Consumer lock-free queue.
+	* Designed to avoid lock contention and frame delay caused by mutex.
+	* Only one thread may call Enqueue/Emplace,
+	* and only one other thread may call Dequeue.
+	* 
+	* Fixed size ring buffer using power-of-two size.
+	* Index is wrapped by bit mask for fast modulo.
+	*/
+
+	/**
+	* Enqueue vs Emplace
+	* Enqueue : create object first, then move into queue.
+	* Emplace : create object directly inside queue memory.
+	*/
+
+
+	/**
+	* NOTE:
+	* 64 bytes is the cache line size on all mainstream x86/ARM CPUs,
+	* so we intentionally fix it for ABI stability.
+	*/
+	inline constexpr std::size_t CACHE_LINE_SIZE = 64;
+
 	template<typename T, std::size_t sizeT>
 	class SPSCQueue
 	{
@@ -29,6 +47,9 @@ namespace tomato
 		{
 			size_t read = read_.load(std::memory_order_relaxed);
 			size_t write = write_.load(std::memory_order_relaxed);
+
+			// Destroy remaining objects in queue.
+			// Needed because objects are created with placement new.
 			while (read != write)
 			{
 				auto* item = reinterpret_cast<T*>(&cells_[read & mask_].buffer_);
@@ -37,6 +58,14 @@ namespace tomato
 			}
 		}
 
+		/**
+		* Push already constructed object into queue.
+		* This moves the object into internal buffer.
+		* 
+		* write index uses release,
+		* read index uses acquire to quarantee visibility
+		* between producer and consumer thread.
+		*/
 		bool Enqueue(T item)
 		{
 			const auto write = write_.load(std::memory_order_relaxed);
@@ -76,6 +105,10 @@ namespace tomato
 			return true;
 		}
 
+		/**
+		* Construct object directly inside queue buffer.
+		* Avoids temporary object and extra move.
+		*/
 		template<typename... Args>
 		bool Emplace(Args&&... args)
 		{
@@ -95,8 +128,27 @@ namespace tomato
 			return true;
 		}
 
+		const T* Front() const
+		{
+			auto read = read_.load(std::memory_order_acquire);
+			auto write = write_.load(std::memory_order_acquire);
+
+			if (read == write)
+				return nullptr;
+
+			const auto index = read & mask_;
+			return reinterpret_cast<const T*>(cells_[index].buffer_);
+		}
+
 		bool Empty() const { return write_.load(std::memory_order_acquire) == read_.load(std::memory_order_acquire); }
-		const std::size_t GetSize() const { return sizeT; }
+		const std::size_t Capacity() const { return sizeT; }
+		const std::size_t Size() const
+		{ 
+			const auto write = write_.load(std::memory_order_relaxed);
+			auto read = read_.load(std::memory_order_acquire);
+
+			return write - read;
+		}
 	
 	#ifdef _DEBUG
 		const T* DebugReadValue() const
@@ -114,8 +166,11 @@ namespace tomato
 			alignas(T) std::byte buffer_[sizeof(T)];
 		};
 		
+		// size if power of two, so index wrap can be done with bit mask.
 		static constexpr std::size_t mask_ = sizeT - 1;
 
+		// Separate read and write index into different cache lines
+		// to avoid false sharing between threads.
 		alignas(CACHE_LINE_SIZE) std::atomic<size_t> write_ = 0;
 		alignas(CACHE_LINE_SIZE) std::atomic<size_t> read_ = 0;
 
