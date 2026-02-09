@@ -1,0 +1,16 @@
+add_executable(matchserver
+        src/main.cpp
+        src/MatchServer.cpp
+        src/Match.cpp
+        src/MatchManager.cpp
+        src/SessionManager.cpp
+        src/NetworkService.cpp "src/Session.cpp")
+
+target_link_libraries(matchserver
+        PRIVATE
+        engine
+)
+target_include_directories(matchserver
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)

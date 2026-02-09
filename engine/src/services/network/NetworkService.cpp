@@ -10,7 +10,6 @@ namespace tomato
 	NetworkService::NetworkService(Engine& engine)
     : engine_(engine), playerID_(0)
     {
-        Socket::InitWinsock();
         InitSocket();
 
         playerToName[0] = "yejin";
@@ -28,7 +27,6 @@ namespace tomato
 
     NetworkService::~NetworkService()
     {
-        Socket::CleanUp();
     }
 
     // !!! FOR TEST !!!
@@ -64,8 +62,13 @@ namespace tomato
 	
 	bool NetworkService::InitSocket()
 	{
-		socket_ = Socket::CreateSocket();
+		/**
+        * Create UDP socket for game networking.
+        * If this fails, network service cannot start.
+        */
+        socket_ = Socket::CreateSocket();
 
+        // INADDR_ANY allows receiving packets from any Network Interface Controller.
 		uint32_t port = 7777;
 		SocketAddress myAddr((uint32_t)INADDR_ANY, port);
 		socket_->Bind(myAddr);
@@ -81,6 +84,22 @@ namespace tomato
 		return true;
 	}
 
+/*
+    void NetworkService::NetThreadLoop()
+    {
+        SocketAddress fromAddr;
+        isNetThreadRunning_ = true;
+        while (isNetThreadRunning_)
+        {
+            RawBuffer* buffer = bufferPool_.Allocate();
+            int receivedBytes;
+            if (driver_->RecvPacket(buffer, receivedBytes, fromAddr))
+                pendingPackets_.Emplace(buffer, receivedBytes, fromAddr);
+            else
+                bufferPool_.Deallocate(buffer);
+        }
+    }
+*/
     // use network thread
     void NetworkService::Dispatch()
     {

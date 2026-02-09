@@ -24,13 +24,17 @@ set(ENGINE_HEADERS
         include/tomato/services/InputService.h
         include/tomato/input/InputTypes.h
         include/tomato/services/WindowService.h
+        include/tomato/services/network/CoreNetwork.h
         include/tomato/services/network/Socket.h
+        include/tomato/services/network/TCPSocket.h
         include/tomato/services/network/SocketAddress.h
+        include/tomato/services/network/NetConnection.h
+        include/tomato/services/network/NetDriver.h
+        include/tomato/services/network/TCPNetDriver.h
         include/tomato/services/network/NetworkService.h
         include/tomato/serialization/BitReader.h
         include/tomato/serialization/BitWriter.h
         include/tomato/net/NetBitReader.h
-        include/tomato/services/network/CoreNetwork.h
         include/tomato/net/NetBitWriter.h
         include/tomato/containers/MemoryPool.h
         include/tomato/net/NetMessageRegistry.h
@@ -49,6 +53,9 @@ set(ENGINE_HEADERS
         include/tomato/input/InputConstants.h
         include/tomato/input/InputRecord.h
         include/tomato/tomato_math.h
+        include/tomato/services/network/SocketUtil.h
+        include/tomato/services/network/WinsockContext.h
+        include/tomato/tomato_packet_types.h
 )
 
 set(ENGINE_SOURCES
@@ -65,9 +72,13 @@ set(ENGINE_SOURCES
         src/resource/render/Texture.cpp
         src/services/InputService.cpp
         src/services/WindowService.cpp
+        src/services/network/NetDriver.cpp
+        src/services/network/TCPNetDriver.cpp
         src/services/network/NetworkService.cpp
         src/services/network/Socket.cpp
+        src/services/network/TCPSocket.cpp
         src/services/network/SocketAddress.cpp
+        src/services/network/SocketUtil.cpp
         src/serialization/BitReader.cpp
         src/serialization/BitWriter.cpp
         src/net/NetBitReader.cpp

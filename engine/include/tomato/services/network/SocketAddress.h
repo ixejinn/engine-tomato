@@ -1,13 +1,17 @@
-#ifndef TOMATO_SOCKET_ADDRESS_H
+﻿#ifndef TOMATO_SOCKET_ADDRESS_H
 #define TOMATO_SOCKET_ADDRESS_H
 
-//#pragma comment(lib, "ws2_32")
 #include <WinSock2.h>
 #include <string>
 #include <cstdint>
 
 namespace tomato
 {
+	/**
+	* IPv4 기반 sockaddr 래퍼 클래스
+	* - 내부적으로 sockaddr / sockaddr_in 구조를 직접 다루지 않도록 캡슐화
+	* - 주소 표현을 일관되게 유지하기 위한 목적
+	*/
 	class SocketAddress
 	{
 	public:
@@ -19,7 +23,8 @@ namespace tomato
 			GetAsSockAddrIn()->sin_port = htons(inPort);
 		}
 
-
+		// 문자열 형태 IPv4주소 초기화 (ex: "127.0.0.1")
+		// inet_addr 사용 -> IPv6 미지원
 		SocketAddress(const char* inAddress, uint16_t inPort)
 		{
 			GetAsSockAddrIn()->sin_family = AF_INET;
@@ -46,6 +51,8 @@ namespace tomato
 				(GetIPv4Ref() == other.GetIPv4Ref());
 		}
 
+		// unordered_map / unordered_set 사용을 위한 해시 생성
+		// IPv4 / Port / AddressFamily 조합 기반
 		size_t GetHash() const
 		{
 			return (GetIPv4Ref()) |
@@ -55,11 +62,17 @@ namespace tomato
 
 		uint32_t			GetSize()			const { return sizeof(sockaddr); }
 		std::string			ToString()			const;
+		uint32_t			GetIPv4()			const { return ::ntohl(GetAsSockAddrIn()->sin_addr.S_un.S_addr); }
+		uint16_t			GetPort()			const { return ntohs(GetAsSockAddrIn()->sin_port); }
 
 	private:
 		friend class Socket;
+		friend class TCPSocket;
 
 		sockaddr sockAddr_;
+		
+		// sockaddr 내부 IPv4 필드에 대한 직접 참조
+		// reinterpret_cast 사용 -> 구조체 레이아웃 변경 시 위험
 		uint32_t& GetIPv4Ref() { return *reinterpret_cast<uint32_t*>(&GetAsSockAddrIn()->sin_addr.S_un.S_addr); }
 		const uint32_t& GetIPv4Ref()		const { return *reinterpret_cast<const uint32_t*>(&GetAsSockAddrIn()->sin_addr.S_un.S_addr); }
 
@@ -71,6 +84,7 @@ namespace tomato
 
 namespace std
 {
+	// SocketAddress를 unordered_map의 key로 사용하기 위한 hash 특수화
 	template<> struct hash< tomato::SocketAddress >
 	{
 		size_t operator()(const tomato::SocketAddress& inAddress) const
