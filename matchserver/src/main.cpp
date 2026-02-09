@@ -126,7 +126,7 @@ int main()
 		mm.Update(0.016f);
 	}
 	
-#elif 1
+#elif 0
 	ServerTimeMs serverSteadyNow = static_cast<ServerTimeMs>(
 		duration_cast<std::chrono::milliseconds>(
 			std::chrono::steady_clock::now().time_since_epoch()).count());
@@ -156,6 +156,35 @@ int main()
 
 	//cout << int(rb->data()[0]);
 
+#elif 1
+	tomato::TCPSocketPtr sockets[4];
+
+	RawBuffer rawBuffer;
+	tomato::NetBitWriter helloPacket{ &rawBuffer };
+	helloPacket.WriteInt(static_cast<uint16_t>(0), std::numeric_limits<uint16_t>::max());
+	helloPacket.WriteInt(static_cast<uint16_t>(TCPPacketType::MATCH_REQUEST), static_cast<uint16_t>(TCPPacketType::COUNT));
+	uint16_t pSize = helloPacket.GetByteSize();
+	std::memcpy(rawBuffer.data(), &pSize, sizeof(uint16_t));
+
+	for (int i = 0; i < 4; i++)
+	{
+		sockets[i] = tomato::TCPSocket::CreateTCPSocket();
+		sm.GenerateSession(sockets[i], addr[i]);
+		auto packet = sm.AppendRecvBuffer(sm.GetSessionId(sockets[i]), rawBuffer.data(), pSize);
+		if (packet == nullptr)
+		{
+			cout << "nullptr packet\n";
+			continue;
+		}
+
+		ns.AddNetMassage(packet);
+	}
+
+	while (true)
+	{
+		ns.Update(0.016f);
+		mm.Update(0.016f);
+	}
 
 #endif // 0
 

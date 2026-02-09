@@ -4,6 +4,8 @@
 #include <typeinfo>
 #include <string>
 
+#include "tomato/EngineConfig.h"
+#include "tomato/tomato_packet_types.h"
 #include "tomato/services/network/SocketAddress.h"
 
 namespace tomato
@@ -18,15 +20,25 @@ namespace tomato
 	*  - Heartbeat : time when the last packet was received (lastSeenTime)
 	*    If no packet is received for a certain time, the connection is considered lost.
 	*/
-
+	class NetBitWriter;
+	class NetBitReader;
 	struct NetConnection
 	{
-		uint32_t sessionId; 
+		uint32_t sessionId{ 0 };
 
 		uint16_t matchId;
 		uint8_t playerId;
-		std::string name;
+		std::string name{};
 		SocketAddress addr;
+	};
+
+	struct NetConnectionPacket
+	{
+		void Write(NetBitWriter& writer);
+		void Read(NetBitReader& reader);
+
+		static constexpr TCPPacketType type = TCPPacketType::MATCH_INTRO;
+		NetConnection netconn[EngineConfig::MAX_PLAYER_NUM];
 	};
 }
 

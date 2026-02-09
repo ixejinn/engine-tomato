@@ -92,7 +92,8 @@ MatchState Match::RequestToSendNetConnection(tomato::SPSCQueue<SendCommandPtr, 2
 	
 	for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
 	{
-		writer.WriteInt(static_cast<uint8_t>(conn[i].playerId), std::numeric_limits<uint16_t>::max());
+		writer.WriteInt(static_cast<uint8_t>(conn[i].playerId), std::numeric_limits<uint8_t>::max());
+		writer.WriteInt(static_cast<uint16_t>(conn[i].name.size()), std::numeric_limits<uint16_t>::max());
 		for (int j = 0; j < conn[i].name.size(); j++)
 			writer.WriteInt(static_cast<uint8_t>(conn[i].name[j]), std::numeric_limits<uint8_t>::max());
 		writer.WriteInt(static_cast<uint32_t>(conn[i].addr.GetIPv4()), std::numeric_limits<uint32_t>::max());

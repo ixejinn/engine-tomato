@@ -141,8 +141,9 @@ void NetworkService::HandlePacketRequest(const TCPPacketType& header, tomato::Ne
 		MatchRequestQueue.Emplace(client, 0, MatchRequestAction::Enqueue);
 		break;
 
-	case TCPPacketType::MATCH_CANCEL:
 	case TCPPacketType::MATCH_INTRO_SUCCESS:
+
+	case TCPPacketType::MATCH_CANCEL:
 	case TCPPacketType::MATCH_INTRO_FAILED:
 	{
 		MatchId matchId;

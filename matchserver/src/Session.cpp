@@ -21,15 +21,15 @@ namespace TCP
 		uint16_t size;
 		std::memcpy(&size, recvBuffer.data(), sizeof(size));
 
-		const std::size_t totalSize = sizeof(uint16_t) + size;
+		//const std::size_t totalSize = sizeof(uint16_t) + size;
 
-		if (recvBuffer.size() < totalSize)
+		if (recvBuffer.size() < size)
 			return nullptr;
 
 		auto packet = std::make_unique<TCPPacket>(size, id);
 		std::memcpy(packet->buffer.data(), recvBuffer.data() + sizeof(uint16_t), size);
 			
-		recvBuffer.erase(recvBuffer.begin(), recvBuffer.begin() + totalSize);
+		recvBuffer.erase(recvBuffer.begin(), recvBuffer.begin() + size);
 
 		return packet;
 	}

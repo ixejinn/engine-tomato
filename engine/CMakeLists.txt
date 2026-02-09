@@ -85,7 +85,7 @@ set(ENGINE_SOURCES
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
         src/input/InputRecorder.cpp
-)
+ "src/services/network/NetConnection.cpp")
 
 set(EXTERNAL_SOURCES
         external/glad/src/glad.c
@@ -95,7 +95,7 @@ add_library(engine STATIC
         ${ENGINE_HEADERS}
         ${ENGINE_SOURCES}
         ${EXTERNAL_SOURCES}
-)
+ "src/services/network/NetConnection.cpp")
 
 target_include_directories(engine
         PUBLIC
