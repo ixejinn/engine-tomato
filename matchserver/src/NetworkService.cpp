@@ -1,5 +1,4 @@
-﻿#define NOMINMAX
-#include "NetworkService.h"
+﻿#include "NetworkService.h"
 #include "PacketTypes.h"
 
 #include <iostream>

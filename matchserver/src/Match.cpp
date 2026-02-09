@@ -1,5 +1,4 @@
-﻿#define NOMINMAX
-#include "Match.h"
+﻿#include "Match.h"
 #include <iostream>
 #include <tomato/net/NetBitWriter.h>
 

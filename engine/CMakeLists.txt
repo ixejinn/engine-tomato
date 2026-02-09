@@ -97,12 +97,6 @@ add_library(engine STATIC
         ${EXTERNAL_SOURCES}
 )
 
-target_compile_definitions(engine
-        PUBLIC
-        WIN32_LEAN_AND_MEAN
-        NOMINMAX
-)
-
 target_include_directories(engine
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
@@ -130,6 +124,7 @@ target_link_libraries(engine
         glfw
         glm
         EnTT
+        project_options
 
         PRIVATE
         opengl32    # OpenGL

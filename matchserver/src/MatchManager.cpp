@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "MatchManager.h"
 #include <chrono>
 #include <tomato/net/NetBitWriter.h>

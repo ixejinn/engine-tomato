@@ -38,6 +38,14 @@ FetchContent_Declare(entt
 )
 FetchContent_MakeAvailable(entt)
 
+add_library(project_options INTERFACE)
+
+target_compile_definitions(project_options
+        INTERFACE
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+)
+
 add_subdirectory(engine)
 add_subdirectory(contents)
 add_subdirectory(matchserver)
