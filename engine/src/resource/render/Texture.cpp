@@ -1,7 +1,7 @@
-#include "tomato/render/Texture.h"
+#include "tomato/resource/render/Texture.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "stb_image.h"
 
 #include <string>
 #include <iostream>

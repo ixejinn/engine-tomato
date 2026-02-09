@@ -18,9 +18,9 @@ set(ENGINE_HEADERS
         include/tomato/ecs/systems/RenderSystem.h
         include/tomato/ecs/systems/System.h
         include/tomato/ecs/systems/TransformSystem.h
-        include/tomato/render/Mesh.h
-        include/tomato/render/Shader.h
-        include/tomato/render/Texture.h
+        include/tomato/resource/render/Mesh.h
+        include/tomato/resource/render/Shader.h
+        include/tomato/resource/render/Texture.h
         include/tomato/services/InputService.h
         include/tomato/input/InputTypes.h
         include/tomato/services/WindowService.h
@@ -60,9 +60,9 @@ set(ENGINE_SOURCES
         src/ecs/systems/TransformSystem.cpp
         src/ecs/SystemManager.cpp
         src/ecs/SystemRegistry.cpp
-        src/render/Mesh.cpp
-        src/render/Shader.cpp
-        src/render/Texture.cpp
+        src/resource/render/Mesh.cpp
+        src/resource/render/Shader.cpp
+        src/resource/render/Texture.cpp
         src/services/InputService.cpp
         src/services/WindowService.cpp
         src/services/network/NetworkService.cpp

@@ -84,6 +84,19 @@ namespace tomato
 
 		//Textures
 		RegisterTexture("PWLogo", "assets/WATER_GAME_LOGO.png");
+
+//        //나중에 초기화 값 수정할 것
+//        std::vector<Vertex> _vertices = {
+//                {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}}, // 좌하단
+//                {{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}}, // 우하단
+//                {{ 0.5f,  0.5f, 0.0f}, {1.0f, 1.0f}}, // 우상단
+//                {{-0.5f,  0.5f, 0.0f}, {0.0f, 1.0f}}, // 좌상단
+//        };
+//
+//        std::vector<unsigned int> _indices = {
+//                0, 1, 2,  // 첫 번째 삼각형
+//                2, 3, 0   // 두 번째 삼각형
+//        };
 	}
 
 	void RenderSystem::Update(Engine& engine, const SimContext& ctx) { TMT_LOG << "Render Update";  }
