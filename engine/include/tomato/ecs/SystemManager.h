@@ -27,7 +27,7 @@ namespace tomato
         ~SystemManager();
 
         void Simulate(Engine& engine, const SimContext& ctx);
-        void Render(const Engine& engine, const SimContext& ctx);
+        void Render(Engine& engine, const SimContext& ctx);
 
     private:
         using SystemPtr = std::unique_ptr<System>;

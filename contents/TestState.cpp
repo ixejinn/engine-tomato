@@ -4,7 +4,7 @@
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
-#include "tomato/ecs/components/Sprite.h"
+#include "tomato/ecs/components/Render.h"
 #include <iostream>
 
 void TestState::Init(tomato::World& world)

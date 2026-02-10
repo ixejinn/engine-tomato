@@ -1,5 +1,27 @@
-#ifndef TOMATO_RENDER_H
-#define TOMATO_RENDER_H
+#ifndef TOMATO_RENDERSYSTEM_H
+#define TOMATO_RENDERSYSTEM_H
+
+#include "tomato/ecs/systems/System.h"
+#include <glad/glad.h>
+
+namespace tomato
+{
+    class RenderSystem : public System
+    {
+    public:
+        RenderSystem();
+
+        void Update(Engine& engine, const SimContext& ctx) override;
+
+    private:
+        void Init();
+
+        GLuint curShader_{0};
+    };
+}
+
+
+
 
 #include <unordered_map>
 #include <atomic>
@@ -58,4 +80,4 @@ namespace tomato
 	};
 }
 
-#endif
+#endif //TOMATO_RENDERSYSTEM_H

@@ -2,7 +2,6 @@
 #include "tomato/ecs/SystemRegistry.h"
 #include "tomato/Engine.h"
 #include "tomato/ecs/systems/System.h"
-#include "tomato/ecs/systems/RenderSystem.h"
 #include "tomato/ecs/World.h"
 #include "tomato/tomato_sim.h"
 
@@ -36,11 +35,8 @@ namespace tomato
         }
     }
 
-    void SystemManager::Render(const Engine& engine, const SimContext& ctx)
+    void SystemManager::Render(Engine& engine, const SimContext& ctx)
     {
-        // TODO: 나중에 빼기!!!!!
-        glClear(GL_COLOR_BUFFER_BIT);
-
         for (SystemPhase phase : renderOrder_)
         {
             for (auto& system : systems_[phase])

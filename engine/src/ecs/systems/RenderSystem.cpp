@@ -1,3 +1,38 @@
+#include "tomato/ecs/systems/RenderSystem.h"
+#include "tomato/ecs/components/Transform.h"
+#include "tomato/ecs/components/Render.h"
+#include "tomato/ecs/World.h"
+#include "tomato/Engine.h"
+#include "tomato/Logger.h"
+
+#include "tomato/ecs/SystemRegistry.h"
+REGISTER_SYSTEM(tomato::SystemPhase::RENDER, RenderSystem)
+
+namespace tomato
+{
+    RenderSystem::RenderSystem()
+    {
+        Init();
+    }
+
+    void RenderSystem::Update(Engine& engine, const SimContext& ctx)
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        static auto group = engine.GetWorld().GetRegistry().group<PositionComponent, RenderComponent>();
+        //group.sort<> 정렬 조건: 불투명 셰이더(가까운 → 먼) → 투명 셰이더(먼 → 가까운)
+
+        for (auto [e, pos, render] : group.each())
+        {
+            if (curShader_ != render.shader)
+            {
+
+            }
+        }
+    }
+}
+
+
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -6,7 +41,7 @@
 #include "tomato/ecs/systems/RenderSystem.h"
 #include "tomato/Engine.h"
 #include "tomato/tomato_sim.h"
-#include "tomato/ecs/components/Sprite.h"
+#include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Transform.h"
 //#include "tomato/ecs/components/Camera.h"
 

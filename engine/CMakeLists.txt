@@ -10,7 +10,7 @@ set(ENGINE_HEADERS
         include/tomato/ecs/components/Camera.h
         include/tomato/ecs/components/Movement.h
         include/tomato/ecs/components/Rigidbody.h
-        include/tomato/ecs/components/Sprite.h
+        include/tomato/ecs/components/Render.h
         include/tomato/ecs/components/Tags.h
         include/tomato/ecs/components/Transform.h
         include/tomato/ecs/systems/CameraSystem.h
@@ -56,6 +56,7 @@ set(ENGINE_HEADERS
         include/tomato/services/network/SocketUtil.h
         include/tomato/services/network/WinsockContext.h
         include/tomato/tomato_packet_types.h
+        include/tomato/resource/AssetRegistry.h
 )
 
 set(ENGINE_SOURCES
@@ -85,6 +86,7 @@ set(ENGINE_SOURCES
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
         src/input/InputRecorder.cpp
+        src/ecs/World.cpp
 )
 
 set(EXTERNAL_SOURCES

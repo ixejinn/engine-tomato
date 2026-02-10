@@ -13,12 +13,16 @@ namespace tomato
     class World
     {
     public:
+        World();
+
         Registry& GetRegistry() { return registry_; }
         const Registry& GetRegistry() const { return registry_; }
 
         Entity CreateEntity() { return registry_.create(); }
 
     private:
+        void Init();
+
         Registry registry_;
     };
 }
