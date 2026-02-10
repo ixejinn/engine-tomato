@@ -18,16 +18,7 @@ namespace tomato
 {
     class Engine;
 
-    struct Packet
-    {
-        RawBuffer* buffer{nullptr};
-        std::size_t size;
-        SocketAddress addr;
-
-        Packet() = default;
-        Packet(RawBuffer* bufPtr, std::size_t size, SocketAddress addr)
-        : buffer(bufPtr), size(size), addr(addr) {}
-    };
+    
 
 	class NetworkService
 	{

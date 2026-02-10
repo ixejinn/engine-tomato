@@ -25,8 +25,7 @@ public:
 
 	MatchState CollectNetConnection(const MatchRequest* matchRequest);
 	MatchState RequestToSendNetConnection(tomato::SPSCQueue<SendCommandPtr, 256>& sendRequestQ, const MatchRequest* matchRequest);
-	MatchState ProcessIntroResult(tomato::SPSCQueue<MatchRequestCommand, 128>& MatchRequestQ);
-
+	
 	void SetPeerAck(int idx, int set);
 	
 	const int GetPlayerId(const SessionId& client) const;
@@ -41,7 +40,7 @@ private:
 	
 	std::bitset<MatchConstants::MAX_MATCH_PLAYER> peerAck;
 
-	float timer_; //check for waiting, timeout
+	float timer_{ 0.f }; //check for waiting, timeout
 };
 
 #endif // !MATCH_H

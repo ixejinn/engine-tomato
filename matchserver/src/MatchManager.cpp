@@ -83,11 +83,13 @@ void MatchManager::HandleCancel(const SessionId& client)
 
 void MatchManager::HandleIntroResult(const SessionId& client, MatchId& matchId, const int& set)
 {
+	
 	auto it = matches.find(matchId);
 	if (it != matches.end())
 	{
 		int idx = it->second.GetPlayerId(client);
 		if (idx < 0) return;
+		std::cout << __FUNCTION__ << '\n';
 		it->second.SetPeerAck(idx, set);
 	}
 }
@@ -160,7 +162,7 @@ void MatchManager::ProcessMatchResult(float dt)
 		{
 			//SendPacket for game start
 			//then, Remove from matches
-
+			std::cout << "Match ReadyToStart\n";
 			ServerTimeMs serverSteadyTime = static_cast<ServerTimeMs>(
 				duration_cast<std::chrono::milliseconds>(
 					std::chrono::steady_clock::now().time_since_epoch()

@@ -1,7 +1,7 @@
 ﻿#include "Match.h"
 #include <iostream>
 #include <tomato/net/NetBitWriter.h>
-
+#include "SessionManager.h" //for test
 Match::Match(const MatchContext& ctx) : ctx_(ctx), timer_(0.f) {}
 
 MatchUpdateResult Match::Update(float dt, tomato::SPSCQueue<SendCommandPtr, 256>& sendRequestQ)
@@ -29,7 +29,8 @@ MatchUpdateResult Match::Update(float dt, tomato::SPSCQueue<SendCommandPtr, 256>
 	{
 	// 모든 피어들의 피어간 연결 성공 패킷이 다 도착할 때까지 대기
 	// 일정 시간이 지나면 timeout으로 Failed 처리
-		std::cout << "WaitPeerReady" << '\n';
+		//std::cout << "WaitPeerReady" << '\n';
+		//std::cout << timer_ << '\n';
 		if (peerAck.all())
 		{
 			ctx_.state = MatchState::AllReady;
@@ -38,26 +39,24 @@ MatchUpdateResult Match::Update(float dt, tomato::SPSCQueue<SendCommandPtr, 256>
 
 		if (timer_ >= MatchConstants::CONNECT_TIMEOUT_SEC)
 		{
+			//std::cout << "TIMEOUT\n";
 			peerAck.reset();
 			ctx_.state = MatchState::Failed;
 			return MatchUpdateResult::Failed;
 		}
-		else
-		{
-			ctx_.state = MatchState::AllReady;
-			return MatchUpdateResult::ReadyToStart;
-		}
+
+		return MatchUpdateResult::None;
 	}
 
 	case MatchState::Failed:
 		std::cout << "Failed" << '\n';
 		ctx_.state = MatchState::Processing;
-		break;
+		return MatchUpdateResult::Failed;
 
 	case MatchState::AllReady:
 		std::cout << "Done" << '\n';
 		ctx_.state = MatchState::Processing;
-		break;
+		return MatchUpdateResult::ReadyToStart;
 	}
 
 	return MatchUpdateResult::None;
@@ -73,11 +72,17 @@ MatchState Match::CollectNetConnection(const MatchRequest* matchRequest)
 		(conn + i)->name = "name";
 
 		int len{};
-		tomato::SocketAddress address;
-		if ((matchRequest + i)->socket->GetSocketAddress(address, len) == 0)
-			(conn + i)->addr = address;
-		else
-			return MatchState::Failed;
+		//tomato::SocketAddress address;
+		//if ((matchRequest + i)->socket->GetSocketAddress(address, len) == 0)
+		//	(conn + i)->addr = address;
+		//else
+		//	return MatchState::Failed;
+		tomato::SocketAddress addr[4];
+		addr[0] = { "192.168.55.165", 7777 };
+		addr[1] = { "192.168.55.166", 7777 };
+		addr[2] = { "192.168.55.167", 7777 };
+		addr[3] = { "192.168.55.168", 7777 };
+		(conn + i)->addr = addr[i];
 	}
 	return MatchState::InfoSent;
 }
@@ -111,12 +116,6 @@ MatchState Match::RequestToSendNetConnection(tomato::SPSCQueue<SendCommandPtr, 2
 	}
 
 	return MatchState::WaitPeerReady;
-}
-
-MatchState Match::ProcessIntroResult(tomato::SPSCQueue<MatchRequestCommand, 128>& MatchRequestQ)
-{
-	
-	return MatchState();
 }
 
 const int Match::GetPlayerId(const SessionId& client) const

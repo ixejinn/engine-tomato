@@ -10,7 +10,7 @@
 namespace MatchConstants
 {
 	constexpr int			MAX_MATCH_PLAYER = 4;
-	constexpr float			CONNECT_TIMEOUT_SEC = 2.0f;
+	constexpr float			CONNECT_TIMEOUT_SEC = 5000.0f;
 	constexpr ServerTimeMs	START_SERVER_TIME = 10000;
 }
 
