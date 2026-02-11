@@ -2,21 +2,18 @@
 #define TOMATO_RENDERSYSTEM_H
 
 #include "tomato/ecs/systems/System.h"
-#include <glad/glad.h>
+#include "tomato/resource/tomato_resource.h"
 
 namespace tomato
 {
     class RenderSystem : public System
     {
     public:
-        RenderSystem();
-
         void Update(Engine& engine, const SimContext& ctx) override;
 
     private:
-        void Init();
-
-        GLuint curShader_{0};
+        AssetId curShader_{0};
+        AssetId curMesh_{0};
     };
 }
 

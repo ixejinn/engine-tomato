@@ -10,11 +10,6 @@ REGISTER_SYSTEM(tomato::SystemPhase::RENDER, RenderSystem)
 
 namespace tomato
 {
-    RenderSystem::RenderSystem()
-    {
-        Init();
-    }
-
     void RenderSystem::Update(Engine& engine, const SimContext& ctx)
     {
         glClear(GL_COLOR_BUFFER_BIT);

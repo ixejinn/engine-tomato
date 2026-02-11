@@ -1,5 +1,26 @@
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef TOMATO_SHADER_H
+#define TOMATO_SHADER_H
+
+#include <glad/glad.h>
+
+namespace tomato
+{
+    class Shader
+    {
+    public:
+        Shader(const char* vsName, const char* fsName);
+        ~Shader();
+
+        void Use() const;
+
+        //TODO: 유니폼 함수..
+
+    private:
+        GLuint programId_{0};
+    };
+}
+
+
 
 #include <string>
 #include "glad/glad.h"
@@ -27,4 +48,4 @@ private:
 	void CheckCompileErrors(unsigned int shader, std::string type);
 };
 
-#endif
+#endif //TOMATO_SHADER_H

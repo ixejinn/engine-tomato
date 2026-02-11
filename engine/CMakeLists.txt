@@ -57,6 +57,7 @@ set(ENGINE_HEADERS
         include/tomato/services/network/WinsockContext.h
         include/tomato/tomato_packet_types.h
         include/tomato/resource/AssetRegistry.h
+        include/tomato/resource/tomato_resource.h
 )
 
 set(ENGINE_SOURCES
@@ -87,6 +88,8 @@ set(ENGINE_SOURCES
         src/net/InputNetMessage.cpp
         src/input/InputRecorder.cpp
         src/ecs/World.cpp
+        src/core/State.cpp
+        src/resource/tomato_resource.cpp
 )
 
 set(EXTERNAL_SOURCES

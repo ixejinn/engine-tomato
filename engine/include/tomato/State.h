@@ -11,7 +11,9 @@ namespace tomato
     class State
     {
     public:
-        virtual ~State() = default;
+        //TODO: src/core/State.cpp 수정
+        State();
+        virtual ~State();
 
         virtual void Init(World& world) = 0;
         virtual void Exit() = 0;

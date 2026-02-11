@@ -1,20 +1,18 @@
 #ifndef TOMATO_RENDER_H
 #define TOMATO_RENDER_H
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
+#include "tomato/resource/tomato_resource.h"
 
 namespace tomato
 {
-    // Stores handle of ResourceRegistry
+    // Stores asset ID
     struct RenderComponent
     {
-        uint32_t mesh{0};
-        uint32_t shader{0};
+        AssetId mesh{0};
+        AssetId shader{0};
     };
 
-    struct TextureComponent { uint32_t texture{0}; };
+    struct TextureComponent { AssetId texture{0}; };
 
 	struct SpriteComponent
 	{
