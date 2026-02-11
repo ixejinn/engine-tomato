@@ -27,7 +27,7 @@ namespace tomato
 		uint32_t sessionId{ 0 };
 
 		uint16_t matchId;
-		uint8_t playerId;
+		PlayerId playerId;
 		std::string name{};
 		SocketAddress addr;
 	};

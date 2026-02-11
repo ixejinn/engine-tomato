@@ -22,7 +22,7 @@ public:
 	void Update(float dt);
 
 	void ProcessMatchRequest();
-	void HandleEnqueue(const SessionId& client);
+	void HandleEnqueue(const SessionId& client, const std::string& name);
 	void HandleCancel(const SessionId& client);
 	void HandleIntroResult(const SessionId&, MatchId& matchId, const int& set);
 

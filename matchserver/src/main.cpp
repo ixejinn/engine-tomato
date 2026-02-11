@@ -93,6 +93,8 @@ int main()
 	addr[1] = { "192.168.55.166", 7777 };
 	addr[2] = { "192.168.55.167", 7777 };
 	addr[3] = { "192.168.55.168", 7777 };
+
+	std::string names[4] = { "name1", "name2", "name3", "name4" };
 #if 0
 	RawBuffer rawBuffer;
 	tomato::NetBitWriter helloPacket{ &rawBuffer };
@@ -225,6 +227,9 @@ int main()
 	tomato::NetBitWriter helloPacket{ &rawBuffer };
 	helloPacket.WriteInt(static_cast<uint16_t>(0), std::numeric_limits<uint16_t>::max());
 	helloPacket.WriteInt(static_cast<uint16_t>(TCPPacketType::MATCH_REQUEST), static_cast<uint16_t>(TCPPacketType::COUNT));
+	helloPacket.WriteInt(static_cast<uint16_t>(names[0].size()), std::numeric_limits<uint16_t>::max());
+	for(int i = 0; i < names[0].size(); i++)
+		helloPacket.WriteInt(static_cast<uint8_t>(names[0][i]), std::numeric_limits<uint8_t>::max());
 	uint16_t pSize = helloPacket.GetByteSize();
 	std::memcpy(rawBuffer.data(), &pSize, sizeof(uint16_t));
 
@@ -239,12 +244,12 @@ int main()
 			continue;
 		}
 
-		ns.AddNetMassage(packet);
+		//ns.AddNetMassage(packet);
 	}
 
 	while (true)
 	{
-		PushPacket(sm, ns);
+		//PushPacket(sm, ns);
 		ns.Update(0.016f);
 		mm.Update(0.016f);
 	}

@@ -69,7 +69,7 @@ MatchState Match::CollectNetConnection(const MatchRequest* matchRequest)
 		(conn + i)->sessionId = (matchRequest + i)->sessionId;
 		(conn + i)->matchId = ctx_.matchId;
 		(conn + i)->playerId = i;
-		(conn + i)->name = "name";
+		(conn + i)->name = (matchRequest + i)->name;
 
 		int len{};
 		//tomato::SocketAddress address;

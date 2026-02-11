@@ -12,6 +12,7 @@ void NetworkService::AddNetMassage(PacketPtr& packets)
 
 void NetworkService::Update(float dt)
 {
+	TCPRecvThreadLoop();
 	ProcessQueuedPackets();
 	ProcessNetSendRequest();
 	//ProcessSendPacket();
@@ -156,25 +157,35 @@ void NetworkService::ProcessPacket(const TCPPacketType& header, tomato::NetBitRe
 void NetworkService::HandlePacketRequest(const TCPPacketType& header, tomato::NetBitReader& reader, SessionId& client)
 {
 	//패킷 읽어서 해석 x 그냥 리퀘스트 커맨드 구조체로 큐에 넣어줌
+	uint16_t nameSize{};
+	std::string name{};
+	uint8_t tmp;
+	MatchId matchId{0};
 	switch (header)
 	{
 	case TCPPacketType::MATCH_REQUEST:
-		MatchRequestQueue.Emplace(client, 0, MatchRequestAction::Enqueue);
+	{
+		reader.ReadInt(nameSize, std::numeric_limits<uint16_t>::max());
+		for(int i = 0; i < nameSize; i++)
+		{
+			reader.ReadInt(tmp, std::numeric_limits<uint8_t>::max());
+			name += tmp;
+		}
+		MatchRequestQueue.Emplace(client, name, matchId, MatchRequestAction::Enqueue);
 		break;
+	}
 
 	case TCPPacketType::MATCH_INTRO_SUCCESS:
 	{
-		MatchId matchId;
 		reader.ReadInt(matchId, std::numeric_limits<MatchId>::max());
-		MatchRequestQueue.Emplace(client, matchId, MatchRequestAction::Success);
+		MatchRequestQueue.Emplace(client, name, matchId, MatchRequestAction::Success);
 		break;
 	}
 	case TCPPacketType::MATCH_CANCEL:
 	case TCPPacketType::MATCH_INTRO_FAILED:
 	{
-		MatchId matchId;
 		reader.ReadInt(matchId, std::numeric_limits<MatchId>::max());
-		MatchRequestQueue.Emplace(client, matchId, MatchRequestAction::Cancel);
+		MatchRequestQueue.Emplace(client, name, matchId, MatchRequestAction::Cancel);
 		break;
 	}
 	}
@@ -267,6 +278,7 @@ void NetworkService::TCPRecvThreadLoop()
 				{
 					readBlockSockets.push_back(newSocket);
 					sessionMgr_.GenerateSession(newSocket, newClientAddress);
+					std::cout << "New Connect\n";
 				}
 			}
 			else

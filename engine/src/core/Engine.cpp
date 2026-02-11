@@ -25,7 +25,7 @@ namespace tomato
 
     void Engine::Run()
     {
-        std::thread th(&NetworkService::Dispatch, &network_);
+        //std::thread th(&NetworkService::NetThreadLoop, &network_);
 
         while (!window_.ShouldClose() && isRunning_)
         {
@@ -41,8 +41,8 @@ namespace tomato
                 ChangeState();
         }
 
-        network_.isNetThreadRunning_ = false;
-        th.join();
+        //network_.isNetThreadRunning_ = false;
+        //th.join();
     }
 
     void Engine::SetInputData(uint8_t playerID, const InputRecord &record)
@@ -106,7 +106,7 @@ namespace tomato
 
         while (simLimit--) {
             systemManager_.Simulate(*this, SimContext{tick_});
-            network_.SendPacket(0);
+            network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
             ++tick_;
 
             if (rollbackManager_)

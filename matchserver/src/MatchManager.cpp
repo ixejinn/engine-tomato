@@ -40,7 +40,7 @@ void MatchManager::ProcessMatchRequest()
 		MatchRequestQueue.Dequeue(reqCommand);
 
 		if (reqCommand.action == MatchRequestAction::Enqueue)
-			HandleEnqueue(reqCommand.sessionId);
+			HandleEnqueue(reqCommand.sessionId, reqCommand.name);
 		
 		if (reqCommand.action == MatchRequestAction::Cancel)
 			HandleCancel(reqCommand.sessionId);
@@ -53,11 +53,11 @@ void MatchManager::ProcessMatchRequest()
 	}
 }
 
-void MatchManager::HandleEnqueue(const SessionId& client)
+void MatchManager::HandleEnqueue(const SessionId& client, const std::string& name)
 {
 	MatchRequest mRequest{
-		.socket = nullptr,
 		.sessionId = client,
+		.name = name,
 		.requestId = 0,
 		.enqueueTime = 0,
 		//duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -218,6 +218,7 @@ void MatchManager::ReQueing(const MatchId& matchId)
 			MatchRequest reRequest
 			{
 				.sessionId = (request + i)->sessionId,
+				.name = (request + i)->name,
 				.requestId = (request + i)->requestId,
 				.enqueueTime = static_cast<ServerTimeMs>(
 					duration_cast<std::chrono::milliseconds>(

@@ -24,9 +24,9 @@ namespace tomato
 		~NetDriver();
 
 		bool InitSocket();
-		void SendPacket(uint32_t messageType, const SocketAddress&);
+		bool SendPacket(const void* buffer, int& byteSentCount, const SocketAddress& inToAddress);
 		// Returns true if data was received, false otherwise.
-		bool RecvPacket(RawBuffer*, int, SocketAddress&);
+		bool RecvPacket(void* buffer, int& receivedBytes, SocketAddress& outFromAddress);
 
 	private:
 		SocketPtr socket_;

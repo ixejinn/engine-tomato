@@ -1,7 +1,11 @@
 #ifndef TOMATO_TOMATO_PACKET_TYPES_H
 #define TOMATO_TOMATO_PACKET_TYPES_H
 #include <typeinfo>
+#include <vector>
+#include "tomato/services/network/CoreNetwork.h"
+#include "tomato/services/network/SocketAddress.h"
 
+using PlayerId = uint8_t;
 using MatchId = uint16_t;
 using RequestId = uint32_t;
 using SessionId = uint32_t;
@@ -9,6 +13,13 @@ using ServerTimeMs = uint32_t;
 
 namespace tomato
 {
+	enum class SendPolicy
+	{
+		Unicast,
+		Broadcast
+	};
+	
+	////////////////////////////////////////// UDP //////////////////////////////////////////
 	struct Packet
 	{
 		RawBuffer* buffer{ nullptr };
@@ -21,6 +32,18 @@ namespace tomato
 		}
 	};
 
+	enum class UDPPacketType : uint16_t
+	{
+		HELLO,
+		WELCOME,
+
+		INPUT,
+
+		COUNT
+	};
+
+
+	////////////////////////////////////////// TCP //////////////////////////////////////////
 	struct TCPPacket
 	{
 		std::vector<uint8_t> buffer;
@@ -49,7 +72,6 @@ namespace tomato
 		TIME_SYNC_RES,
 		MATCH_INTRO_SUCCESS,
 		MATCH_INTRO_FAILED,
-		READY_ACK,
 		MATCH_START,
 
 		COUNT

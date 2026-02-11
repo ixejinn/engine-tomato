@@ -21,7 +21,7 @@ namespace tomato
 		}
 		else
 		{
-			TMT_ERR << "Failed to Socket::CreateCocket";
+			TMT_ERR << "Failed to TCPSocket::CreateCocket";
 			return nullptr;
 		}
 	}
