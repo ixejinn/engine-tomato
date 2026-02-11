@@ -1,83 +1,76 @@
 #include "tomato/resource/render/Texture.h"
+#include "tomato/Logger.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb/stb_image.h>
 
-#include <string>
-#include <iostream>
-
-inline GLenum ConvertFormat(ImageFormat fmt)
+namespace tomato
 {
-    switch (fmt)
+    Texture::Texture(const char* filename, TextureFormat format) : format_(ConvertFormatGL(format))
     {
-    case ImageFormat::R8:       return GL_R8;
-    case ImageFormat::RG8:      return GL_RG8;
-    case ImageFormat::RGBA8:    return GL_RGBA8;
+        stbi_set_flip_vertically_on_load(true);
+        glCreateTextures(GL_TEXTURE_2D, 1, &textureId_);
 
-    case ImageFormat::R16F:     return GL_R16F;
-    case ImageFormat::RG16F:    return GL_RG16F;
-    case ImageFormat::RGBA16F:  return GL_RGBA16F;
+        // Set wrapping options
+        glTextureParameteri(textureId_, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(textureId_, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    case ImageFormat::R32F:     return GL_R32F;
-    case ImageFormat::RG32F:    return GL_RG32F;
-    case ImageFormat::RGBA32F:  return GL_RGBA32F;
+        // Set filtering options
+        glTextureParameteri(textureId_, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTextureParameteri(textureId_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    case ImageFormat::R8UI:     return GL_R8UI;
-    case ImageFormat::RG8UI:    return GL_RG8UI;
-    case ImageFormat::RGBA8UI:  return GL_RGBA8UI;
+        int width, height, actualCh;
+        unsigned char* image = stbi_load(filename, &width, &height, &actualCh, format_.channels);
 
-    case ImageFormat::R32UI:    return GL_R32UI;
-    case ImageFormat::RG32UI:   return GL_RG32UI;
-    case ImageFormat::RGBA32UI: return GL_RGBA32UI;
+        if (image)
+        {
+            if (format_.channels != 0 && actualCh > format_.channels)
+                TMT_WARN << "Data loss occurs: " << filename;
+
+            glTextureStorage2D(textureId_, 1, format_.internalFormat, width, height);
+            glTextureSubImage2D(textureId_, 0, 0, 0, width, height, format_.format, format_.type, image);
+
+            glGenerateTextureMipmap(textureId_);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            stbi_image_free(image);
+        }
+        else
+        {
+            TMT_ERR << "Failed to load texture: " << filename;
+        }
     }
-    return GL_RGBA8;
-}
 
-Texture::Texture(const std::string& path, ImageFormat format) : id_(0), width_(0), height_(0), channels_(0), format_(format)
-{
-    stbi_set_flip_vertically_on_load(true);
-    glGenTextures(1, &id_);
-    glBindTexture(GL_TEXTURE_2D, id_);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    unsigned char* data = stbi_load(path.c_str(), &width_, &height_, &channels_, 0);
-    if (data)
+    Texture::~Texture()
     {
-        TMT_LOG << "Success to load texture: " << path;// << '\n';
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        if (textureId_ != 0)
+            glDeleteTextures(1, &textureId_);
     }
-    else
-        TMT_ERR << "Failed to load texture: " << path;// << '\n';
 
-    stbi_image_free(data);
-}
+    void Texture::Bind() const
+    {
+        glBindTexture(GL_TEXTURE_2D, textureId_);
+    }
 
-Texture::Texture(const char* path, ImageFormat format) : Texture(std::string(path), format) {};
-
-Texture::~Texture()
-{
-    if (id_ != 0)
-        glDeleteTextures(1, &id_);
-}
-
-void Texture::BindTexture() const
-{
-    glBindTexture(GL_TEXTURE_2D, id_);
-}
-
-void Texture::Bind(unsigned int slot) const
-{
-    //glBindTextureUnit(slot, id_);
-}
-
-void Texture::UnBind(unsigned int slot) const
-{
-    //glBindTextureUnit(slot, 0);
+    Texture::GLFormat Texture::ConvertFormatGL(TextureFormat format)
+    {
+        switch (format)
+        {
+            case TextureFormat::RGB8:
+                return {GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, STBI_rgb};
+            case TextureFormat::RGBA8:
+            default:
+                return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, STBI_rgb_alpha};
+            case TextureFormat::SRGBA8:
+                return {GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE, STBI_rgb_alpha};
+            case TextureFormat::RGBA16F:
+                return {GL_RGBA16F, GL_RGBA, GL_FLOAT, STBI_rgb_alpha};
+            case TextureFormat::R8:
+                return {GL_R8, GL_RED, GL_UNSIGNED_BYTE, 1};
+            case TextureFormat::Depth24Stencil8:
+                return {GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0};
+        }
+    }
 }

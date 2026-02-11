@@ -1,40 +1,48 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef TOMATO_TEXTURE_H
+#define TOMATO_TEXTURE_H
 
-#include "glad/glad.h"
-#include <string>
+#include <glad/glad.h>
 
-#include "tomato/Logger.h"
-
-enum class ImageFormat
+namespace tomato
 {
-    R8, RG8, RGBA8,
-    R16F, RG16F, RGBA16F,
-    R32F, RG32F, RGBA32F,
-    R8UI, RG8UI, RGBA8UI,
-    R32UI, RG32UI, RGBA32UI
-};
+    enum class TextureFormat
+    {
+        // 일반적인 색상 포맷 (LDR)
+        RGB8,           // 투명도 없는 이미지 (JPG 등)
+        RGBA8,          // 투명도 있는 표준 이미지 (PNG 등)
+        SRGBA8,         // 감마 보정이 적용된 표준 이미지
 
-class Texture
-{
-public:
-    Texture(const std::string& path, ImageFormat format = ImageFormat::RGBA8);
-    Texture(const char* path, ImageFormat format = ImageFormat::RGBA8);
-    ~Texture();
+        // 고정밀 포맷 (HDR)
+        RGBA16F,        // 반정밀도 부동소수점 (HDR, 블룸 효과 등)
 
-    void BindTexture() const;
-    void Bind(unsigned int slot = 0) const;
-    void UnBind(unsigned int slot) const;
+        // 데이터 및 마스크용
+        R8,             // 흑백, 마스크, 글꼴, 그림자 맵
 
-    int GetWidth() const { return width_; }
-    int GetHeight() const { return height_; }
-    unsigned int GetID() const { return id_; }
+        // 렌더용
+        Depth24Stencil8 // 깊이 + 스텐실
+    };
 
- 
-private:
-    unsigned int id_;
-    int width_, height_, channels_;
-    ImageFormat format_;
-};
+    class Texture
+    {
+    public:
+        Texture(const char* filename, TextureFormat format = TextureFormat::RGBA8);
+        ~Texture();
 
-#endif
+        void Bind() const;
+
+    private:
+        struct GLFormat
+        {
+            GLenum internalFormat;  // GPU가 VRAM에 저장하는 방식
+            GLenum format;          // 데이터의 채널 구성
+            GLenum type;            // 데이터의 자료형
+            int channels;           // 채널 개수
+        };
+        static GLFormat ConvertFormatGL(TextureFormat format);
+
+        GLuint textureId_{0};
+        GLFormat format_;
+    };
+}
+
+#endif //TOMATO_TEXTURE_H

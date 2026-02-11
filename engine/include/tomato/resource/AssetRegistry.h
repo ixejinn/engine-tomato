@@ -11,19 +11,19 @@
 namespace tomato
 {
     template<typename T>
-    class tomato_resource
+    class AssetRegistry
     {
     private:
-        tomato_resource() = default;
+        AssetRegistry() = default;
 
     public:
-        ~tomato_resource() = default;
+        ~AssetRegistry() = default;
 
-        tomato_resource& operator=(const tomato_resource&) = delete;
+        AssetRegistry& operator=(const AssetRegistry&) = delete;
 
-        static tomato_resource& GetInstance()
+        static AssetRegistry& GetInstance()
         {
-            static tomato_resource instance;
+            static AssetRegistry instance;
             return instance;
         }
 
@@ -49,7 +49,7 @@ namespace tomato
 
     template<typename T>
     template<typename... Args>
-    T* tomato_resource<T>::Get(const char* filename, Args&&... args)
+    T* AssetRegistry<T>::Get(const char* filename, Args&&... args)
     {
         const auto id = GetAssetID(filename);
         if (idToIdx_.find(id) == idToIdx_.end())
@@ -59,7 +59,7 @@ namespace tomato
     }
 
     template<typename T>
-    T* tomato_resource<T>::Get(const char* filename)
+    T* AssetRegistry<T>::Get(const char* filename)
     {
         const auto id = GetAssetID(filename);
         if (idToIdx_.find(id) == idToIdx_.end())
@@ -69,7 +69,7 @@ namespace tomato
     }
 
     template<typename T>
-    T* tomato_resource<T>::Get(const AssetId id)
+    T* AssetRegistry<T>::Get(const AssetId id)
     {
         if (idToIdx_.find(id) == idToIdx_.end())
             TMT_ERR << "Invalid asset ID: " << id;
@@ -79,14 +79,14 @@ namespace tomato
 
     template<typename T>
     template<typename... Args>
-    void tomato_resource<T>::Load(const char* filename, Args&&... args)
+    void AssetRegistry<T>::Load(const char* filename, Args&&... args)
     {
         idToIdx_[GetAssetID(filename)] = data_.size();
         data_.emplace_back(args...);
     }
 
     template<typename T>
-    void tomato_resource<T>::Load(const char* filename)
+    void AssetRegistry<T>::Load(const char* filename)
     {
         idToIdx_[GetAssetID(filename)] = data_.size();
         data_.emplace_back(filename);

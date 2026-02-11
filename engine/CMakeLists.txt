@@ -113,7 +113,7 @@ target_include_directories(engine
         ${CMAKE_CURRENT_LIST_DIR}/include
 
         PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/external/stb
+        ${CMAKE_CURRENT_LIST_DIR}/external
         ${CMAKE_CURRENT_LIST_DIR}/external/glad/include
 )
 

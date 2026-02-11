@@ -1,4 +1,5 @@
 #include "tomato/services/WindowService.h"
+#include "tomato/Logger.h"
 #include <stdexcept>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -21,8 +22,8 @@ namespace tomato
     {
         // [GLFW] initialize and configure
         glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         handle_ = glfwCreateWindow(width, height, title, nullptr, nullptr);
@@ -47,6 +48,12 @@ namespace tomato
             handle_ = nullptr;
             throw std::runtime_error("Failed to initialize GLAD");
         }
+
+        const GLubyte* version = glGetString(GL_VERSION);
+        if (version)
+            TMT_LOG << "OpenGL version: " << (const char*)version;
+        else
+            TMT_LOG << "Failed to get version information";
     }
 
     WindowService::~WindowService()
