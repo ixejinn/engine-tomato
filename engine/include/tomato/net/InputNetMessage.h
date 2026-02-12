@@ -23,11 +23,13 @@ namespace tomato
     struct InputNetMessage : public NetMessage
     {
     private:
-        void Serialize(NetBitWriter& writer, Engine& engine) override;
+        void Serialize(NetBitWriter& writer) override;
+        void Build(Engine& engine) override;
 
         void Deserialize(NetBitReader& reader) override;
-        void Handler(Engine &engine, SocketAddress &fromAddr) override;
+        void Apply(SocketAddress &fromAddr, Engine &engine) override;
 
+        uint32_t tick{0};
         InputRecord inputRecord;
     };
 }

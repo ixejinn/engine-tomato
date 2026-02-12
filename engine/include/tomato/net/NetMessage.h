@@ -17,45 +17,69 @@ namespace tomato
     {
     public:
         /**
-         * @brief Reads a message from the given bit reader and dispatches it.
+         * @brief Deserializes the payload and applies it to the engine.
          * @param reader Bit reader containing the message payload.
-         * @param engine Engine instance to apply/consume the message.
+         * @param engine Engine instance to apply the message.
          * @param fromAddr Source address of the received datagram.
-         *
-         * Deserialize()를 호출해 멤버 필드를 채운 뒤,
-         * Handler()를 호출해 처리한다.
          */
         void Read(NetBitReader& reader, Engine& engine, SocketAddress& fromAddr)
         {
             Deserialize(reader);
-            Handler(engine, fromAddr);
+            Apply(fromAddr, engine);
         }
 
         /**
-         * @brief Writes a message to the given bit writer.
+         * @brief Deserializes the payload and applies it without engine context.
+         * @param reader Bit reader containing the message payload.
+         * @param fromAddr Source address of the received datagram.
+         */
+        void Read(NetBitReader& reader, SocketAddress& fromAddr)
+        {
+            Deserialize(reader);
+            Apply(fromAddr);
+        }
+
+        /**
+         * @brief Builds message data from the engine and serializes it.
          * @param writer Bit writer to append the serialized payload.
          * @param engine Engine instance used as a data source for serialization.
          *
-         * Serialize()를 호출해 전달할 데이터를 payload로 인코딩한다.
+         * Calls Build() followed by Serialize().
          */
         void Write(NetBitWriter& writer, Engine& engine)
         {
-            Serialize(writer, engine);
+            Build(engine);
+            Serialize(writer);
+        }
+
+        /**
+         * @brief Serializes the message without engine context.
+         * @param writer Bit writer to append the serialized payload.
+         */
+        void Write(NetBitWriter& writer)
+        {
+            Build();
+            Serialize(writer);
         }
 
     private:
         /**
-         * @brief Serializes this message into a bit-stream.
+         * @brief Serializes member variables into a bit-stream.
          * @warning Must remains symmetric with Deserialize().
          */
-        virtual void Serialize(NetBitWriter&, Engine&) = 0;
+        virtual void Serialize(NetBitWriter&) = 0;
+
+        virtual void Build(Engine&) {};
+        virtual void Build() {};
 
         /**
-         * @brief Deserializes this message from a bit-stream.
+         * @brief Deserializes member variables from a bit-stream.
          * @warning Must remains symmetric with Serialize().
          */
         virtual void Deserialize(NetBitReader&) = 0;
-        virtual void Handler(Engine&, SocketAddress&) = 0;
+
+        virtual void Apply(SocketAddress&, Engine&) {};
+        virtual void Apply(SocketAddress&) {};
     };
 }
 
