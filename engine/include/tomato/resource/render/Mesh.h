@@ -16,7 +16,7 @@ namespace tomato
     class Mesh
     {
     public:
-        Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+        Mesh(const char* filename, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
         //Mesh(const char* filename); TODO: 파일 읽어서 메시 생성할 수 있도록 추가
         ~Mesh();
 

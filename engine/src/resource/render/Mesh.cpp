@@ -2,7 +2,7 @@
 
 namespace tomato
 {
-    Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+    Mesh::Mesh(const char* filename, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     {
         SetMesh(vertices, indices);
     }

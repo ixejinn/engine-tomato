@@ -10,6 +10,7 @@ namespace tomato
     {
         AssetId mesh{0};
         AssetId shader{0};
+        AssetId texture{0};
     };
 
     struct TextureComponent { AssetId texture{0}; };

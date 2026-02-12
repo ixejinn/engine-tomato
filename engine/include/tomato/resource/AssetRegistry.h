@@ -27,9 +27,8 @@ namespace tomato
             return instance;
         }
 
-        template<typename... Args>
+        template<typename U = T, typename... Args>
         T* Get(const char* filename, Args&&... args);
-        T* Get(const char* filename);
         T* Get(AssetId id);
 
         void Clear()
@@ -39,57 +38,42 @@ namespace tomato
         }
 
     private:
-        template<typename... Args>
-        void Load(const char* filename, Args&&... args);
-        void Load(const char* filename);
+        template<typename U = T, typename... Args>
+        void Load(AssetId id, const char* filename, Args&&... args);
 
         std::vector<std::unique_ptr<T>> data_;
         std::unordered_map<AssetId, uint32_t> idToIdx_;
     };
 
     template<typename T>
-    template<typename... Args>
+    template<typename U, typename... Args>
     T* AssetRegistry<T>::Get(const char* filename, Args&&... args)
     {
         const auto id = GetAssetID(filename);
-        if (idToIdx_.find(id) == idToIdx_.end())
-            Load(filename, args...);
+        auto it = idToIdx_.find(id);
 
-        return data_[idToIdx_[GetAssetID(filename)]].get();
-    }
+        if (it == idToIdx_.end())
+            Load<U>(id, filename, std::forward<Args>(args)...);
 
-    template<typename T>
-    T* AssetRegistry<T>::Get(const char* filename)
-    {
-        const auto id = GetAssetID(filename);
-        if (idToIdx_.find(id) == idToIdx_.end())
-            Load(filename);
-
-        return data_[idToIdx_[id]].get();
+        return data_[it->second].get();
     }
 
     template<typename T>
     T* AssetRegistry<T>::Get(const AssetId id)
     {
-        if (idToIdx_.find(id) == idToIdx_.end())
+        auto it = idToIdx_.find(id);
+        if (it == idToIdx_.end())
             TMT_ERR << "Invalid asset ID: " << id;
 
-        return data_[idToIdx_[id]].get();
+        return data_[it->second].get();
     }
 
     template<typename T>
-    template<typename... Args>
-    void AssetRegistry<T>::Load(const char* filename, Args&&... args)
+    template<typename U, typename... Args>
+    void AssetRegistry<T>::Load(AssetId id, const char* filename, Args&&... args)
     {
-        idToIdx_[GetAssetID(filename)] = data_.size();
-        data_.emplace_back(args...);
-    }
-
-    template<typename T>
-    void AssetRegistry<T>::Load(const char* filename)
-    {
-        idToIdx_[GetAssetID(filename)] = data_.size();
-        data_.emplace_back(filename);
+        idToIdx_[id] = data_.size();
+        data_.emplace_back(std::make_unique<U>(filename, std::forward<Args>(args)...));
     }
 }
 

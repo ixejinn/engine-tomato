@@ -1,6 +1,10 @@
 #include "tomato/ecs/systems/RenderSystem.h"
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/Render.h"
+#include "tomato/resource/AssetRegistry.h"
+#include "tomato/resource/render/Mesh.h"
+#include "tomato/resource/render/Shader.h"
+#include "tomato/resource/render/Texture.h"
 #include "tomato/ecs/World.h"
 #include "tomato/Engine.h"
 #include "tomato/Logger.h"
@@ -17,12 +21,27 @@ namespace tomato
         static auto group = engine.GetWorld().GetRegistry().group<PositionComponent, RenderComponent>();
         //group.sort<> 정렬 조건: 불투명 셰이더(가까운 → 먼) → 투명 셰이더(먼 → 가까운)
 
+        Shader* shader = AssetRegistry<Shader>::GetInstance().Get(curShader_);
+
         for (auto [e, pos, render] : group.each())
         {
             if (curShader_ != render.shader)
             {
-
+                curShader_ = render.shader;
+                shader = AssetRegistry<Shader>::GetInstance().Get(curShader_);
+                shader->Use();
             }
+
+            shader->SetUniformVariables();
+
+
+            if (curMesh_ != render.mesh)
+            {
+                AssetRegistry<Mesh>::GetInstance().Get(render.mesh)->Bind();
+                curMesh_ = render.mesh;
+            }
+
+
         }
     }
 }

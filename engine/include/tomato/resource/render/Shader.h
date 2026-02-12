@@ -9,10 +9,13 @@ namespace tomato
     {
     public:
         Shader(const char* vsName, const char* fsName);
-        ~Shader();
+        virtual ~Shader();
 
         void Use() const;
 
+        virtual void SetUniformVariables() const;
+
+    protected:
         void SetUniformBool(const char* name, bool value) const;
         void SetUniformInt(const char* name, int value) const;
         void SetUniformFloat(const char* name, float value) const;
