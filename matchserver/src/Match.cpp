@@ -20,7 +20,7 @@ MatchUpdateResult Match::Update(float dt, tomato::SPSCQueue<SendCommandPtr, 256>
 	case MatchState::InfoSent:
 	{
 	// 각 피어들에게 NetConnection 정보 전송 요청
-		std::cout << "InfoSent" << '\n';
+		std::cout << "[MatchState::InfoSent]" << '\n';
 		ctx_.state = RequestToSendNetConnection(sendRequestQ, ctx_.players);
 		return MatchUpdateResult::None;
 	}
@@ -39,7 +39,7 @@ MatchUpdateResult Match::Update(float dt, tomato::SPSCQueue<SendCommandPtr, 256>
 
 		if (timer_ >= MatchConstants::CONNECT_TIMEOUT_SEC)
 		{
-			//std::cout << "TIMEOUT\n";
+			std::cout << "!!!!TIMEOUT";
 			peerAck.reset();
 			ctx_.state = MatchState::Failed;
 			return MatchUpdateResult::Failed;
@@ -71,19 +71,24 @@ MatchState Match::CollectNetConnection(const MatchRequest* matchRequest)
 		(conn + i)->playerId = i;
 		(conn + i)->name = (matchRequest + i)->name;
 
+#if 0
 		int len{};
-		//tomato::SocketAddress address;
+		tomato::SocketAddress address;
 		//if ((matchRequest + i)->socket->GetSocketAddress(address, len) == 0)
 		//	(conn + i)->addr = address;
-		//else
-		//	return MatchState::Failed;
+		else
+			return MatchState::Failed;
+#elif 1
 		tomato::SocketAddress addr[4];
 		addr[0] = { "192.168.55.165", 7777 };
 		addr[1] = { "192.168.55.166", 7777 };
 		addr[2] = { "192.168.55.167", 7777 };
-		addr[3] = { "192.168.55.168", 7777 };
+		//addr[3] = { "192.168.55.168", 7777 };
+		addr[3] = { "192.168.31.234", 7777 };
 		(conn + i)->addr = addr[i];
 	}
+#endif
+
 	return MatchState::InfoSent;
 }
 

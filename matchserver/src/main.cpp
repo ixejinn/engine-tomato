@@ -11,6 +11,8 @@
 #include <iostream>
 #include <limits>
 #include <conio.h>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -92,7 +94,7 @@ int main()
 	addr[0] = { "192.168.55.165", 7777 };
 	addr[1] = { "192.168.55.166", 7777 };
 	addr[2] = { "192.168.55.167", 7777 };
-	addr[3] = { "192.168.55.168", 7777 };
+	addr[3] = { "192.168.31.234", 50123 };
 
 	std::string names[4] = { "name1", "name2", "name3", "name4" };
 #if 0
@@ -233,27 +235,45 @@ int main()
 	uint16_t pSize = helloPacket.GetByteSize();
 	std::memcpy(rawBuffer.data(), &pSize, sizeof(uint16_t));
 
-	for (int i = 0; i < 4; i++)
-	{
-		sockets[i] = tomato::TCPSocket::CreateTCPSocket();
-		sm.GenerateSession(sockets[i], addr[i]);
-		auto packet = sm.AppendRecvBuffer(sm.GetSessionId(sockets[i]), rawBuffer.data(), pSize);
-		if (packet == nullptr)
-		{
-			cout << "nullptr packet\n";
-			continue;
-		}
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	sockets[i] = tomato::TCPSocket::CreateTCPSocket();
+	//	sm.GenerateSession(sockets[i], addr[i]);
+	//	auto packet = sm.AppendRecvBuffer(sm.GetSessionId(sockets[i]), rawBuffer.data(), pSize);
+	//	if (packet == nullptr)
+	//	{
+	//		cout << "nullptr packet\n";
+	//		continue;
+	//	}
 
-		//ns.AddNetMassage(packet);
-	}
+	//	//ns.AddNetMassage(packet);
+	//}
 
+	constexpr float fixedDt = 1.0f / 60.0f;
+
+	float accumulator = 0.0f;
+	auto prev = std::chrono::steady_clock::now();
+
+	std::thread recvth(&NetworkService::TCPRecvThreadLoop, &ns);
 	while (true)
 	{
-		//PushPacket(sm, ns);
-		ns.Update(0.016f);
-		mm.Update(0.016f);
-	}
+		auto now = std::chrono::steady_clock::now();
+		std::chrono::duration<float> delta = now - prev;
+		prev = now;
 
+		accumulator += delta.count();
+
+		while (accumulator >= fixedDt)
+		{
+			//PushPacket(sm, ns);
+			ns.Update(fixedDt);
+			mm.Update(fixedDt);
+
+			accumulator -= fixedDt;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+	recvth.join();
 #endif // 0
 
 	

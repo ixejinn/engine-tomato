@@ -20,9 +20,7 @@ namespace tomato
 			socket_->Accept(inAddress);
 	}
 
-	TCPNetDriver::~TCPNetDriver()
-	{	
-	}
+	TCPNetDriver::~TCPNetDriver(){}
 
 	bool TCPNetDriver::InitTCPSocket()
 	{

@@ -25,6 +25,8 @@ namespace tomato
         playerToSocket[1] = SocketAddress{"192.168.55.88", 7777};
         socketToPlayer[playerToSocket[1]] = 1;
 #elif 1
+        
+        //test code
         ConnectToServer();
         SocketAddress address[4] = { {"192.168.55.165", 0}, {"192.168.31.234", 0},  {"192.168.55.88", 0} };
         conn.try_emplace(0, 0, 0, 0, "yejin", address[0]);
@@ -73,10 +75,13 @@ namespace tomato
         int err = server_->Connect({ "192.168.31.234", 7777 });
         if (err == NO_ERROR)
             std::cout << "Connect to Server\n";
+        else if (err == -WSAECONNREFUSED)
+            std::cout << "Not activated Match server\n";
         else
             std::cout << err << '\n';
     }
 
+    // use network thread
     void NetworkService::NetThreadLoop()
     {
         SocketAddress fromAddr;
@@ -92,7 +97,6 @@ namespace tomato
         }
     }
 
-    // use network thread
     /*
     void NetworkService::Dispatch()
     {
@@ -188,7 +192,79 @@ namespace tomato
             BroadcastToPeers(rawBuffer.data());
     }
 
-    void NetworkService::SendTCPPacket(TCPPacketType messageType, const SocketAddress& inToAddress)
+    void NetworkService::TCPNetRecvThreadLoop()
+    {
+        while (true)
+        {
+            uint8_t segment[MAX_PACKET_SIZE]{};
+            int received = server_->Receive(segment, MAX_PACKET_SIZE);
+            if (received > 0) //parsing
+            {
+                recvBuffer.insert(recvBuffer.end(), segment, segment + received);
+                if (recvBuffer.size() < sizeof(uint16_t))
+                    continue;
+
+                uint16_t size;
+                std::memcpy(&size, recvBuffer.data(), sizeof(size));
+
+                if (recvBuffer.size() < size)
+                    continue;
+
+                auto packet = std::make_unique<TCPPacket>(size, 0);
+                std::memcpy(packet->buffer.data(), recvBuffer.data() + sizeof(uint16_t), size);
+
+                recvBuffer.erase(recvBuffer.begin(), recvBuffer.begin() + size);
+
+                pendingTCPPackets_.Emplace(std::move(packet));
+            }
+            else
+            {
+                std::cout << received << '\n';
+            }
+        }
+    }
+
+    void NetworkService::ProcessQueuedTCPPacket()
+    {
+        while (!pendingTCPPackets_.Empty())
+        {
+            std::unique_ptr<TCPPacket> nextPacket;
+            pendingTCPPackets_.Dequeue(nextPacket);
+
+            uint16_t type;
+            NetBitReader reader(nextPacket->buffer.data(), nextPacket->size());
+
+            reader.ReadInt(type, static_cast<uint16_t>(TCPPacketType::COUNT));
+
+            ProcessTCPPacket(static_cast<TCPPacketType>(type), reader);
+        }
+    }
+
+    void NetworkService::ProcessTCPPacket(const TCPPacketType& header, NetBitReader& reader)
+    {
+        switch (header)
+        {
+        case TCPPacketType::MATCH_INTRO:
+            //Set NetConnections
+            std::cout << "Receive MATCH_INTRO\n";
+            HandleMatchIntroPacket(reader);
+            //Send Hello Packet to all peers
+            //Send TIME_SYNC_REQ Packet to server
+            break;
+
+        case TCPPacketType::TIME_SYNC_RES:
+            std::cout << "Receive TIME_SYNC_RES\n";
+            //Calculate Server Tick
+            //and Send MATCH_INTRO_RESULT(SUCCESS/FAILED) Packet to server
+            break;
+
+        case TCPPacketType::MATCH_START:
+            std::cout << "Receive MATCH_START\n";
+            break;
+        }
+    }
+
+    void NetworkService::SendTCPPacket(TCPPacketType messageType)
     {
         RawBuffer rawBuffer{};
         NetBitWriter writer{ &rawBuffer };
@@ -206,14 +282,14 @@ namespace tomato
         }
 
         case TCPPacketType::MATCH_CANCEL:
+        case TCPPacketType::MATCH_INTRO_SUCCESS:
+        case TCPPacketType::MATCH_INTRO_FAILED:
         {
             writer.WriteInt(matchID_, std::numeric_limits<MatchId>::max());
             break;
         }
 
         case TCPPacketType::TIME_SYNC_REQ:
-        case TCPPacketType::MATCH_INTRO_SUCCESS:
-        case TCPPacketType::MATCH_INTRO_FAILED:
             break;
         }
         
@@ -221,6 +297,37 @@ namespace tomato
         std::memcpy(rawBuffer.data(), &byteSize, sizeof(uint16_t));
 
         server_->Send(rawBuffer.data(), byteSize);
+    }
+
+    void NetworkService::HandleMatchIntroPacket(NetBitReader& reader)
+    {
+        uint16_t readMatchId{ 0 };
+        reader.ReadInt(readMatchId, std::numeric_limits<uint16_t>::max());
+        matchID_ = readMatchId;
+        std::cout << "[MATCH ID = " << matchID_ << "]\n";
+        for (int i = 0; i < 1; i++)
+        {
+            uint8_t readPlayerId{ 0 }, rname{};
+            uint16_t readNameSize{};
+            std::string readName{};
+            uint32_t addr{ 0 };
+
+            reader.ReadInt(readPlayerId, std::numeric_limits<uint8_t>::max());
+            reader.ReadInt(readNameSize, std::numeric_limits<uint16_t>::max());
+
+            for (int j = 0; j < readNameSize; j++)
+            {
+                reader.ReadInt(rname, std::numeric_limits<uint8_t>::max());
+                readName += rname;
+            }
+            reader.ReadInt(addr, std::numeric_limits<uint32_t>::max());
+            tomato::SocketAddress readAddr(addr, 0);
+
+            //std::cout << int(readSize) << " " << int(readType) << " " << int(readMatchId) << " " << int(readPlayerId) << '\n';
+            //std::cout << readName << " -> "  << readAddr.ToString() << '\n';
+
+            conn.try_emplace(readPlayerId, 0, readMatchId, readPlayerId, readName, readAddr);
+        }
     }
 //    void NetworkService::SendPacket(uint32_t messageType)
 //    {

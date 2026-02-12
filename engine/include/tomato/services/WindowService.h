@@ -60,7 +60,6 @@ namespace tomato
          */
         // TODO: UI System 만들면 삭제
         void TMP_CheckEscapeKey();
-
     private:
         static void OnFramebufferSizeChanged(GLFWwindow* window, int width, int height);
 

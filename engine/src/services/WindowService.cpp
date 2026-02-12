@@ -2,7 +2,6 @@
 #include <stdexcept>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 namespace tomato
 {
     void WindowService::OnFramebufferSizeChanged(GLFWwindow* window, int width, int height)

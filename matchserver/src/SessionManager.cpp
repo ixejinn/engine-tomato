@@ -99,11 +99,14 @@ void SessionManager::AppendSendBuffer(const SessionId& client, const uint8_t* in
 
 void SessionManager::GetWritableSockets(std::vector<tomato::TCPSocketPtr>& outVector)
 {
+	//for (auto& session : tcpSessions)
+	//{
+	//	if (!session.second.sendBuffer.empty())
+	//		outVector.push_back(session.second.GetSocket());
+	//}
+
 	for (auto& session : tcpSessions)
-	{
-		if (!session.second.sendBuffer.empty())
-			outVector.push_back(session.second.GetSocket());
-	}
+		outVector.push_back(session.second.GetSocket());
 }
 
 TCP::Session* SessionManager::GetSession(const tomato::TCPSocketPtr& socket)

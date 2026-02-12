@@ -21,8 +21,6 @@ namespace TCP
 		uint16_t size;
 		std::memcpy(&size, recvBuffer.data(), sizeof(size));
 
-		//const std::size_t totalSize = sizeof(uint16_t) + size;
-
 		if (recvBuffer.size() < size)
 			return nullptr;
 

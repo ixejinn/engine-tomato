@@ -24,11 +24,14 @@ namespace tomato
         InputRecorder();
 
         void UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick);
+        char TMP_UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick);
 
         void BindInputIntent(Key key, InputIntent intent) { keyIntents_[key] = intent; }
         InputIntent GetBoundInputIntent(Key key) { return keyIntents_[key]; }
 
         const InputRecord& GetCurrInputRecord() const { return curr_; }
+
+        float GetKeyStates(Key key) const { return keyStates_[key].value; }
 
     private:
         void InitKeyActionMap();

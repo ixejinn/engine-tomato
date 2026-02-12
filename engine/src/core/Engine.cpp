@@ -26,7 +26,7 @@ namespace tomato
     void Engine::Run()
     {
         //std::thread th(&NetworkService::NetThreadLoop, &network_);
-
+        std::thread tcpRecvTh(&NetworkService::TCPNetRecvThreadLoop, &network_);
         while (!window_.ShouldClose() && isRunning_)
         {
             ProcessNetPackets();
@@ -43,6 +43,7 @@ namespace tomato
 
         //network_.isNetThreadRunning_ = false;
         //th.join();
+        tcpRecvTh.join();
     }
 
     void Engine::SetInputData(uint8_t playerID, const InputRecord &record)
@@ -92,7 +93,31 @@ namespace tomato
 
         input_.DrainKeyEvents(keyEvents_);
         // TODO: UI가 우선 소비 (소비하면 consumed = true)
-        inputRecorder_.UpdateInputAxis(keyEvents_, tick_);
+        //inputRecorder_.UpdateInputAxis(keyEvents_, tick_);
+
+        char c = inputRecorder_.TMP_UpdateInputAxis(keyEvents_, tick_);
+        switch (c)
+        {
+        case 1: //Match request
+            std::cout << "SendTCPPacket(TCPPacketType::MATCH_REQUEST)\n";
+            network_.SendTCPPacket(TCPPacketType::MATCH_REQUEST);
+            break;
+
+        case 2: //Send TIME_SYNC_REQ
+            std::cout << "SendTCPPacket(TCPPacketType::TIME_SYNC_REQ)\n";
+            network_.SendTCPPacket(TCPPacketType::TIME_SYNC_REQ);
+            break;
+
+        case 3:
+            std::cout << "SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS)\n";
+            network_.SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS);
+            break;
+
+        case 4:
+            std::cout << "SendTCPPacket(TCPPacketType::MATCH_INTRO_FAILED)\n";
+            network_.SendTCPPacket(TCPPacketType::MATCH_INTRO_FAILED);
+            break;
+        }
 
         inputTimelines_[network_.GetPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
     }
@@ -106,7 +131,7 @@ namespace tomato
 
         while (simLimit--) {
             systemManager_.Simulate(*this, SimContext{tick_});
-            network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
+            //network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
             ++tick_;
 
             if (rollbackManager_)
@@ -127,7 +152,8 @@ namespace tomato
     void Engine::ProcessNetPackets()
     {
         latestTick_ = tick_;
-        network_.ProcessPendingPacket();
+        //network_.ProcessPendingPacket();
+        network_.ProcessQueuedTCPPacket();
     }
 
     void Engine::Rollback()

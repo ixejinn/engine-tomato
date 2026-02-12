@@ -42,7 +42,12 @@ namespace tomato
         void BroadcastToPeers(const void* buffer);
         void SendUDPPacket(UDPPacketType messageType, SendPolicy policy, const SocketAddress* inToAddress = nullptr);
         
-        void SendTCPPacket(TCPPacketType messageType, const SocketAddress& inToAddress);
+        void TCPNetRecvThreadLoop();
+        void ProcessQueuedTCPPacket();
+        void ProcessTCPPacket(const TCPPacketType& header, NetBitReader& reader);
+        void SendTCPPacket(TCPPacketType messageType);
+
+        void HandleMatchIntroPacket(NetBitReader& reader);
 
         PlayerId GetPlayerID() const { return playerID_; }
         PlayerId GetPlayerID(const SocketAddress& addr) { return addToId[addr]; }
@@ -53,6 +58,9 @@ namespace tomato
         WinsockContext winsock_;
         NetDriver driver_;
         TCPSocketPtr server_;
+
+        std::vector<uint8_t> recvBuffer;
+        SPSCQueue<std::unique_ptr<TCPPacket>, 128> pendingTCPPackets_;
 
         MemoryPool<RawBuffer, 128> bufferPool_;
         SPSCQueue<Packet, 128> pendingPackets_;
@@ -65,7 +73,7 @@ namespace tomato
 		//std::unordered_map<SocketAddress, uint32_t> socketToPlayer;
 
 		//SocketPtr socket_;
-        std::string name_{};
+        std::string name_ = "testing";
         PlayerId playerID_{ 0 };
         MatchId matchID_{ 0 };
 

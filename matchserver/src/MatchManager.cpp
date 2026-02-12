@@ -84,6 +84,7 @@ void MatchManager::HandleCancel(const SessionId& client)
 void MatchManager::HandleIntroResult(const SessionId& client, MatchId& matchId, const int& set)
 {
 	
+	std::cout << __FUNCTION__ << '\n';
 	auto it = matches.find(matchId);
 	if (it != matches.end())
 	{
@@ -162,7 +163,7 @@ void MatchManager::ProcessMatchResult(float dt)
 		{
 			//SendPacket for game start
 			//then, Remove from matches
-			std::cout << "Match ReadyToStart\n";
+			std::cout << "[MatchState::ALLREADY] Match ReadyToStart\n";
 			ServerTimeMs serverSteadyTime = static_cast<ServerTimeMs>(
 				duration_cast<std::chrono::milliseconds>(
 					std::chrono::steady_clock::now().time_since_epoch()
