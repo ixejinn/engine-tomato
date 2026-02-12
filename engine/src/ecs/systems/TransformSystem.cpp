@@ -8,7 +8,7 @@
 #include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Transform.h"
 
-#include "tomato/ecs/SystemRegistry.h"
+#include "tomato/RegistryEntry.h"
 REGISTER_SYSTEM(tomato::SystemPhase::INTEGRATOR, TransformSystem)
 
 namespace tomato

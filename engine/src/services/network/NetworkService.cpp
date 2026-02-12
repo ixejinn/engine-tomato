@@ -4,6 +4,7 @@
 #include "tomato/net/NetBitReader.h"
 #include "tomato/net/NetBitWriter.h"
 #include "tomato/net/InputNetMessage.h"
+#include "tomato/net/NetMessageRegistry.h"
 
 namespace tomato
 {
@@ -135,8 +136,8 @@ namespace tomato
 
             if (messageType == 0)
             {
-                InputNetMessage tmp;
-                tmp.Read(reader, engine_, packet.addr);
+                auto tmp = NetMessageRegistry::GetInstance().GetFactory(NetMessageType::INPUT)();
+                tmp->Read(reader, engine_, packet.addr);
                 //std::cout << "NetworkService::ProcessPendingPacket() " << engine_.GetTick() << "\n";
             }
 
@@ -156,8 +157,8 @@ namespace tomato
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
         if (messageType == 0)
         {
-            InputNetMessage tmp;
-            tmp.Write(writer, engine_);
+            auto tmp = NetMessageRegistry::GetInstance().GetFactory(NetMessageType::INPUT)();
+            tmp->Write(writer, engine_);
         }
 
         //std::cout << "NetworkService::SendPacket " << engine_.GetTick() << "\n";

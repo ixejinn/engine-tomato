@@ -16,6 +16,8 @@ namespace tomato
     struct NetMessage
     {
     public:
+        virtual ~NetMessage() = default;
+
         /**
          * @brief Deserializes the payload and applies it to the engine.
          * @param reader Bit reader containing the message payload.

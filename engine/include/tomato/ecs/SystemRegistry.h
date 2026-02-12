@@ -11,7 +11,7 @@ namespace tomato
 {
     class System;
 
-    using Factory = std::function<std::unique_ptr<System>()>;
+    using SystemFactory = std::function<std::unique_ptr<System>()>;
 
     /**
      * @brief Global registry that stores system factory functions grouped by SystemPhase.
@@ -27,10 +27,11 @@ namespace tomato
     public:
         ~SystemRegistry() = default;
 
+        SystemRegistry(const SystemRegistry&) = delete;
         SystemRegistry& operator=(const SystemRegistry&) = delete;
 
-        void RegisterFactory(SystemPhase phase, Factory&& factory);
-        const std::vector<Factory>& GetFactory(SystemPhase phase);
+        void RegisterFactory(SystemPhase phase, SystemFactory&& factory);
+        const std::vector<SystemFactory>& GetFactory(SystemPhase phase);
 
         static SystemRegistry& GetInstance()
         {
@@ -39,27 +40,8 @@ namespace tomato
         }
 
     private:
-        EnumArray<SystemPhase, std::vector<Factory>> factories_{};
-    };
-
-    /**
-     * @brief Helper struct used for static registration of system factories.
-     *
-     * 자동 등록을 위한 구조체.
-     * 각 시스템 .cpp의 익명 네임스페이스에서 SystemRegistryEntry 정적 객체를 생성하여,
-     * 시스템 생성 함수를 SystemRegistry에 자동으로 등록한다.
-     * 이를 위한 REGISTER_SYSTEM(PHASE, CLASS) 매크로가 있다.
-     */
-    struct SystemRegistryEntry
-    {
-        SystemRegistryEntry(const SystemPhase phase, Factory&& factory)
-        {
-            SystemRegistry::GetInstance().RegisterFactory(phase, std::move(factory));
-        }
+        EnumArray<SystemPhase, std::vector<SystemFactory>> factories_{};
     };
 }
-
-#define REGISTER_SYSTEM(PHASE, CLASS)\
-namespace { static tomato::SystemRegistryEntry CLASS##Entry{PHASE, []() { return std::make_unique<tomato::CLASS>(); }}; }
 
 #endif //TOMATO_SYSTEMREGISTRY_H

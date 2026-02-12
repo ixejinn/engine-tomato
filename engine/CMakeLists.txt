@@ -56,6 +56,8 @@ set(ENGINE_HEADERS
         include/tomato/services/network/SocketUtil.h
         include/tomato/services/network/WinsockContext.h
         include/tomato/tomato_packet_types.h
+        include/tomato/net/tomato_message_type.h
+        include/tomato/RegistryEntry.h
 )
 
 set(ENGINE_SOURCES
@@ -85,6 +87,7 @@ set(ENGINE_SOURCES
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
         src/input/InputRecorder.cpp
+        src/net/NetMessageRegistry.cpp
 )
 
 set(EXTERNAL_SOURCES

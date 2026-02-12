@@ -3,12 +3,12 @@
 
 namespace tomato
 {
-    void SystemRegistry::RegisterFactory(const SystemPhase phase, Factory&& factory)
+    void SystemRegistry::RegisterFactory(const SystemPhase phase, SystemFactory&& factory)
     {
         factories_[phase].push_back(std::move(factory));
     }
 
-    const std::vector<Factory>& SystemRegistry::GetFactory(const SystemPhase phase)
+    const std::vector<SystemFactory>& SystemRegistry::GetFactory(const SystemPhase phase)
     {
         return factories_[phase];
     }

@@ -3,8 +3,10 @@
 #include "tomato/net/NetBitWriter.h"
 #include "tomato/Engine.h"
 #include "tomato/services/network/SocketAddress.h"
-
 #include <limits>
+
+#include "tomato/RegistryEntry.h"
+REGISTER_NET_MESSAGE(tomato::NetMessageType::INPUT, InputNetMessage)
 
 namespace tomato
 {
