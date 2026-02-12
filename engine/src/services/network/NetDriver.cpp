@@ -26,7 +26,7 @@ namespace tomato
         SocketAddress myAddr((uint32_t)INADDR_ANY, port);
         socket_->Bind(myAddr);
 
-        TMT_LOG << "Initializing UDP NetDriver at " << myAddr.ToString();
+        TMT_INFO << "Initializing UDP NetDriver at " << myAddr.ToString();
 
         if (socket_ == nullptr)
             return false;
@@ -44,7 +44,7 @@ namespace tomato
 
         writer.WriteInt(messageType, 4);
 
-        // !!! Å×½ºÆ® ÄÚµå NetMessageRegistry ¸¸µé¸é ¼öÁ¤ÇØ¾ß ÇÔ !!!
+        // !!! ï¿½×½ï¿½Æ® ï¿½Úµï¿½ NetMessageRegistry ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½ï¿½ !!!
         if (messageType == 0)
         {
             InputNetMessage tmp;
@@ -53,7 +53,7 @@ namespace tomato
 
         socket_->SendTo(rawBuffer.data(), MAX_PACKET_SIZE, inToAddress);
         //std::cout << "NetworkService::SendPacket " << engine_.GetTick() << "\n";
-        // !!! Å×½ºÆ® ÄÚµå NetMessageRegistry ¸¸µé¸é ¼öÁ¤ÇØ¾ß ÇÔ !!!
+        // !!! ï¿½×½ï¿½Æ® ï¿½Úµï¿½ NetMessageRegistry ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½ï¿½ !!!
 	}
 
 	bool NetDriver::RecvPacket(RawBuffer* buffer, int size, SocketAddress& outFromAddress)

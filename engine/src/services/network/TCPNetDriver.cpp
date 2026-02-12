@@ -34,13 +34,13 @@ namespace tomato
 		
 		if (socket_ == nullptr)
 		{
-			TMT_LOG << "Failed to Initialize TCP NetDriver";
+			TMT_INFO << "Failed to Initialize TCP NetDriver";
 			return false;
 		}
 
-		TMT_LOG << "Initializing TCP NetDriver at " << myAddr.ToString();
+		TMT_INFO << "Initializing TCP NetDriver at " << myAddr.ToString();
 		socket_->Listen();
-		TMT_LOG << "START TO LISTEN....";
+		TMT_INFO << "START TO LISTEN....";
 		return true;
 	}
 

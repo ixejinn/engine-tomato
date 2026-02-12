@@ -47,7 +47,7 @@ Texture::Texture(const std::string& path, ImageFormat format) : id_(0), width_(0
     unsigned char* data = stbi_load(path.c_str(), &width_, &height_, &channels_, 0);
     if (data)
     {
-        TMT_LOG << "Success to load texture: " << path;// << '\n';
+        TMT_INFO << "Success to load texture: " << path;// << '\n';
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width_, height_, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
         glEnable(GL_BLEND);

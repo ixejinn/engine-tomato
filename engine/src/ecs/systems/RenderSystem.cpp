@@ -36,7 +36,7 @@ namespace tomato
 		shaders_[id] = std::make_unique<Shader>(vertexPath, fragmentPath);
 		tagToShaderID_[tag] = id;
 
-		TMT_LOG << "[shader] " << tag << " is successfully registered. id = " << id;
+		TMT_INFO << "[shader] " << tag << " is successfully registered. id = " << id;
 	}
 
 	Shader* RenderSystem::GetShader(ResourceID id)
@@ -65,7 +65,7 @@ namespace tomato
 		textures_[id] = std::make_unique<Texture>(path, format);
 		tagToTextureID_[tag] = id;
 
-		TMT_LOG << "[texture] " << tag << " is successfully registered. id = " << id;
+		TMT_INFO << "[texture] " << tag << " is successfully registered. id = " << id;
 	}
 
 	Texture* RenderSystem::GetTexture(ResourceID id)
@@ -86,15 +86,15 @@ namespace tomato
 		RegisterTexture("PWLogo", "assets/WATER_GAME_LOGO.png");
 	}
 
-	void RenderSystem::Update(Engine& engine, const SimContext& ctx) { TMT_LOG << "Render Update";  }
+	void RenderSystem::Update(Engine& engine, const SimContext& ctx) { TMT_INFO << "Render Update";  }
 	void RenderSystem::Update(const Engine& engine, const SimContext& ctx)
 	{
-		//TMT_LOG << "const Render Update";
+		//TMT_INFO << "const Render Update";
 
 		auto view = engine.GetWorld().GetRegistry().view<SpriteComponent, WorldMatrixComponent>();
 		for (auto [e, sprite, mtx] : view.each())
 		{
-			//TMT_LOG << sprite.shader_id << "," << sprite.texture_id;
+			//TMT_INFO << sprite.shader_id << "," << sprite.texture_id;
 
 			Shader* shader = GetShader(sprite.shader_id);
 			Texture* texture = GetTexture(sprite.texture_id);
@@ -134,7 +134,7 @@ namespace tomato
 
 	//	for (auto [e, sprite, mtx_] : view.each())
 	//	{
-	//		//TMT_LOG << sprite.shader_id << "," << sprite.texture_id;
+	//		//TMT_INFO << sprite.shader_id << "," << sprite.texture_id;
 
 	//		Shader* shader = GetShader(sprite.shader_id);
 	//		Texture* texture = GetTexture(sprite.texture_id);

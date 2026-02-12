@@ -9,7 +9,7 @@
 class Logger
 {
 public:
-	enum Level { LOG, WARN, ERR };
+	enum Level { INFO, DEBUG, WARN, ERR };
 
 	Logger(Level level, std::source_location loc = std::source_location::current())
     : level_(level), location_(loc) {}
@@ -25,7 +25,7 @@ public:
 	{
         std::cout << Prefix(level_) << buffer_.str();
 
-        if (level_ > Level::LOG)
+        if (level_ > Level::INFO)
             std::cout << "\n"
             << location_.file_name() << ":" << location_.line()
             << ": " << location_.function_name();
@@ -37,9 +37,10 @@ private:
     {
         switch (lv)
         {
-            case Level::LOG:  return "[LOG] ";
-            case Level::WARN: return "[WARN] ";
-            case Level::ERR:  return "[ERR] ";
+            case Level::INFO:   return "[INFO] ";
+            case Level::DEBUG:  return "[DEBUG] ";
+            case Level::WARN:   return "[WARN] ";
+            case Level::ERR:    return "[ERR] ";
         }
         return "";
     }
@@ -50,8 +51,9 @@ private:
 	std::ostringstream buffer_;
 };
 
-#define TMT_LOG  Logger(Logger::LOG)
-#define TMT_WARN Logger(Logger::WARN)
-#define TMT_ERR  Logger(Logger::ERR)
+#define TMT_INFO    Logger(Logger::INFO)
+#define TMT_DEBUG   Logger(Logger::DEBUG)
+#define TMT_WARN    Logger(Logger::WARN)
+#define TMT_ERR     Logger(Logger::ERR)
 
 #endif //TOMATO_LOGGER_H

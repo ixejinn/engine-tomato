@@ -29,6 +29,27 @@ namespace tomato
             case GLFW_KEY_DOWN:
                 return Key::Down;
 
+            case GLFW_KEY_0:
+                return Key::K_0;
+            case GLFW_KEY_1:
+                return Key::K_1;
+            case GLFW_KEY_2:
+                return Key::K_2;
+            case GLFW_KEY_3:
+                return Key::K_3;
+            case GLFW_KEY_4:
+                return Key::K_4;
+            case GLFW_KEY_5:
+                return Key::K_5;
+            case GLFW_KEY_6:
+                return Key::K_6;
+            case GLFW_KEY_7:
+                return Key::K_7;
+            case GLFW_KEY_8:
+                return Key::K_8;
+            case GLFW_KEY_9:
+                return Key::K_9;
+
             case GLFW_KEY_A:
                 return Key::A;
             case GLFW_KEY_B:
@@ -81,6 +102,27 @@ namespace tomato
                 return Key::Y;
             case GLFW_KEY_Z:
                 return Key::Z;
+
+            case GLFW_KEY_KP_0:
+                return Key::KP_0;
+            case GLFW_KEY_KP_1:
+                return Key::KP_1;
+            case GLFW_KEY_KP_2:
+                return Key::KP_2;
+            case GLFW_KEY_KP_3:
+                return Key::KP_3;
+            case GLFW_KEY_KP_4:
+                return Key::KP_4;
+            case GLFW_KEY_KP_5:
+                return Key::KP_5;
+            case GLFW_KEY_KP_6:
+                return Key::KP_6;
+            case GLFW_KEY_KP_7:
+                return Key::KP_7;
+            case GLFW_KEY_KP_8:
+                return Key::KP_8;
+            case GLFW_KEY_KP_9:
+                return Key::KP_9;
 
             default:
                 return Key::UNKNOWN;

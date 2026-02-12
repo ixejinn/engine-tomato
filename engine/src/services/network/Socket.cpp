@@ -88,7 +88,7 @@ namespace tomato
 				return 0;
 			else if (error == WSAECONNRESET)
 			{
-				TMT_LOG << "Connection reset from " << outFromAddress.ToString();
+				TMT_INFO << "Connection reset from " << outFromAddress.ToString();
 				return -WSAECONNRESET;
 			}
 			else

@@ -30,6 +30,17 @@ namespace tomato
         Right,
         Down,
 
+        K_0,
+        K_1,
+        K_2,
+        K_3,
+        K_4,
+        K_5,
+        K_6,
+        K_7,
+        K_8,
+        K_9,
+
         A,
         B,
         C,
@@ -56,6 +67,17 @@ namespace tomato
         X,
         Y,
         Z,
+
+        KP_0,
+        KP_1,
+        KP_2,
+        KP_3,
+        KP_4,
+        KP_5,
+        KP_6,
+        KP_7,
+        KP_8,
+        KP_9,
 
         // AXES ---------------------------------------------------
         AXIS_BEGIN,
@@ -88,6 +110,12 @@ namespace tomato
         RIGHT   = 1 << 3,
 
         JUMP    = 1 << 4,
+
+        // Debug
+        TEST_1  = 1 << 5,
+        TEST_2  = 1 << 6,
+        TEST_3  = 1 << 7,
+        TEST_4  = 1 << 8,
 
         COUNT
     };

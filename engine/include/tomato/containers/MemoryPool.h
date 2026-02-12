@@ -149,7 +149,7 @@ namespace tomato
         auto endB = static_cast<std::byte*>(pool_) + N * chunkSize_;
         if (curB < beginB || curB >= endB)
         {
-            TMT_LOG << "Not data in memory pool range";
+            TMT_INFO << "Not data in memory pool range";
             return false;
         }
 
@@ -157,7 +157,7 @@ namespace tomato
         auto diffB = curB - beginB;
         if (diffB % chunkSize_ != 0)
         {
-            TMT_LOG << "Not the starting address of the chunk of memory pool";
+            TMT_INFO << "Not the starting address of the chunk of memory pool";
             return false;
         }
 
@@ -167,7 +167,7 @@ namespace tomato
         auto offset = diffB / chunkSize_;
         if (!IsValid(offset))
         {
-            TMT_LOG << "Already returned memory chunk";
+            TMT_INFO << "Already returned memory chunk";
             return false;
         }
 

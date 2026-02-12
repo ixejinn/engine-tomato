@@ -24,7 +24,6 @@ namespace tomato
                 keyStates_[event.key].value = 0;
                 curr_.held &= ~keyIntents_[event.key];
             }
-
             else             // KeyAction::PRESS
             {
                 keyStates_[event.key].value = 1;
@@ -40,5 +39,6 @@ namespace tomato
         keyIntents_[Key::S] = InputIntent::DOWN;
         keyIntents_[Key::A] = InputIntent::LEFT;
         keyIntents_[Key::D] = InputIntent::RIGHT;
+        keyIntents_[Key::SpaceBar] = InputIntent::JUMP;
     }
 }

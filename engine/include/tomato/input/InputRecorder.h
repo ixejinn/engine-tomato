@@ -29,6 +29,7 @@ namespace tomato
         InputIntent GetBoundInputIntent(Key key) { return keyIntents_[key]; }
 
         const InputRecord& GetCurrInputRecord() const { return curr_; }
+        bool IsPress(InputIntent intent) const { return ((curr_.down & intent) == InputIntent::NONE ? false : true); }
 
     private:
         void InitKeyActionMap();

@@ -91,10 +91,17 @@ namespace tomato
         WindowService::PollEvents();
 
         input_.DrainKeyEvents(keyEvents_);
-        // TODO: UI가 우선 소비 (소비하면 consumed = true)
+        //TODO: UI가 우선 소비 (소비하면 consumed = true)
         inputRecorder_.UpdateInputAxis(keyEvents_, tick_);
 
         inputTimelines_[network_.GetPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
+
+        // ---------- Example for using debug key
+        // Bind key and intent
+        inputRecorder_.BindInputIntent(Key::K_1, InputIntent::TEST_1);
+        // Print if key was pressed
+        if (inputRecorder_.IsPress(InputIntent::TEST_1))
+            TMT_DEBUG << "Key 1 press at " << tick_;
     }
 
     void Engine::Simulate()
@@ -139,7 +146,7 @@ namespace tomato
         if (rollbackTick < tick_)
         {
             rollbackManager_->Rollback(*world_, rollbackTick);
-            //TMT_LOG << "Rollback to " << rollbackTick;
+            //TMT_INFO << "Rollback to " << rollbackTick;
 
             while (rollbackTick < tick_)
             {

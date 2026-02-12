@@ -73,7 +73,7 @@ namespace tomato
 		SocketAddress myAddr((uint32_t)INADDR_ANY, port);
 		socket_->Bind(myAddr);
 
-		TMT_LOG << "Initializing NetworkService at " << myAddr.ToString();
+		TMT_INFO << "Initializing NetworkService at " << myAddr.ToString();
 
 		if (socket_ == nullptr)
 			return false;
