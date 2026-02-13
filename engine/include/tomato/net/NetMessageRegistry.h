@@ -9,7 +9,7 @@
 
 namespace tomato
 {
-    class NetMessage;
+    struct NetMessage;
 
     using NetMessageFactory = std::function<std::unique_ptr<NetMessage>()>;
 
