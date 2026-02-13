@@ -15,6 +15,7 @@ namespace tomato
 	class SocketAddress
 	{
 	public:
+		static bool CheckMyAddress(uint32_t& inAddress);
 
         SocketAddress(uint32_t inAddress, uint16_t inPort)
 		{

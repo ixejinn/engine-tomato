@@ -8,7 +8,7 @@
 namespace tomato
 {
 	NetworkService::NetworkService(Engine& engine)
-    : engine_(engine), playerID_(0)
+    : engine_(engine), playerID_(0), netState_(NetworkServiceState::NSS_Uninitialized)
     {
 #if 0
         InitSocket();
@@ -142,6 +142,48 @@ namespace tomato
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
     }
 
+    void NetworkService::ProcessQueuedUDPPacket()
+    {
+        while (!pendingPackets_.Empty())
+        {
+            Packet packet;
+            pendingPackets_.Dequeue(packet);
+            NetBitReader reader(packet.buffer->data(), packet.size);
+
+            uint16_t type;
+            reader.ReadInt(type, static_cast<uint16_t>(UDPPacketType::COUNT));
+
+            ProcessUDPPacket(static_cast<UDPPacketType>(type), reader, packet.addr);
+
+            bufferPool_.Deallocate(packet.buffer);
+        }
+    }
+
+    void NetworkService::ProcessUDPPacket(const UDPPacketType& type, NetBitReader& reader, const SocketAddress& inToAddress)
+    {
+        switch (type)
+        {
+        case UDPPacketType::HELLO:
+            //Send Welcome to peer
+            SendUDPPacket(UDPPacketType::WELCOME, SendPolicy::Unicast, &inToAddress);
+            break;
+
+        case UDPPacketType::WELCOME:
+            //Check the peer is connected
+            if (HandleWelcomePacket(inToAddress))
+            {
+                SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS);
+                netState_ = NetworkServiceState::NSS_Lobby;
+            }
+            //TODO@ timeout
+            break;
+
+        case UDPPacketType::INPUT:
+            break;
+        }
+
+    }
+
     void NetworkService::BuildUDPPacket(NetBitWriter& writer, UDPPacketType messageType)
     {
         writer.WriteInt(static_cast<uint16_t>(messageType), static_cast<uint16_t>(UDPPacketType::COUNT));
@@ -192,6 +234,14 @@ namespace tomato
             BroadcastToPeers(rawBuffer.data());
     }
 
+    bool NetworkService::HandleWelcomePacket(const SocketAddress& inToAddress)
+    {
+        PlayerId id = GetPlayerID(inToAddress);
+        connected.set(id, true);
+
+        return connected.all();
+    }
+
     void NetworkService::TCPNetRecvThreadLoop()
     {
         while (true)
@@ -217,10 +267,6 @@ namespace tomato
 
                 pendingTCPPackets_.Emplace(std::move(packet));
             }
-            else
-            {
-                std::cout << received << '\n';
-            }
         }
     }
 
@@ -245,21 +291,25 @@ namespace tomato
         switch (header)
         {
         case TCPPacketType::MATCH_INTRO:
+            netState_ = NetworkServiceState::NSS_Hello;
             //Set NetConnections
             std::cout << "Receive MATCH_INTRO\n";
             HandleMatchIntroPacket(reader);
             //Send Hello Packet to all peers
+            SendUDPPacket(UDPPacketType::HELLO, SendPolicy::Broadcast);
             //Send TIME_SYNC_REQ Packet to server
+            SendTCPPacket(TCPPacketType::TIME_SYNC_REQ);
             break;
 
         case TCPPacketType::TIME_SYNC_RES:
             std::cout << "Receive TIME_SYNC_RES\n";
             //Calculate Server Tick
-            //and Send MATCH_INTRO_RESULT(SUCCESS/FAILED) Packet to server
+            HandleServerTimeSyncPacket(reader);
             break;
 
         case TCPPacketType::MATCH_START:
             std::cout << "Receive MATCH_START\n";
+            HandleMatchStartPacket(reader);
             break;
         }
     }
@@ -322,6 +372,13 @@ namespace tomato
             }
             reader.ReadInt(addr, std::numeric_limits<uint32_t>::max());
             tomato::SocketAddress readAddr(addr, 0);
+            std::cout << readAddr.ToString() << '\n';
+            if (SocketAddress::CheckMyAddress(addr))
+            {
+                playerID_ = readPlayerId;
+                std::cout << "[My PlayerID = " << playerID_ << "]\n";
+                connected.set(playerID_, true);
+            }
 
             //std::cout << int(readSize) << " " << int(readType) << " " << int(readMatchId) << " " << int(readPlayerId) << '\n';
             //std::cout << readName << " -> "  << readAddr.ToString() << '\n';
@@ -329,6 +386,23 @@ namespace tomato
             conn.try_emplace(readPlayerId, 0, readMatchId, readPlayerId, readName, readAddr);
         }
     }
+    void NetworkService::HandleServerTimeSyncPacket(NetBitReader& reader)
+    {
+        //@TODO : Calculate server steady time
+    }
+
+    void NetworkService::HandleMatchStartPacket(NetBitReader& reader)
+    {
+        if (netState_ == NetworkServiceState::NSS_Lobby)
+        {
+            ServerTimeMs serverStartTime{};
+            reader.ReadInt(serverStartTime, std::numeric_limits<ServerTimeMs>::max());
+            //@TODO : Calculate server tick, inform start tick to engine
+            
+            netState_ == NetworkServiceState::NSS_Starting;
+        }
+    }
+
 //    void NetworkService::SendPacket(uint32_t messageType)
 //    {
 //        //RawBuffer* rawBuffer = bufferPool_.Allocate();

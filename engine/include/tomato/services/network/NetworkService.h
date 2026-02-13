@@ -1,6 +1,7 @@
 #ifndef TOMATO_NETWORKSERVICE_H
 #define TOMATO_NETWORKSERVICE_H
 
+#include <bitset>
 #include <map>
 #include <unordered_map>
 #include <string>
@@ -19,7 +20,15 @@ namespace tomato
 {
     class Engine;
 
-    
+    // Represents current network state of the client during match flow.
+    enum class NetworkServiceState : uint8_t
+    {
+        NSS_Uninitialized,  
+        NSS_Hello,          // Received MATCH_INTRO, attempting peer connections
+        NSS_Lobby,          // All peers connected, waiting for match start
+        NSS_Starting,       // Received MATCH_START, waiting for start tick
+        NSS_Playing,        // Match in progress
+    };
 
 	class NetworkService
 	{
@@ -37,17 +46,24 @@ namespace tomato
         //void Dispatch();
         void NetThreadLoop();
         void ProcessPendingPacket();
+        void ProcessQueuedUDPPacket();
+        void ProcessUDPPacket(const UDPPacketType& type, NetBitReader& reader, const SocketAddress& inToAddress);
         //void SendPacket(uint32_t messageType);
         void BuildUDPPacket(NetBitWriter& writer, UDPPacketType messageType);
         void BroadcastToPeers(const void* buffer);
         void SendUDPPacket(UDPPacketType messageType, SendPolicy policy, const SocketAddress* inToAddress = nullptr);
         
+        bool HandleWelcomePacket(const SocketAddress& inToAddress);
+
         void TCPNetRecvThreadLoop();
         void ProcessQueuedTCPPacket();
         void ProcessTCPPacket(const TCPPacketType& header, NetBitReader& reader);
         void SendTCPPacket(TCPPacketType messageType);
 
         void HandleMatchIntroPacket(NetBitReader& reader);
+        void HandleServerTimeSyncPacket(NetBitReader& reader);
+        void HandleMatchStartPacket(NetBitReader& reader);
+
 
         PlayerId GetPlayerID() const { return playerID_; }
         PlayerId GetPlayerID(const SocketAddress& addr) { return addToId[addr]; }
@@ -65,14 +81,11 @@ namespace tomato
         MemoryPool<RawBuffer, 128> bufferPool_;
         SPSCQueue<Packet, 128> pendingPackets_;
 
+        std::bitset<2> connected{ "0000" };
         std::unordered_map<PlayerId, NetConnection> conn;
         std::unordered_map<SocketAddress, PlayerId> addToId;
 
-		//std::map<uint32_t, std::string> playerToName;
-		//std::map<uint32_t, SocketAddress> playerToSocket;
-		//std::unordered_map<SocketAddress, uint32_t> socketToPlayer;
-
-		//SocketPtr socket_;
+        NetworkServiceState netState_;
         std::string name_ = "testing";
         PlayerId playerID_{ 0 };
         MatchId matchID_{ 0 };

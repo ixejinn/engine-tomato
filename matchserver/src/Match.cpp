@@ -85,7 +85,7 @@ MatchState Match::CollectNetConnection(const MatchRequest* matchRequest)
 		addr[2] = { "192.168.55.167", 7777 };
 		//addr[3] = { "192.168.55.168", 7777 };
 		addr[3] = { "192.168.31.234", 7777 };
-		(conn + i)->addr = addr[i];
+		(conn + i)->addr = { "192.168.31.234", 7777 };
 	}
 #endif
 
