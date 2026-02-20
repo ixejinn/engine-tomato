@@ -1,6 +1,7 @@
 #include "tomato/resource/render/Shader.h"
 #include "tomato/Logger.h"
 #include <fstream>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace tomato
 {
@@ -102,13 +103,22 @@ namespace tomato
         );
     }
 
-    void Shader::SetUniformMat4(const char* name, const float* mat) const
+    void Shader::SetUniformVec4(const char* name, Vector4 value) const
+    {
+        glUniform4fv(
+                glGetUniformLocation(programId_, name),
+                4,
+                glm::value_ptr(value)
+        );
+    }
+
+    void Shader::SetUniformMat4(const char* name, Matrix value) const
     {
         glUniformMatrix4fv(
             glGetUniformLocation(programId_, name),
             1,
             GL_FALSE,
-            mat
+            glm::value_ptr(value)
         );
     }
 

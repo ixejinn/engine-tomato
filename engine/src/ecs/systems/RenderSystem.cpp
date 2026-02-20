@@ -8,22 +8,52 @@
 #include "tomato/ecs/World.h"
 #include "tomato/Engine.h"
 #include "tomato/Logger.h"
+#include "tomato/services/WindowService.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "tomato/ecs/SystemRegistry.h"
 REGISTER_SYSTEM(tomato::SystemPhase::RENDER, RenderSystem)
 
 namespace tomato
 {
+    RenderSystem::RenderSystem()
+    {
+        // 기본 에셋 추가
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
     void RenderSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        static auto group = engine.GetWorld().GetRegistry().group<PositionComponent, RenderComponent>();
+        static auto group = engine.GetWorld().GetRegistry().group<PositionComponent, WorldMatrixComponent, RenderComponent>();
+        // TODO: group 정렬
         //group.sort<> 정렬 조건: 불투명 셰이더(가까운 → 먼) → 투명 셰이더(먼 → 가까운)
 
         Shader* shader = AssetRegistry<Shader>::GetInstance().Get(curShader_);
 
-        for (auto [e, pos, render] : group.each())
+        // TODO: 임시 카메라 수정
+        // 카메라의 엔티티ID를 가지고 있게 하든지..
+        auto view = glm::mat4(1.f);
+        view = glm::translate(view, glm::vec3(0.f, 0.f, -10.f));    // 카메라 위치만큼 옮기기
+
+        auto projection = glm::mat4(1.f);
+        //           glm::perspective(fovy, aspect, zNear, zFar)
+        auto& window = engine.GetWindow();
+        projection = glm::perspective(glm::radians(45.f), (float)window.GetWidth() / window.GetHeight(), 0.1f, 100.f);
+        // fovy   : field of view in the y direction 시야각(카메라 렌즈의 각도)
+        // aspect : 화면의 가로 너비 / 세로 높이 비율
+        // zNear  : frustum의 근평면 (물체가 이 거리보다 멀어야 그려짐)
+        // zFar   : frustum의 원평면 (물체가 이 거리보다 가까워야 그려짐)
+
+        // TODO: frustum culling 위해서 Frustum 클래스 만드는게 나을듯 6개 면과 엔티티 비교할 수 있게
+
+        auto viewProjection = projection * view;
+
+        for (auto [e, pos, mtx, render] : group.each())
         {
             if (curShader_ != render.shader)
             {
@@ -32,7 +62,11 @@ namespace tomato
                 shader->Use();
             }
 
-            shader->SetUniformVariables();
+            // TODO: frustum culling
+
+            shader->SetUniformMat4("uModel", mtx.matrix);
+            shader->SetUniformMat4("uViewProj", viewProjection);
+            shader->SetUniformVec4("uColor", render.color);
 
 
             if (curMesh_ != render.mesh)

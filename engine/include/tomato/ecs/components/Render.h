@@ -2,12 +2,14 @@
 #define TOMATO_RENDER_H
 
 #include "tomato/resource/tomato_resource.h"
+#include "tomato/tomato_math.h"
 
 namespace tomato
 {
     // Stores asset ID
     struct RenderComponent
     {
+        Vector4 color{1.f, 1.f, 1.f, 1.f};
         AssetId mesh{0};
         AssetId shader{0};
         AssetId texture{0};

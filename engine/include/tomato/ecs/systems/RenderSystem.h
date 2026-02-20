@@ -9,6 +9,8 @@ namespace tomato
     class RenderSystem : public System
     {
     public:
+        RenderSystem();
+
         void Update(Engine& engine, const SimContext& ctx) override;
 
     private:
