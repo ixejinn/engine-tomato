@@ -7,9 +7,9 @@
 
 #include "System.h"
 #include "tomato/Logger.h"
-#include "tomato/render/Mesh.h"
-#include "tomato/render/Shader.h"
-#include "tomato/render/Texture.h"
+#include "tomato/resource/render/Mesh.h"
+#include "tomato/resource/render/Shader.h"
+#include "tomato/resource/render/Texture.h"
 
 using ResourceID = uint32_t;
 
@@ -45,7 +45,7 @@ namespace tomato
 		void Update(const Engine& engine, const SimContext& ctx) override;
 
 	private:
-		Mesh mesh;
+		Mesh* mesh{nullptr};
 
 		std::atomic<uint32_t> shaderCounter_{ 0 };
 		std::unordered_map<ResourceID, std::unique_ptr<Shader>> shaders_;

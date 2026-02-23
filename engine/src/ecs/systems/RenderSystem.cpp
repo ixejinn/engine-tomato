@@ -12,11 +12,14 @@
 
 #include "tomato/RegistryEntry.h"
 REGISTER_SYSTEM(tomato::SystemPhase::RENDER, RenderSystem)
+
 namespace tomato
 {
 	RenderSystem::RenderSystem()
 	{
 		Init();
+
+        mesh = new Mesh(Mesh::PrimitiveType::PLAIN);
 	}
 
 	void RenderSystem::RegisterShader(const std::string& tag, const char* vertexPath, const char* fragmentPath)
@@ -118,66 +121,8 @@ namespace tomato
 				else
 					TMT_ERR << "Uniform variable doesn't exist";
 
-				mesh.Draw();
+				mesh->Draw();
 			}
 		}
-
-	//	auto view = world.View<SpriteComponent, WorldMatrixComponent>();
-	//	auto camView = world.View<CameraComponent>();
-	//	glm::mat4 matView, matProj;
-	//	for (auto [e, cam] : camView.each())
-	//	{
-	//		if (!cam.active) continue;
-	//		matView = cam.view;
-	//		matProj = cam.projection;
-	//	}
-
-	//	for (auto [e, sprite, mtx_] : view.each())
-	//	{
-	//		//TMT_INFO << sprite.shader_id << "," << sprite.texture_id;
-
-	//		Shader* shader = GetShader(sprite.shader_id);
-	//		Texture* texture = GetTexture(sprite.texture_id);
-	//		//std::cout << "Matrix:" << std::endl;
-	//		//for (int i = 0; i < 4; i++) {
-	//		//	for (int j = 0; j < 4; j++) {
-	//		//		std::cout << mtx_.matrix[i][j] << " ";
-	//		//	}
-	//		//	std::cout << std::endl;
-	//		//}
-	//		if (texture && shader)
-	//		{
-	//			shader->Use();
-	//			glDisable(GL_DEPTH_TEST);
-	//			glad_glActiveTexture(GL_TEXTURE0);
-	//			glBindTexture(GL_TEXTURE_2D, texture->GetID());
-
-	//			GLint texLoc = glGetUniformLocation(shader->GetID(), "uTexture");
-	//			glUniform1i(texLoc, 0);
-
-	//			GLint uniform_var_color = glGetUniformLocation(shader->GetID(), "uColor");
-	//			glUniform4f(uniform_var_color, 1.f, 1.f, 1.f, 1.f);
-
-	//			GLint uniform_var_loc1 = glGetUniformLocation(shader->GetID(), "model");
-	//			if (uniform_var_loc1 >= 0)
-	//				glUniformMatrix4fv(uniform_var_loc1, 1, GL_FALSE, glm::value_ptr(mtx_.matrix));
-	//			else
-	//				TMT_ERR << "Uniform variable doesn't exist";
-
-	//			GLint uniform_var_view = glGetUniformLocation(shader->GetID(), "view");
-	//			if (uniform_var_view >= 0)
-	//				glUniformMatrix4fv(uniform_var_view, 1, GL_FALSE, glm::value_ptr(matView));
-	//			else
-	//				TMT_ERR << "Uniform variable doesn't exist";
-
-	//			GLint uniform_var_proj = glGetUniformLocation(shader->GetID(), "projection");
-	//			if (uniform_var_proj >= 0)
-	//				glUniformMatrix4fv(uniform_var_proj, 1, GL_FALSE, glm::value_ptr(matProj));
-	//			else
-	//				TMT_ERR << "Uniform variable doesn't exist";
-
-	//			mesh.Draw();
-	//		}
-	//	}
 	}
 }
