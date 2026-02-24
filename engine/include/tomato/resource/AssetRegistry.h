@@ -34,9 +34,9 @@ namespace tomato
         AssetRegistry() = default;
 
     public:
-        static AssetRegistry& GetInstance()
+        static AssetRegistry<T>& GetInstance()
         {
-            static AssetRegistry instance;
+            static AssetRegistry<T> instance;
             return instance;
         }
 
@@ -51,6 +51,11 @@ namespace tomato
         void Register(const char* name, std::unique_ptr<T>&& asset);
 
         T* Get(AssetId id);
+
+        void Init()
+        {
+            T::Create();
+        }
 
         void Clear()
         {

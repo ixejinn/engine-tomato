@@ -1,107 +1,38 @@
-#include <iostream>
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "tomato/ecs/systems/RenderSystem.h"
 #include "tomato/Engine.h"
 #include "tomato/tomato_sim.h"
-#include "tomato/ecs/components/Sprite.h"
-#include "tomato/ecs/components/Transform.h"
-//#include "tomato/ecs/components/Camera.h"
 #include "tomato/services/WindowService.h"
 #include "tomato/resource/AssetRegistry.h"
+#include "tomato/resource/render/Mesh.h"
+#include "tomato/resource/render/Shader.h"
+#include "tomato/resource/render/Texture.h"
+
+#include "tomato/ecs/components/Render.h"
+#include "tomato/ecs/components/Transform.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "tomato/RegistryEntry.h"
 REGISTER_SYSTEM(tomato::SystemPhase::RENDER, RenderSystem)
 
 namespace tomato
 {
-	RenderSystem::RenderSystem()
-	{
-		Init();
-        Mesh::Create();
-        mesh = AssetRegistry<Mesh>::GetInstance().Get(GetAssetID(Mesh::GetName(Mesh::PrimitiveType::PLAIN)));
+    RenderSystem::RenderSystem() :
+    curMesh_(GetAssetID(Mesh::GetName(Mesh::PrimitiveType::PLAIN))),
+    curShader_(GetAssetID(Shader::PrimitiveName)),
+    curTexture_(GetAssetID(Texture::PrimitiveName))
+    {
+        glEnable(GL_DEPTH_TEST);
 
-        Texture::Create();
-        Texture::Create("assets/WATER_GAME_LOGO.png");
+        AssetRegistry<Mesh>::GetInstance().Init();
+        AssetRegistry<Texture>::GetInstance().Init();
+        AssetRegistry<Shader>::GetInstance().Init();
+    }
 
-        Shader::Create();
-	}
-
-	void RenderSystem::RegisterShader(const std::string& tag, const char* vertexPath, const char* fragmentPath)
-	{
-//		auto itTag = tagToShaderID_.find(tag);
-//		if (itTag != tagToShaderID_.end())
-//		{
-//			ResourceID id = itTag->second;
-//			if (shaders_.find(id) != shaders_.end())
-//			{
-//				TMT_ERR << "[shader] " << tag << " is already registered.";
-//				return;
-//			}
-//		}
-//
-//		ResourceID id = shaderCounter_.fetch_add(1);
-//		shaders_[id] = std::make_unique<Shader>(vertexPath, fragmentPath);
-//		tagToShaderID_[tag] = id;
-//
-//		TMT_INFO << "[shader] " << tag << " is successfully registered. id = " << id;
-	}
-
-	Shader* RenderSystem::GetShader(ResourceID id)
-	{
-		auto shader = shaders_.find(id);
-		if (shader != shaders_.end())
-			return shader->second.get();
-
-		return nullptr;
-	}
-
-	void RenderSystem::RegisterTexture(const std::string& tag, const std::string& path, Texture::Format format)
-	{
-//		auto itTag = tagToTextureID_.find(tag);
-//		if (itTag != tagToTextureID_.end())
-//		{
-//			ResourceID id = itTag->second;
-//			if (textures_.find(id) != textures_.end())
-//			{
-//				TMT_ERR << "[texture] " << tag << " is already registered.";
-//				return;
-//			}
-//		}
-//
-//		ResourceID id = textureCounter_.fetch_add(1);
-//		textures_[id] = std::make_unique<Texture>(path.c_str(), format);
-//		//textures_[id] = std::make_unique<Texture>();
-//		tagToTextureID_[tag] = id;
-//
-//		TMT_INFO << "[texture] " << tag << " is successfully registered. id = " << id;
-	}
-
-	Texture* RenderSystem::GetTexture(ResourceID id)
-	{
-		auto tex = textures_.find(id);
-		if (tex != textures_.end())
-			return tex->second.get();
-
-		return nullptr;
-	}
-
-	void RenderSystem::Init()
-	{
-		//Shaders
-		//RegisterShader("default", "assets/shader.vs", "assets/shader.fs");
-
-		//Textures
-		//RegisterTexture("PWLogo", "assets/WATER_GAME_LOGO.png");
-	}
-
-	void RenderSystem::Update(Engine& engine, const SimContext& ctx) { TMT_INFO << "Render Update";  }
-	void RenderSystem::Update(const Engine& engine, const SimContext& ctx)
-	{
+	void RenderSystem::Update(Engine& engine, const SimContext& ctx)
+    {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//TMT_INFO << "const Render Update";
 
         // TODO: 임시 카메라 수정
         // 카메라의 엔티티ID를 가지고 있게 하든지..
@@ -112,37 +43,55 @@ namespace tomato
         //           glm::perspective(fovy, aspect, zNear, zFar)
         auto& window = engine.GetWindow();
         projection = glm::perspective(glm::radians(45.f), (float)window.GetWidth() / window.GetHeight(), 0.1f, 100.f);
-        //TMT_INFO << window.GetWidth() << ", " << window.GetHeight() << (float)window.GetWidth() / window.GetHeight();
         //projection = glm::perspective(glm::radians(45.f), 1.f, 0.1f, 100.f);
         // fovy   : field of view in the y direction 시야각(카메라 렌즈의 각도)
         // aspect : 화면의 가로 너비 / 세로 높이 비율
         // zNear  : frustum의 근평면 (물체가 이 거리보다 멀어야 그려짐)
         // zFar   : frustum의 원평면 (물체가 이 거리보다 가까워야 그려짐)
 
+        // TODO: frustum culling 위한 Frustum 클래스? 필요하다면 만들기 (6개 면과 엔티티 위치 비교)
+
         auto viewProjection = projection * view;
 
-		auto group = engine.GetWorld().GetRegistry().view<SpriteComponent, WorldMatrixComponent>();
-		for (auto [e, sprite, mtx] : group.each())
-		{
-			//TMT_INFO << sprite.shader_id << "," << sprite.texture_id;
+        Mesh* mesh = AssetRegistry<Mesh>::GetInstance().Get(curMesh_);
+        mesh->Bind();
 
-			Shader* shader = AssetRegistry<Shader>::GetInstance().Get(sprite.shader_id);
-			Texture* texture = AssetRegistry<Texture>::GetInstance().Get(sprite.texture_id);
-			
-			if (texture && shader)
-			{
-				shader->Use();
-				glDisable(GL_DEPTH_TEST);
-				glActiveTexture(GL_TEXTURE0);
-                texture->Bind();
+        Shader* shader = AssetRegistry<Shader>::GetInstance().Get(curShader_);
+        shader->Use();
 
-                shader->SetUniformInt("uTexture", 0);
-                shader->SetUniformVec4("uColor", 1.f, 1.f, 1.f, 1.f);
-                shader->SetUniformMat4("uModel", mtx.matrix);
-                shader->SetUniformMat4("uViewProj", viewProjection);
+        AssetRegistry<Texture>::GetInstance().Get(curTexture_)->Bind();
 
-				mesh->Draw();
-			}
-		}
-	}
+        auto group = engine.GetWorld().GetRegistry().group<PositionComponent, RenderComponent, WorldMatrixComponent>();
+        for (auto [e, pos, render, mtx] : group.each())
+        {
+            // TODO: frustum culling
+
+            if (curShader_ != render.shader)
+            {
+                curShader_ = render.shader;
+                shader = AssetRegistry<Shader>::GetInstance().Get(curShader_);
+                shader->Use();
+            }
+
+            if (curTexture_ != render.texture)
+            {
+                curTexture_ = render.texture;
+                AssetRegistry<Texture>::GetInstance().Get(curTexture_)->Bind();
+            }
+
+            if (curMesh_ != render.mesh)
+            {
+                curMesh_ = render.mesh;
+                mesh = AssetRegistry<Mesh>::GetInstance().Get(curMesh_);
+                mesh->Bind();
+            }
+
+            shader->SetUniformInt("uTexture", 0);
+            shader->SetUniformVec4("uColor", render.color);
+            shader->SetUniformMat4("uModel", mtx.matrix);
+            shader->SetUniformMat4("uViewProj", viewProjection);
+
+            mesh->Draw();
+        }
+    }
 }

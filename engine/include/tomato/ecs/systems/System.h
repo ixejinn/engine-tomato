@@ -18,11 +18,6 @@ namespace tomato
         virtual ~System() = default;
 
         virtual void Update(Engine& engine, const SimContext& ctx) = 0;
-
-        /**
-         * @note Render system only
-         */
-        virtual void Update(const Engine& engine, const SimContext& ctx) {}
     };
 }
 

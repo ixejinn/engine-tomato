@@ -61,7 +61,7 @@ namespace tomato
 
     void Shader::SetUniformVec4(const char* name, Vector4 value) const
     {
-        glUniform4fv(glGetUniformLocation(programId_, name), 4, glm::value_ptr(value));
+        glUniform4fv(glGetUniformLocation(programId_, name), 1, glm::value_ptr(value));
     }
 
     void Shader::SetUniformMat4(const char* name, Matrix value) const

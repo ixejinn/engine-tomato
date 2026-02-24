@@ -10,7 +10,7 @@ set(ENGINE_HEADERS
         include/tomato/ecs/components/Camera.h
         include/tomato/ecs/components/Movement.h
         include/tomato/ecs/components/Rigidbody.h
-        include/tomato/ecs/components/Sprite.h
+        include/tomato/ecs/components/Render.h
         include/tomato/ecs/components/Tags.h
         include/tomato/ecs/components/Transform.h
         include/tomato/ecs/systems/CameraSystem.h

@@ -92,6 +92,7 @@ namespace tomato
 
     void Texture::Bind() const
     {
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureId_);
     }
 }
