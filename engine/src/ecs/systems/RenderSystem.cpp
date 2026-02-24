@@ -52,7 +52,7 @@ namespace tomato
 		return nullptr;
 	}
 
-	void RenderSystem::RegisterTexture(const std::string& tag, const std::string& path, ImageFormat format)
+	void RenderSystem::RegisterTexture(const std::string& tag, const std::string& path, Texture::Format format)
 	{
 		auto itTag = tagToTextureID_.find(tag);
 		if (itTag != tagToTextureID_.end())
@@ -66,7 +66,8 @@ namespace tomato
 		}
 
 		ResourceID id = textureCounter_.fetch_add(1);
-		textures_[id] = std::make_unique<Texture>(path, format);
+		textures_[id] = std::make_unique<Texture>(path.c_str(), format);
+		//textures_[id] = std::make_unique<Texture>();
 		tagToTextureID_[tag] = id;
 
 		TMT_INFO << "[texture] " << tag << " is successfully registered. id = " << id;
@@ -127,7 +128,7 @@ namespace tomato
 				shader->Use();
 				glDisable(GL_DEPTH_TEST);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, texture->GetID());
+                texture->Bind();
 
                 shader->SetUniformInt("uTexture", 0);
                 shader->SetUniformVec4("uColor", 1.f, 1.f, 1.f, 1.f);

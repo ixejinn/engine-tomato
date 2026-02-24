@@ -24,8 +24,8 @@ namespace tomato
     {
         // [GLFW] initialize and configure
         glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         handle_ = glfwCreateWindow(width, height, title, nullptr, nullptr);
@@ -50,6 +50,12 @@ namespace tomato
             handle_ = nullptr;
             throw std::runtime_error("Failed to initialize GLAD");
         }
+
+        const GLubyte* version = glGetString(GL_VERSION);
+        if (version)
+            TMT_INFO << "OpenGL version: " << (const char*)version;
+        else
+            TMT_INFO << "Failed to get version information";
     }
 
     WindowService::~WindowService()

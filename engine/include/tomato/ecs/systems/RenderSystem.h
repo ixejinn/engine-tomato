@@ -36,7 +36,7 @@ namespace tomato
 		void RegisterShader(const std::string& tag, const char* vertexPath, const char* fragmentPath);
 		Shader* GetShader(ResourceID id);
 
-		void RegisterTexture(const std::string& tag, const std::string& path, ImageFormat format = ImageFormat::RGBA8);
+		void RegisterTexture(const std::string& tag, const std::string& path, Texture::Format format = Texture::Format::RGBA8);
 		Texture* GetTexture(ResourceID id);
 
 		void Init();
