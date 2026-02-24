@@ -1,4 +1,5 @@
 #include "tomato/resource/render/Texture.h"
+#include "tomato/resource/AssetRegistry.h"
 #include "tomato/Logger.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -6,6 +7,18 @@
 
 namespace tomato
 {
+    void Texture::Create()
+    {
+        std::unique_ptr<Texture> ptr{new Texture};
+        AssetRegistry<Texture>::GetInstance().Register(PrimitiveName, std::move(ptr));
+    }
+
+    void Texture::Create(const char* filename, Format format)
+    {
+        std::unique_ptr<Texture> ptr{new Texture(filename, format)};
+        AssetRegistry<Texture>::GetInstance().Register(filename, std::move(ptr));
+    }
+
     Texture::GLFormat Texture::ConvertFormatGL(tomato::Texture::Format format)
     {
         switch (format)

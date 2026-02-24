@@ -10,6 +10,7 @@
 #include "tomato/ecs/components/Transform.h"
 //#include "tomato/ecs/components/Camera.h"
 #include "tomato/services/WindowService.h"
+#include "tomato/resource/AssetRegistry.h"
 
 #include "tomato/RegistryEntry.h"
 REGISTER_SYSTEM(tomato::SystemPhase::RENDER, RenderSystem)
@@ -19,28 +20,33 @@ namespace tomato
 	RenderSystem::RenderSystem()
 	{
 		Init();
+        Mesh::Create();
+        mesh = AssetRegistry<Mesh>::GetInstance().Get(GetAssetID(Mesh::GetName(Mesh::PrimitiveType::PLAIN)));
 
-        mesh = new Mesh(Mesh::PrimitiveType::PLAIN);
+        Texture::Create();
+        Texture::Create("assets/WATER_GAME_LOGO.png");
+
+        Shader::Create();
 	}
 
 	void RenderSystem::RegisterShader(const std::string& tag, const char* vertexPath, const char* fragmentPath)
 	{
-		auto itTag = tagToShaderID_.find(tag);
-		if (itTag != tagToShaderID_.end())
-		{
-			ResourceID id = itTag->second;
-			if (shaders_.find(id) != shaders_.end())
-			{
-				TMT_ERR << "[shader] " << tag << " is already registered.";
-				return;
-			}
-		}
-
-		ResourceID id = shaderCounter_.fetch_add(1);
-		shaders_[id] = std::make_unique<Shader>(vertexPath, fragmentPath);
-		tagToShaderID_[tag] = id;
-
-		TMT_INFO << "[shader] " << tag << " is successfully registered. id = " << id;
+//		auto itTag = tagToShaderID_.find(tag);
+//		if (itTag != tagToShaderID_.end())
+//		{
+//			ResourceID id = itTag->second;
+//			if (shaders_.find(id) != shaders_.end())
+//			{
+//				TMT_ERR << "[shader] " << tag << " is already registered.";
+//				return;
+//			}
+//		}
+//
+//		ResourceID id = shaderCounter_.fetch_add(1);
+//		shaders_[id] = std::make_unique<Shader>(vertexPath, fragmentPath);
+//		tagToShaderID_[tag] = id;
+//
+//		TMT_INFO << "[shader] " << tag << " is successfully registered. id = " << id;
 	}
 
 	Shader* RenderSystem::GetShader(ResourceID id)
@@ -54,23 +60,23 @@ namespace tomato
 
 	void RenderSystem::RegisterTexture(const std::string& tag, const std::string& path, Texture::Format format)
 	{
-		auto itTag = tagToTextureID_.find(tag);
-		if (itTag != tagToTextureID_.end())
-		{
-			ResourceID id = itTag->second;
-			if (textures_.find(id) != textures_.end())
-			{
-				TMT_ERR << "[texture] " << tag << " is already registered.";
-				return;
-			}
-		}
-
-		ResourceID id = textureCounter_.fetch_add(1);
-		textures_[id] = std::make_unique<Texture>(path.c_str(), format);
-		//textures_[id] = std::make_unique<Texture>();
-		tagToTextureID_[tag] = id;
-
-		TMT_INFO << "[texture] " << tag << " is successfully registered. id = " << id;
+//		auto itTag = tagToTextureID_.find(tag);
+//		if (itTag != tagToTextureID_.end())
+//		{
+//			ResourceID id = itTag->second;
+//			if (textures_.find(id) != textures_.end())
+//			{
+//				TMT_ERR << "[texture] " << tag << " is already registered.";
+//				return;
+//			}
+//		}
+//
+//		ResourceID id = textureCounter_.fetch_add(1);
+//		textures_[id] = std::make_unique<Texture>(path.c_str(), format);
+//		//textures_[id] = std::make_unique<Texture>();
+//		tagToTextureID_[tag] = id;
+//
+//		TMT_INFO << "[texture] " << tag << " is successfully registered. id = " << id;
 	}
 
 	Texture* RenderSystem::GetTexture(ResourceID id)
@@ -85,10 +91,10 @@ namespace tomato
 	void RenderSystem::Init()
 	{
 		//Shaders
-		RegisterShader("default", "assets/shader.vs", "assets/shader.fs");
+		//RegisterShader("default", "assets/shader.vs", "assets/shader.fs");
 
 		//Textures
-		RegisterTexture("PWLogo", "assets/WATER_GAME_LOGO.png");
+		//RegisterTexture("PWLogo", "assets/WATER_GAME_LOGO.png");
 	}
 
 	void RenderSystem::Update(Engine& engine, const SimContext& ctx) { TMT_INFO << "Render Update";  }
@@ -120,8 +126,8 @@ namespace tomato
 		{
 			//TMT_INFO << sprite.shader_id << "," << sprite.texture_id;
 
-			Shader* shader = GetShader(sprite.shader_id);
-			Texture* texture = GetTexture(sprite.texture_id);
+			Shader* shader = AssetRegistry<Shader>::GetInstance().Get(sprite.shader_id);
+			Texture* texture = AssetRegistry<Texture>::GetInstance().Get(sprite.texture_id);
 			
 			if (texture && shader)
 			{

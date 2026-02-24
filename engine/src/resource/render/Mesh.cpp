@@ -1,7 +1,20 @@
 ﻿#include "tomato/resource/render/Mesh.h"
+#include "tomato/resource/AssetRegistry.h"
 
 namespace tomato
 {
+    void Mesh::Create()
+    {
+        auto& registry = AssetRegistry<Mesh>::GetInstance();
+        for (int i = 0; i < static_cast<int>(PrimitiveType::COUNT); ++i)
+        {
+            auto type = static_cast<PrimitiveType>(i);
+
+            std::unique_ptr<Mesh> ptr{new Mesh(type)};
+            registry.Register(GetName(type), std::move(ptr));
+        }
+    }
+
     Mesh::Mesh(PrimitiveType type)
     {
         std::vector<Vertex> vertices;
@@ -9,7 +22,7 @@ namespace tomato
 
         switch (type)
         {
-            case PLAIN:
+            case PrimitiveType::PLAIN:
                 vertices = {
                         {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}}, // 좌하단
                         {{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}}, // 우하단
@@ -23,8 +36,7 @@ namespace tomato
                 };
                 break;
 
-            case CUBE:
-            default:
+            case PrimitiveType::CUBE:
                 vertices = {
                         // 벽면
                         {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},

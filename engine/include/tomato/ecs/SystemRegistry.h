@@ -25,6 +25,12 @@ namespace tomato
         SystemRegistry() = default;
 
     public:
+        static SystemRegistry& GetInstance()
+        {
+            static SystemRegistry instance;
+            return instance;
+        }
+
         ~SystemRegistry() = default;
 
         SystemRegistry(const SystemRegistry&) = delete;
@@ -32,12 +38,6 @@ namespace tomato
 
         void RegisterFactory(SystemPhase phase, SystemFactory&& factory);
         const std::vector<SystemFactory>& GetFactory(SystemPhase phase);
-
-        static SystemRegistry& GetInstance()
-        {
-            static SystemRegistry instance;
-            return instance;
-        }
 
     private:
         EnumArray<SystemPhase, std::vector<SystemFactory>> factories_{};

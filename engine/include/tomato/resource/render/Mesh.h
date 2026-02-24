@@ -2,6 +2,7 @@
 #define TOMATO_MESH_H
 
 #include <vector>
+#include <memory>
 #include <glad/glad.h>
 #include "tomato/tomato_math.h"
 
@@ -16,14 +17,33 @@ namespace tomato
     class Mesh
     {
     public:
-        enum PrimitiveType
+        enum class PrimitiveType
         {
             PLAIN,
             CUBE,
             COUNT
         };
 
+        constexpr static const char* GetName(PrimitiveType type)
+        {
+            switch (type)
+            {
+                case PrimitiveType::PLAIN:
+                    return "Mesh_PLAIN";
+                case PrimitiveType::CUBE:
+                default:
+                    return "Mesh_CUBE";
+            }
+        }
+
+        static void Create();
+        //static void Create(const char* filename);
+
+    private:
         Mesh(PrimitiveType type);
+        //Mesh(const char* filename);
+
+    public:
         ~Mesh();
 
         void Bind() const;

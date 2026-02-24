@@ -1,10 +1,23 @@
 #include "tomato/resource/render/Shader.h"
+#include "tomato/resource/AssetRegistry.h"
 #include "tomato/Logger.h"
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace tomato
 {
+    void Shader::Create()
+    {
+        std::unique_ptr<Shader> ptr{new Shader};
+        AssetRegistry<Shader>::GetInstance().Register(PrimitiveName, std::move(ptr));
+    }
+
+    void Shader::Create(const char* vsName, const char* fsName)
+    {
+        std::unique_ptr<Shader> ptr{new Shader(vsName, fsName)};
+        AssetRegistry<Shader>::GetInstance().Register(fsName, std::move(ptr));
+    }
+
     Shader::Shader()
     {
         ReadShaderSourceFile("assets/shader.vs", "assets/shader.fs");

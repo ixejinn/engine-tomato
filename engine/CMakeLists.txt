@@ -58,6 +58,8 @@ set(ENGINE_HEADERS
         include/tomato/tomato_packet_types.h
         include/tomato/net/tomato_message_type.h
         include/tomato/RegistryEntry.h
+        include/tomato/resource/AssetRegistry.h
+        include/tomato/resource/tomato_resource.h
 )
 
 set(ENGINE_SOURCES
@@ -110,7 +112,7 @@ target_include_directories(engine
         PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
 
-        PRIVATE
+#        PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/external
         ${CMAKE_CURRENT_LIST_DIR}/external/glad/include
 )

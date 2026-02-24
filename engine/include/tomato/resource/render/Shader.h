@@ -9,8 +9,16 @@ namespace tomato
     class Shader
     {
     public:
+        constexpr static const char* PrimitiveName = "Shader_PRIMITIVE";
+
+        static void Create();
+        static void Create(const char* vsName, const char* fsName);
+
+    private:
         Shader();
         Shader(const char* vsName, const char* fsName);
+
+    public:
         ~Shader();
 
         void Use() const;

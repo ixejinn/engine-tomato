@@ -5,6 +5,9 @@
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
 #include "tomato/ecs/components/Sprite.h"
+#include "tomato/resource/AssetRegistry.h"
+#include "tomato/resource/render/Texture.h"
+#include "tomato/resource/render/Shader.h"
 #include <iostream>
 
 void TestState::Init(tomato::World& world)
@@ -23,7 +26,9 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::InputChannelComponent>(me, (uint8_t)0);
     registry.emplace<tomato::JumpComponent>(me);
 
-    registry.emplace<tomato::SpriteComponent>(me, (uint16_t)0, (uint16_t)0);
+    registry.emplace<tomato::SpriteComponent>(me,
+                                              tmt::GetAssetID(tmt::Shader::PrimitiveName),
+                                              tmt::GetAssetID("assets/WATER_GAME_LOGO.png"));
 
     const auto other = world.CreateEntity();
 
@@ -37,7 +42,9 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::InputChannelComponent>(other, (uint8_t)1);
     registry.emplace<tomato::JumpComponent>(other);
 
-    registry.emplace<tomato::SpriteComponent>(other, (uint16_t)0, (uint16_t)0);
+    registry.emplace<tomato::SpriteComponent>(other,
+                                              tmt::GetAssetID(tmt::Shader::PrimitiveName),
+                                              tmt::GetAssetID(tmt::Texture::PrimitiveName));
 }
 
 void TestState::Exit() {}

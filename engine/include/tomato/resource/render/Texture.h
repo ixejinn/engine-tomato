@@ -23,8 +23,16 @@ namespace tomato
             Depth24Stencil8 // 깊이 + 스텐실
         };
 
+        constexpr static const char* PrimitiveName = "Texture_PRIMITIVE";
+
+        static void Create();
+        static void Create(const char* filename, Format format = Format::RGBA8);
+
+    private:
         Texture();
         Texture(const char* filename, Format format = Format::RGBA8);
+
+    public:
         ~Texture();
 
         void Bind() const;
