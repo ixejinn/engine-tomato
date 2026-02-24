@@ -16,7 +16,9 @@ set(SHADER_DIR ${CMAKE_SOURCE_DIR}/assets)
 set(TARGET_ASSETS_DIR $<TARGET_FILE_DIR:contents>/assets)
 
 # 빌드 후 assets 폴더 통째로 복사
-add_custom_command(TARGET contents POST_BUILD
+#add_custom_command(TARGET contents POST_BUILD
+add_custom_target(copy_assets ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${SHADER_DIR} ${TARGET_ASSETS_DIR}
 )
+add_dependencies(contents copy_assets)

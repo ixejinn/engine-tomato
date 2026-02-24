@@ -1,30 +1,41 @@
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef TOMATO_SHADER_H
+#define TOMATO_SHADER_H
 
-#include <string>
-#include "glad/glad.h"
+#include <glad/glad.h>
+#include "tomato/tomato_math.h"
 
-class Shader
+namespace tomato
 {
-public:
-	Shader() = default;
-	Shader(const char* vertexPath, const char* fragmentPath);
-	~Shader();
+    class Shader
+    {
+    public:
+        Shader();
+        Shader(const char* vsName, const char* fsName);
+        ~Shader();
 
-	void Use() const;
-	void UnUse() const;
+        void Use() const;
 
-	void SetBool(const std::string& name, bool value) const;
-	void SetInt(const std::string& name, int value) const;
-	void SetFloat(const std::string& name, float value) const;
-	void SetMat4(const std::string& name, const float* mat) const;
+        void SetUniformBool(const char* name, bool value) const;
+        void SetUniformInt(const char* name, int value) const;
+        void SetUniformFloat(const char* name, float value) const;
+        void SetUniformVec4(const char* name, float v0, float v1, float v2, float v3) const;
+        void SetUniformVec4(const char* name, Vector4 value) const;
+        void SetUniformMat4(const char* name, Matrix value) const;
 
-	unsigned int GetID() const { return programID; }
+    private:
+        enum Type
+        {
+            VERTEX,
+            FRAGMENT,
+            PROGRAM
+        };
 
-private:
-	unsigned int programID = 0;
+        static void CheckCompileErrors(GLuint shader, Type type);
 
-	void CheckCompileErrors(unsigned int shader, std::string type);
-};
+        void ReadShaderSourceFile(const char* vsName, const char* fsName);
 
-#endif
+        GLuint programId_{0};
+    };
+}
+
+#endif //TOMATO_SHADER_H

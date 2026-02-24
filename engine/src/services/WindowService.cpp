@@ -1,4 +1,5 @@
 #include "tomato/services/WindowService.h"
+#include "tomato/Logger.h"
 #include <stdexcept>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -12,6 +13,8 @@ namespace tomato
         self->height_ = height;
 
         glViewport(0, 0, width, height);
+
+        TMT_DEBUG << self->width_ << ", " << self->height_;
     }
 
     void WindowService::PollEvents() { glfwPollEvents(); }
