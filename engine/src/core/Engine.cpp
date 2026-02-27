@@ -7,6 +7,8 @@
 #include "tomato/ecs/systems/System.h"
 #include "tomato/input/InputTypes.h"
 #include "tomato/Logger.h"
+#include "/yj/engine-tomato/contents/GameState.h"
+#include "/yj/engine-tomato/contents/TestState.h"
 
 namespace tomato
 {
@@ -25,7 +27,7 @@ namespace tomato
 
     void Engine::Run()
     {
-        //std::thread th(&NetworkService::NetThreadLoop, &network_);
+        std::thread th(&NetworkService::NetThreadLoop, &network_);
         std::thread tcpRecvTh(&NetworkService::TCPNetRecvThreadLoop, &network_);
         while (!window_.ShouldClose() && isRunning_)
         {
@@ -37,6 +39,7 @@ namespace tomato
             Simulate();
             Render();
 
+            TryStartGame();
             if (nextState_)
                 ChangeState();
         }
@@ -84,6 +87,24 @@ namespace tomato
             rollbackManager_->Capture(*world_, 0);
     }
 
+    void Engine::TryStartGame()
+    {
+        if (network_.GetNetState() == NetworkServiceState::NSS_Starting)
+        {
+            if (localStartTime == 0) return;
+            auto now = static_cast<ServerTimeMs>(
+                duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now().time_since_epoch()).count());
+
+            if (static_cast<int32_t>(now - localStartTime) >= 0)
+            {
+                network_.SetNetState(NetworkServiceState::NSS_Playing);
+                SetNextState(std::make_unique<TestState>());
+                std::cout << now << "\n##### Game Start #####\n\n";
+            }
+        }
+    }
+
     void Engine::ProcessKeyEvents()
     {
         keyEvents_.clear();
@@ -96,6 +117,7 @@ namespace tomato
         //inputRecorder_.UpdateInputAxis(keyEvents_, tick_);
 
         char c = inputRecorder_.TMP_UpdateInputAxis(keyEvents_, tick_);
+#if 0
         switch (c)
         {
         case 1: //Match request
@@ -111,6 +133,7 @@ namespace tomato
         case 3:
             std::cout << "SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS)\n";
             network_.SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS);
+            network_.SetNetState(NetworkServiceState::NSS_Lobby);
             break;
 
         case 4:
@@ -118,7 +141,27 @@ namespace tomato
             network_.SendTCPPacket(TCPPacketType::MATCH_INTRO_FAILED);
             break;
         }
+#elif 1
+        SocketAddress myAddr("192.168.31.234", 9000);
+        switch (c)
+        {
+        case 1: //Match request
+            std::cout << "SendUDPPacket(UDPPacketType::HELLO)\n";
+            network_.SendUDPPacket(UDPPacketType::HELLO, SendPolicy::Unicast, &myAddr);
+            break;
 
+        case 2: //Send TIME_SYNC_REQ
+            std::cout << "SendUDPPacket(UDPPacketType::WELCOME)\n";
+            network_.SendUDPPacket(UDPPacketType::WELCOME, SendPolicy::Unicast, &myAddr);
+            break;
+
+        case 3:
+            break;
+
+        case 4:
+            break;
+        }
+#endif
         inputTimelines_[network_.GetPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
     }
 
@@ -153,6 +196,7 @@ namespace tomato
     {
         latestTick_ = tick_;
         //network_.ProcessPendingPacket();
+        network_.ProcessQueuedUDPPacket();
         network_.ProcessQueuedTCPPacket();
     }
 

@@ -209,6 +209,9 @@ void NetworkService::HandlePacketRequest(const TCPPacketType& header, tomato::Ne
 	std::string name{};
 	uint8_t tmp;
 	MatchId matchId{0};
+
+	tomato::SocketAddress addr = sessionMgr_.GetAddress(client);
+
 	switch (header)
 	{
 	case TCPPacketType::MATCH_REQUEST:
@@ -219,21 +222,21 @@ void NetworkService::HandlePacketRequest(const TCPPacketType& header, tomato::Ne
 			reader.ReadInt(tmp, std::numeric_limits<uint8_t>::max());
 			name += tmp;
 		}
-		MatchRequestQueue.Emplace(client, name, matchId, MatchRequestAction::Enqueue);
+		MatchRequestQueue.Emplace(client, addr, name, matchId, MatchRequestAction::Enqueue);
 		break;
 	}
 
 	case TCPPacketType::MATCH_INTRO_SUCCESS:
 	{
 		reader.ReadInt(matchId, std::numeric_limits<MatchId>::max());
-		MatchRequestQueue.Emplace(client, name, matchId, MatchRequestAction::Success);
+		MatchRequestQueue.Emplace(client, addr, name, matchId, MatchRequestAction::Success);
 		break;
 	}
 	case TCPPacketType::MATCH_CANCEL:
 	case TCPPacketType::MATCH_INTRO_FAILED:
 	{
 		reader.ReadInt(matchId, std::numeric_limits<MatchId>::max());
-		MatchRequestQueue.Emplace(client, name, matchId, MatchRequestAction::Cancel);
+		MatchRequestQueue.Emplace(client, addr, name, matchId, MatchRequestAction::Cancel);
 		break;
 	}
 	}

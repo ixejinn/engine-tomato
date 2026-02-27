@@ -93,7 +93,7 @@ namespace tomato
 			}
 			else
 			{
-				TMT_ERR << "Failed to Socket::ReceiveFrom";
+				//TMT_ERR << "Failed to Socket::ReceiveFrom";
 				return -error;
 			}
 		}

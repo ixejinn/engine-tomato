@@ -2,7 +2,7 @@ add_executable(contents
         main.cpp
         TestState.h
         TestState.cpp
-)
+ "GameState.h" "GameState.cpp")
 
 target_link_libraries(contents PRIVATE
         # Force inclusion of all object files in the static library for SystemRegistry

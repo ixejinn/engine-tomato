@@ -28,6 +28,7 @@ enum class MatchRequestAction : uint8_t
 struct MatchRequestCommand
 {
 	SessionId sessionId;
+	tomato::SocketAddress address;
 	std::string name;
 	MatchId matchId;
 	MatchRequestAction action;
@@ -47,6 +48,7 @@ using SendCommandPtr = std::unique_ptr<SendRequestCommand>;
 struct MatchRequest
 {
 	SessionId sessionId;
+	tomato::SocketAddress address;
 	std::string name;
 	RequestId requestId;
 	ServerTimeMs enqueueTime;

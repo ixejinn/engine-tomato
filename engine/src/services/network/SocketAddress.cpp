@@ -1,10 +1,11 @@
 #include "tomato/services/network/SocketAddress.h"
 
 #include <WS2tcpip.h>
+#include <iostream>
 
 namespace tomato
 {
-	bool SocketAddress::CheckMyAddress(uint32_t& inAddress)
+	bool SocketAddress::CheckMyAddress(const SocketAddress& inAddress)
 	{
 		char hostname[256];
 		if (gethostname(hostname, sizeof(hostname)) == 0)
@@ -20,11 +21,13 @@ namespace tomato
 			sockaddr_in* addr_in = reinterpret_cast<sockaddr_in*>(servinfo->ai_addr);
 			uint32_t& myAddr = *reinterpret_cast<uint32_t*>(&addr_in->sin_addr.S_un.S_addr);
 
-			//char myIP[32];
-			//inet_ntop(AF_INET, &(addr_in->sin_addr), myIP, sizeof(myIP));
-			//printf("IP Address : %s\n", myIP);
+			char myIP[32];
+			inet_ntop(AF_INET, &(addr_in->sin_addr), myIP, sizeof(myIP));
+			SocketAddress tmpAddr(myIP, 0);
+			//std::cout << tmpAddr.ToString() << '\n';
+			//printf("My IP Address : %s\n", myIP);
 
-			if (myAddr == inAddress)
+			if (tmpAddr == inAddress)
 			{
 				freeaddrinfo(servinfo);
 				return true;

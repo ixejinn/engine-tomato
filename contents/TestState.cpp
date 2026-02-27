@@ -9,6 +9,7 @@
 
 void TestState::Init(tomato::World& world)
 {
+    std::cout << "TEST STATE\n";
     tmt::Registry& registry = world.GetRegistry();
 
     const auto me = world.CreateEntity();

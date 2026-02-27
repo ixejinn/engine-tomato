@@ -39,6 +39,7 @@ namespace tomato
         // !!! FOR TEST !!!
 		void ReadIncomingData();
 		void SendOutgoingData(const SocketAddress& inToAddress);
+        void SetNetState(NetworkServiceState state) { netState_ = state; }
         // !!! FOR TEST !!!
         
         void ConnectToServer();
@@ -68,6 +69,7 @@ namespace tomato
         PlayerId GetPlayerID() const { return playerID_; }
         PlayerId GetPlayerID(const SocketAddress& addr) { return addToId[addr]; }
 
+        NetworkServiceState GetNetState() const { return netState_; }
         std::atomic<bool> isNetThreadRunning_{false};
 
 	private:
@@ -75,13 +77,16 @@ namespace tomato
         NetDriver driver_;
         TCPSocketPtr server_;
 
+        bool TCPRecvThreadRunning_{ false };
+        //bool TCPRecvThreadRunning_{ false };
+
         std::vector<uint8_t> recvBuffer;
         SPSCQueue<std::unique_ptr<TCPPacket>, 128> pendingTCPPackets_;
 
         MemoryPool<RawBuffer, 128> bufferPool_;
         SPSCQueue<Packet, 128> pendingPackets_;
 
-        std::bitset<2> connected{ "0000" };
+        std::bitset<1> connected{ "0" };
         std::unordered_map<PlayerId, NetConnection> conn;
         std::unordered_map<SocketAddress, PlayerId> addToId;
 
@@ -89,6 +94,10 @@ namespace tomato
         std::string name_ = "testing";
         PlayerId playerID_{ 0 };
         MatchId matchID_{ 0 };
+
+        ServerTimeMs sendTime{ 0 }, recvTime{ 0 };
+        ServerTimeMs serverTimeOffset{ 0 }, localStartTime{ 0 };
+        uint32_t estimatedServerTick{ 0 }, estimatedStartTick{ 0 };
 
         Engine& engine_;
 	};

@@ -70,7 +70,8 @@ MatchState Match::CollectNetConnection(const MatchRequest* matchRequest)
 		(conn + i)->matchId = ctx_.matchId;
 		(conn + i)->playerId = i;
 		(conn + i)->name = (matchRequest + i)->name;
-
+		(conn + i)->addr = (matchRequest + i)->address;
+	}
 #if 0
 		int len{};
 		tomato::SocketAddress address;
@@ -78,7 +79,7 @@ MatchState Match::CollectNetConnection(const MatchRequest* matchRequest)
 		//	(conn + i)->addr = address;
 		else
 			return MatchState::Failed;
-#elif 1
+#elif 0
 		tomato::SocketAddress addr[4];
 		addr[0] = { "192.168.55.165", 7777 };
 		addr[1] = { "192.168.55.166", 7777 };

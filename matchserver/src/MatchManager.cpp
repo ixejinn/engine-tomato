@@ -40,7 +40,7 @@ void MatchManager::ProcessMatchRequest()
 		MatchRequestQueue.Dequeue(reqCommand);
 
 		if (reqCommand.action == MatchRequestAction::Enqueue)
-			HandleEnqueue(reqCommand.sessionId, reqCommand.name);
+			HandleEnqueue(reqCommand.sessionId, reqCommand.address, reqCommand.name);
 		
 		if (reqCommand.action == MatchRequestAction::Cancel)
 			HandleCancel(reqCommand.sessionId);
@@ -53,10 +53,11 @@ void MatchManager::ProcessMatchRequest()
 	}
 }
 
-void MatchManager::HandleEnqueue(const SessionId& client, const std::string& name)
+void MatchManager::HandleEnqueue(const SessionId& client, const tomato::SocketAddress& inAddress, const std::string& name)
 {
 	MatchRequest mRequest{
 		.sessionId = client,
+		.address = inAddress,
 		.name = name,
 		.requestId = 0,
 		.enqueueTime = 0,

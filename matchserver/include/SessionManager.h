@@ -31,6 +31,8 @@ public:
 	void UpdateLastRecv(const SessionId&);
 
 	SessionId GetSessionId(const tomato::SocketAddress& addr) { return addrToSessionId[addr]; }
+	const tomato::SocketAddress& GetAddress(const SessionId& id);
+
 private:
 	std::unordered_map<SessionId, TCP::Session> tcpSessions;
 	std::unordered_map<tomato::TCPSocketPtr, SessionId> socketToId;

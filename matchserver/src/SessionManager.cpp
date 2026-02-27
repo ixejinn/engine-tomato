@@ -117,3 +117,10 @@ TCP::Session* SessionManager::GetSession(const tomato::TCPSocketPtr& socket)
 	
 	return nullptr;
 }
+
+const tomato::SocketAddress& SessionManager::GetAddress(const SessionId& id)
+{
+	auto it = tcpSessions.find(id);
+	if (it != tcpSessions.end())
+		return it->second.addr;
+}

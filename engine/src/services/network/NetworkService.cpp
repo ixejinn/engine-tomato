@@ -27,13 +27,14 @@ namespace tomato
 #elif 1
         
         //test code
-        ConnectToServer();
-        SocketAddress address[4] = { {"192.168.55.165", 0}, {"192.168.31.234", 0},  {"192.168.55.88", 0} };
-        conn.try_emplace(0, 0, 0, 0, "yejin", address[0]);
-        conn.try_emplace(1, 0, 0, 1, "yejin2", address[2]);
-
-        addToId[address[0]] = 0;
-        addToId[address[2]] = 1;
+        //ConnectToServer();
+        isNetThreadRunning_ = true;
+        //SocketAddress address[4] = { {"192.168.55.165", 0}, {"192.168.31.234", 0},  {"192.168.55.88", 0} };
+        //conn.try_emplace(0, 0, 0, 0, "yejin", address[0]);
+        //conn.try_emplace(1, 0, 0, 1, "yejin2", address[2]);
+        //
+        //addToId[address[0]] = 0;
+        //addToId[address[2]] = 1;
 #endif
     }
 
@@ -79,13 +80,15 @@ namespace tomato
             std::cout << "Not activated Match server\n";
         else
             std::cout << err << '\n';
+
+        TCPRecvThreadRunning_ = true;
     }
 
     // use network thread
     void NetworkService::NetThreadLoop()
     {
         SocketAddress fromAddr;
-        isNetThreadRunning_ = true;
+        //isNetThreadRunning_ = true;
         while (isNetThreadRunning_)
         {
             RawBuffer* buffer = bufferPool_.Allocate();
@@ -165,6 +168,7 @@ namespace tomato
         {
         case UDPPacketType::HELLO:
             //Send Welcome to peer
+            std::cout << "Receive HELLO\n";
             SendUDPPacket(UDPPacketType::WELCOME, SendPolicy::Unicast, &inToAddress);
             break;
 
@@ -172,7 +176,9 @@ namespace tomato
             //Check the peer is connected
             if (HandleWelcomePacket(inToAddress))
             {
-                SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS);
+                std::cout << "Receive WELCOME\n";
+                std::cout << "All Checked\n";
+                //SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS);
                 netState_ = NetworkServiceState::NSS_Lobby;
             }
             //TODO@ timeout
@@ -244,7 +250,7 @@ namespace tomato
 
     void NetworkService::TCPNetRecvThreadLoop()
     {
-        while (true)
+        while (TCPRecvThreadRunning_)
         {
             uint8_t segment[MAX_PACKET_SIZE]{};
             int received = server_->Receive(segment, MAX_PACKET_SIZE);
@@ -340,6 +346,9 @@ namespace tomato
         }
 
         case TCPPacketType::TIME_SYNC_REQ:
+            sendTime = static_cast<ServerTimeMs>(
+                duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now().time_since_epoch()).count());
             break;
         }
         
@@ -372,11 +381,11 @@ namespace tomato
             }
             reader.ReadInt(addr, std::numeric_limits<uint32_t>::max());
             tomato::SocketAddress readAddr(addr, 0);
-            std::cout << readAddr.ToString() << '\n';
-            if (SocketAddress::CheckMyAddress(addr))
+            //std::cout << readAddr.ToString() << '\n';
+            if (SocketAddress::CheckMyAddress(readAddr))
             {
                 playerID_ = readPlayerId;
-                std::cout << "[My PlayerID = " << playerID_ << "]\n";
+                std::cout << "[My PlayerID = " << int(playerID_) << "]\n";
                 connected.set(playerID_, true);
             }
 
@@ -388,7 +397,26 @@ namespace tomato
     }
     void NetworkService::HandleServerTimeSyncPacket(NetBitReader& reader)
     {
+        recvTime = static_cast<ServerTimeMs>(
+            duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now().time_since_epoch()).count());
+
+        ServerTimeMs serverSteady{};
+        reader.ReadInt(serverSteady, std::numeric_limits<ServerTimeMs>::max());
+
         //@TODO : Calculate server steady time
+        ServerTimeMs rtt = recvTime - sendTime;
+        serverTimeOffset = serverSteady - (sendTime + (rtt / 2));
+
+        //estimatedServerTime = localSteadyNow + offset
+        ServerTimeMs estimatedServerTime = static_cast<ServerTimeMs>(
+            duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now().time_since_epoch()).count()) + serverTimeOffset;
+
+        estimatedServerTick = floor(estimatedServerTime / 16.67f);
+        engine_.SetServerTicks(estimatedServerTick);
+
+        //std::cout << "[Server Tick] " << int(estimatedServerTick) << "\n[Local Tick] " << int(engine_.GetTick()) << '\n';
     }
 
     void NetworkService::HandleMatchStartPacket(NetBitReader& reader)
@@ -397,9 +425,32 @@ namespace tomato
         {
             ServerTimeMs serverStartTime{};
             reader.ReadInt(serverStartTime, std::numeric_limits<ServerTimeMs>::max());
+
+            estimatedStartTick = floor(serverStartTime / 16.67f );
+            engine_.SetStartTicks(estimatedStartTick);
+
+            //std::cout << "[Start Tick] " << int(estimatedStartTick) << '\n';
             //@TODO : Calculate server tick, inform start tick to engine
-            
-            netState_ == NetworkServiceState::NSS_Starting;
+            ServerTimeMs localSteadyTimeNow = static_cast<ServerTimeMs>(
+                duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now().time_since_epoch()).count());
+
+            ServerTimeMs estimatedServerNow = localSteadyTimeNow + serverTimeOffset;
+            ServerTimeMs remaining = serverStartTime - estimatedServerNow;
+
+            //@TODO
+            if (remaining < 0)
+            {
+                std::cout << "Invalid StartTime\n";
+                return;
+            }
+            localStartTime = static_cast<ServerTimeMs>(
+                duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now().time_since_epoch()).count()) + remaining;
+
+            engine_.SetStartTimes(localStartTime);
+            std::cout << "[Now] " << localSteadyTimeNow << "\n[Start Time] " << localStartTime << '\n';
+            netState_ = NetworkServiceState::NSS_Starting;
         }
     }
 

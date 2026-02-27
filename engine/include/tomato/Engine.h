@@ -60,6 +60,11 @@ namespace tomato
                     >();
         }
 
+        void SetServerOffset(const ServerTimeMs& offset) { serverTimeOffset = offset; }
+        void SetStartTimes(const ServerTimeMs& start) { localStartTime = start; }
+        void SetServerTicks(const uint32_t& serverTick) { estimatedServerTick = serverTick; }
+        void SetStartTicks(const uint32_t& startTick) { estimatedStartTick = startTick; }
+
     private:
         static constexpr int MAX_SIMULATION_NUM{3};
         static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
@@ -68,6 +73,8 @@ namespace tomato
 
         void ChangeState();
         void ResetTick();
+
+        void TryStartGame();
 
         void ProcessKeyEvents();
         void Simulate();
@@ -103,6 +110,9 @@ namespace tomato
 
         std::chrono::duration<float, std::milli> adder_{0};
         std::chrono::steady_clock::time_point start_{};
+
+        ServerTimeMs serverTimeOffset{ 0 }, localStartTime{ 0 };
+        uint32_t estimatedServerTick{ 0 }, estimatedStartTick{ 0 };
     };
 }
 
