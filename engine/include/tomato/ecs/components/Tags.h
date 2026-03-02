@@ -4,7 +4,6 @@
 namespace tomato
 {
 	struct MainCameraTag {};
-
 }
 
 #endif

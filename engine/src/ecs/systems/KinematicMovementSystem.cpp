@@ -34,19 +34,19 @@ namespace tomato
                 x--;
             if (HasIntent(keypress, InputIntent::RIGHT))
                 x++;
-            glm::vec2 dir = glm::vec2{x, y};
+            glm::vec2 dir = glm::vec2{x, -y};
             if (glm::length(dir) > 1)
                 dir = glm::normalize(dir);
 
             pos.position.x += dir.x * speed.speed * Engine::FIXED_DELTA_TIME;
             // !!! for 2D MOVEMENT !!!
-            pos.position.y += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
+            //pos.position.y += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
+
             // !!! for 3D MOVEMENT !!!
-            //pos.position.z += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
+            pos.position.z += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
 
             // Jump
-            /* !!! for 3D MOVEMENT !!!
-            if (HasIntent(down, InputIntent::JUMP) && move.cnt < JUMP_COUNT_MAX)
+            if (HasIntent(keydown, InputIntent::JUMP) && move.cnt < JUMP_COUNT_MAX)
             {
                 // Start jump
                 move.cnt++;
@@ -67,7 +67,6 @@ namespace tomato
                     move.vy = 0.f;
                 }
             }
-            !!! for 3D MOVEMENT !!! */
         }
     }
 }

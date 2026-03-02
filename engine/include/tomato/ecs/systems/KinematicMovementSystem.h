@@ -23,8 +23,8 @@ namespace tomato
 
     private:
         constexpr static uint8_t JUMP_COUNT_MAX{2};
-        constexpr static float JUMP_SPEED{1.f};
-        constexpr static float GRAVITY{-1.f};
+        constexpr static float JUMP_SPEED{1.5f};
+        constexpr static float GRAVITY{-2.f};
     };
 }
 

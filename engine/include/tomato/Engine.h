@@ -60,6 +60,9 @@ namespace tomato
                     >();
         }
 
+        Entity GetCurrentCamera() const { return curCam_; }
+        void SetCurrentCamera(Entity newCam) { curCam_ = newCam; }
+
     private:
         static constexpr int MAX_SIMULATION_NUM{3};
         static constexpr std::chrono::duration<float, std::milli> dt_{1000.f / FRAME_PER_SECOND};
@@ -96,6 +99,8 @@ namespace tomato
         InputRecorder inputRecorder_;
 
         std::unique_ptr<RollbackManagerB> rollbackManager_{nullptr};
+
+        Entity curCam_;
 
         std::unique_ptr<State> currState_{nullptr};
         std::unique_ptr<State> nextState_{nullptr};

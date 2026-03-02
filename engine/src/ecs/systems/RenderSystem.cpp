@@ -8,6 +8,7 @@
 #include "tomato/resource/render/Texture.h"
 
 #include "tomato/ecs/components/Camera.h"
+#include "tomato/ecs/components/Tags.h"
 #include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Transform.h"
 
@@ -35,31 +36,31 @@ namespace tomato
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//        // TODO: 임시 카메라 수정
-//        // 카메라의 엔티티ID를 가지고 있게 하든지..
-//        auto view = glm::mat4(1.f);
-//        view = glm::translate(view, glm::vec3(0.f, 0.f, -10.f));    // 카메라 위치만큼 옮기기
-//
-//        auto projection = glm::mat4(1.f);
-//        //           glm::perspective(fovy, aspect, zNear, zFar)
-//        auto& window = engine.GetWindow();
-//        projection = glm::perspective(glm::radians(45.f), (float)window.GetWidth() / window.GetHeight(), 0.1f, 100.f);
-//        //projection = glm::perspective(glm::radians(45.f), 1.f, 0.1f, 100.f);
-//        // fovy   : field of view in the y direction 시야각(카메라 렌즈의 각도)
-//        // aspect : 화면의 가로 너비 / 세로 높이 비율
-//        // zNear  : frustum의 근평면 (물체가 이 거리보다 멀어야 그려짐)
-//        // zFar   : frustum의 원평면 (물체가 이 거리보다 가까워야 그려짐)
-//
-//        // TODO: frustum culling 위한 Frustum 클래스? 필요하다면 만들기 (6개 면과 엔티티 위치 비교)
-//
-//        auto viewProjection = projection * view;
-
         auto viewProjection = glm::mat4(1.f);
-        auto camEntity = engine.GetWorld().GetRegistry().view<CameraComponent>().front();
-        if (auto* cam = engine.GetWorld().GetRegistry().try_get<CameraComponent>(camEntity))
+        CameraComponent* cam{ nullptr };
+
+        auto curCam = engine.GetCurrentCamera();
+        if (curCam == entt::null)
+        {
+            curCam = engine.GetWorld().GetRegistry().view<MainCameraTag>().front();
+            
+            if (curCam == entt::null)
+            {
+                TMT_WARN << "Main camera not present";
+                return;
+            }
+            else
+                engine.SetCurrentCamera(curCam);
+        }
+        
+        if (cam = engine.GetWorld().GetRegistry().try_get<CameraComponent>(curCam))
             viewProjection = cam->viewProjection;
         else
+        {
+            TMT_WARN << "No camera component in the current camera";
             return;
+        }
+        
 
         Mesh* mesh = AssetRegistry<Mesh>::GetInstance().Get(curMesh_);
         mesh->Bind();
