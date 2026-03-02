@@ -5,6 +5,7 @@
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
 #include "tomato/ecs/components/Render.h"
+#include "tomato/ecs/components/Camera.h"
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Mesh.h"
 #include "tomato/resource/render/Texture.h"
@@ -17,10 +18,17 @@ void TestState::Init(tomato::World& world)
 
     tmt::Registry& registry = world.GetRegistry();
 
+    const auto cam = world.CreateEntity();
+    registry.emplace<tomato::PositionComponent>(cam, glm::vec3(0.f, 1.f, -10.f));
+    registry.emplace<tomato::RotationComponent>(cam, glm::vec3(-20.f, 0.f, 0.f));
+    registry.emplace<tomato::ScaleComponent>(cam);
+    registry.emplace<tomato::WorldMatrixComponent>(cam);
+    registry.emplace<tomato::CameraComponent>(cam);
+
     const auto me = world.CreateEntity();
 
     registry.emplace<tomato::PositionComponent>(me);
-    registry.emplace<tomato::RotationComponent>(me);
+    registry.emplace<tomato::RotationComponent>(me/*, glm::vec3(0.f, 0.f, 60.f)*/);
     registry.emplace<tomato::ScaleComponent>(me, (glm::vec3{1.f, 1.f, 1.f }));
     registry.emplace<tomato::WorldMatrixComponent>(me);
 
@@ -31,27 +39,28 @@ void TestState::Init(tomato::World& world)
 
     registry.emplace<tomato::RenderComponent>(me,
                                               tmt::Vector4(1.f, 1.f, 1.f, 1.f),
-                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::PLAIN)),
+                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
                                               tmt::GetAssetID(tmt::Shader::PrimitiveName),
-                                              tmt::GetAssetID("assets/WATER_GAME_LOGO.png"));
-
-    const auto other = world.CreateEntity();
-
-    registry.emplace<tomato::PositionComponent>(other);
-    registry.emplace<tomato::RotationComponent>(other);
-    registry.emplace<tomato::ScaleComponent>(other, (glm::vec3{1.f, 1.f, 1.f }));
-    registry.emplace<tomato::WorldMatrixComponent>(other);
-
-    registry.emplace<tomato::SpeedComponent>(other, (float)1.f);
-
-    registry.emplace<tomato::InputChannelComponent>(other, (uint8_t)1);
-    registry.emplace<tomato::JumpComponent>(other);
-
-    registry.emplace<tomato::RenderComponent>(other,
-                                              tmt::Vector4(1.f, 1.f, 0.f, 1.f),
-                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::PLAIN)),
-                                              tmt::GetAssetID(tmt::Shader::PrimitiveName),
+                                              //tmt::GetAssetID("assets/WATER_GAME_LOGO.png"));
                                               tmt::GetAssetID(tmt::Texture::PrimitiveName));
+
+//    const auto other = world.CreateEntity();
+//
+//    registry.emplace<tomato::PositionComponent>(other);
+//    registry.emplace<tomato::RotationComponent>(other);
+//    registry.emplace<tomato::ScaleComponent>(other, (glm::vec3{1.f, 1.f, 1.f }));
+//    registry.emplace<tomato::WorldMatrixComponent>(other);
+//
+//    registry.emplace<tomato::SpeedComponent>(other, (float)1.f);
+//
+//    registry.emplace<tomato::InputChannelComponent>(other, (uint8_t)1);
+//    registry.emplace<tomato::JumpComponent>(other);
+//
+//    registry.emplace<tomato::RenderComponent>(other,
+//                                              tmt::Vector4(1.f, 1.f, 0.f, 1.f),
+//                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
+//                                              tmt::GetAssetID(tmt::Shader::PrimitiveName),
+//                                              tmt::GetAssetID(tmt::Texture::PrimitiveName));
 }
 
 void TestState::Exit() {}

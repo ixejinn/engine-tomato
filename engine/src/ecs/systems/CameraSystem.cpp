@@ -1,64 +1,63 @@
 #include "tomato/ecs/systems/CameraSystem.h"
-#include "tomato/ecs/components/Transform.h"
-#include "tomato/ecs/components/Tags.h"
 #include "tomato/Engine.h"
+#include "tomato/ecs/components/Transform.h"
+#include "tomato/ecs/components/Camera.h"
+#include "tomato/services/WindowService.h"
 
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
-#include <cmath>
 
-tomato::CameraSystem::CameraSystem() : activeCamera_(entt::null) {}
+#include "tomato/RegistryEntry.h"
+REGISTER_SYSTEM(tomato::SystemPhase::CAMERA, CameraSystem)
 
-void tomato::CameraSystem::SetActive(World& world, CameraType type)
+namespace tomato
 {
-	auto view = world.GetRegistry().view<CameraComponent>();
-	for (auto [e, cam] : view.each())
-	{
-		bool match = false;
-		switch (type)
-		{
-			case CameraType::Main:
-				match = world.GetRegistry().any_of<MainCameraTag>(e);
-				break;
-		}
+    void CameraSystem::Update(Engine& engine, const SimContext& ctx)
+    {
+        auto view = engine.GetWorld().GetRegistry().view<PositionComponent, RotationComponent, CameraComponent>();
 
-		cam.active = match;
-		if (match)
-			activeCamera_ = e;
-	}
-}
+        for (auto [e, pos, rot, cam] : view.each())
+        {
+////// 1. 방향 벡터 구하기
+////// 쿼터니언 회전이 없을 때(Identity), f는 (0, 0, 1)이 아니라 (0, 0, -1)이어야 합니다. (앞을 봐야 하니까요)
+            auto quaternion = glm::quat(glm::radians(rot.eulerDegree));
+            glm::vec3 f = quaternion * glm::vec3(0, 0, 1);
+            glm::vec3 r = quaternion * glm::vec3(1, 0, 0);
+            glm::vec3 u = quaternion * glm::vec3(0, 1, 0);
+////
+////// 2. 뷰 행렬의 Z축은 "카메라의 뒤쪽"이어야 하므로 -f를 사용합니다.
+            glm::vec3 b = -f;
 
-tomato::CameraComponent* tomato::CameraSystem::GetActiveCamera(World& world)
-{
-	return world.GetRegistry().valid(activeCamera_) ? &world.GetRegistry().get<CameraComponent>(activeCamera_) : nullptr;
-}
+            glm::mat4 viewMtx(1.0f);
 
-void tomato::CameraSystem::Update(Engine& engine, const SimContext& ctx)
-{
-	auto view = engine.GetWorld().GetRegistry().view<CameraComponent, PositionComponent, RotationComponent>();
-	for (auto [e, cam, pos, rot] : view.each())
-	{
-		if (!cam.active) continue;
+// 회전 부분 (Transpose 적용)
+            viewMtx[0][0] = r.x; viewMtx[1][0] = r.y; viewMtx[2][0] = r.z;
+            viewMtx[0][1] = u.x; viewMtx[1][1] = u.y; viewMtx[2][1] = u.z;
+            viewMtx[0][2] = b.x; viewMtx[1][2] = b.y; viewMtx[2][2] = b.z; // f가 아니라 b(-f)입니다!
 
-		//Projection
-		//cam.projection = glm::perspective(glm::radians(cam.fov), /*aspect*/(float)(1600.f / 900.f), cam.nearClip, cam.farClip);
-		cam.projection = glm::perspective(glm::radians(45.f), /*aspect*/(float)(1600.f / 900.f), 0.1f, 100.f);
+// 이동 부분 (Translation Inverse)
+            viewMtx[3][0] = -glm::dot(r, pos.position);
+            viewMtx[3][1] = -glm::dot(u, pos.position);
+            viewMtx[3][2] = -glm::dot(b, pos.position); // f가 아니라 b입니다!
+            viewMtx[3][3] = 1.0f;
 
-		//View
-		glm::vec3 front(0.f, 0.f, -1.f);
-		front.x = cos(glm::radians(rot.rotation.y)) * cos(glm::radians(rot.rotation.x));
-		front.y = sin(glm::radians(rot.rotation.x));
-		front.z = sin(glm::radians(rot.rotation.y)) * cos(glm::radians(rot.rotation.x));
-		front = glm::normalize(front);
+//            auto viewMtx = glm::mat4(1.f);
+//            viewMtx = glm::translate(viewMtx, glm::vec3(0.f, 0.f, -10.f));
 
-		//glm::vec3 cameraTarget = pos.position + glm::normalize(front);
-		glm::vec3 cameraTarget(0.f, 0.f, 0.f);
-		glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
-		glm::vec3 right = glm::normalize(glm::cross(front, worldUp));
-		//glm::vec3 up = glm::normalize(glm::cross(right, front));
+//            auto viewMtx = glm::lookAt(pos.position, pos.position + f, u);
 
-		cam.view = glm::lookAt(pos.position, cameraTarget, worldUp);
-	}
+            glm::mat4 projection{1.f};
+            auto& window = engine.GetWindow();
+            switch (cam.mode)
+            {
+                case PERSPECTIVE:
+                    projection = glm::perspective(glm::radians(cam.degree), (float)window.GetWidth() / window.GetHeight(), cam.zNear, cam.zFar);
+                    break;
+                case ORTHOGONAL:
+                    projection = glm::ortho(0.f, (float)window.GetWidth(), 0.f, (float)window.GetHeight(), cam.zNear, cam.zFar);
+                    break;
+            }
+
+            cam.viewProjection = projection * viewMtx;
+        }
+    }
 }

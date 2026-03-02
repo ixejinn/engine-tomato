@@ -1,18 +1,24 @@
 #ifndef TOMATO_CAMERA_H
 #define TOMATO_CAMERA_H
 
-#include <glm/glm.hpp>
+#include "tomato/tomato_math.h"
 
 namespace tomato
 {
+    enum ProjectionMode
+    {
+        PERSPECTIVE,
+        ORTHOGONAL
+    };
+
 	struct CameraComponent
 	{
-		glm::mat4 view{ 1.0f };
-		glm::mat4 projection{ 1.0f };
-		//float fov{ 45.0f };
-		//float nearClip{ 0.1f };
-		//float farClip{ 100.0f };
-		bool active = true;
+        ProjectionMode mode{PERSPECTIVE};
+
+        float degree{45.f};
+        float zNear{0.1f};
+        float zFar{100.f};
+        Matrix viewProjection{1.f};
 	};
 }
 

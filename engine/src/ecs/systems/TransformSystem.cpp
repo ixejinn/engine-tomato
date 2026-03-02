@@ -2,6 +2,7 @@
 #include "tomato/Engine.h"
 #include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Transform.h"
+#include "tomato/Logger.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -19,7 +20,7 @@ namespace tomato
         {
             // Scale → Rotate → Translate
             auto T = glm::translate(glm::mat4(1.f), pos.position);
-            auto R = glm::toMat4(glm::quat(rot.rotation));
+            auto R = glm::toMat4(glm::quat(glm::radians(rot.eulerDegree)));
             auto S = glm::scale(glm::mat4(1.f), scl.scale);
 
             mat.matrix = T * R * S;

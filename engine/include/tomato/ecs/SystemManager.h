@@ -40,8 +40,8 @@ namespace tomato
 
         static constexpr SystemPhase renderOrder_[] =
                 {
-                SystemPhase::RENDER,
-                SystemPhase::CAMERA
+                SystemPhase::CAMERA,
+                SystemPhase::RENDER
                 };
 
         EnumArray<SystemPhase, std::vector<SystemPtr>> systems_;
