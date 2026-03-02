@@ -26,7 +26,7 @@ namespace tomato
         void Serialize(NetBitWriter& writer, Engine& engine) override;
 
         void Deserialize(NetBitReader& reader) override;
-        void Handler(Engine &engine, SocketAddress &fromAddr) override;
+        void Handler(Engine &engine, const SocketAddress &fromAddr) override;
 
         InputRecord inputRecord;
     };

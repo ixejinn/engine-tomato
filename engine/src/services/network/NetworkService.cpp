@@ -27,7 +27,7 @@ namespace tomato
 #elif 1
         
         //test code
-        //ConnectToServer();
+        ConnectToServer();
         isNetThreadRunning_ = true;
         //SocketAddress address[4] = { {"192.168.55.165", 0}, {"192.168.31.234", 0},  {"192.168.55.88", 0} };
         //conn.try_emplace(0, 0, 0, 0, "yejin", address[0]);
@@ -73,7 +73,7 @@ namespace tomato
     void NetworkService::ConnectToServer()
     {
         server_ = TCPSocket::CreateTCPSocket();
-        int err = server_->Connect({ "192.168.31.234", 7777 });
+        int err = server_->Connect({ "192.168.45.239", 7777 });
         if (err == NO_ERROR)
             std::cout << "Connect to Server\n";
         else if (err == -WSAECONNREFUSED)
@@ -174,18 +174,22 @@ namespace tomato
 
         case UDPPacketType::WELCOME:
             //Check the peer is connected
+            std::cout << "Receive WELCOME\n";
             if (HandleWelcomePacket(inToAddress))
             {
-                std::cout << "Receive WELCOME\n";
                 std::cout << "All Checked\n";
-                //SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS);
+                SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS);
                 netState_ = NetworkServiceState::NSS_Lobby;
             }
             //TODO@ timeout
             break;
 
         case UDPPacketType::INPUT:
+        {
+            InputNetMessage tmp;
+            tmp.Read(reader, engine_, inToAddress);
             break;
+        }
         }
 
     }
@@ -322,6 +326,8 @@ namespace tomato
 
     void NetworkService::SendTCPPacket(TCPPacketType messageType)
     {
+        std::cout << "Send ";
+
         RawBuffer rawBuffer{};
         NetBitWriter writer{ &rawBuffer };
         writer.WriteInt(static_cast<uint16_t>(0), std::numeric_limits<uint16_t>::max());
@@ -341,11 +347,13 @@ namespace tomato
         case TCPPacketType::MATCH_INTRO_SUCCESS:
         case TCPPacketType::MATCH_INTRO_FAILED:
         {
+            std::cout << "MATCH_INTRO_SUCCESS\n";
             writer.WriteInt(matchID_, std::numeric_limits<MatchId>::max());
             break;
         }
 
         case TCPPacketType::TIME_SYNC_REQ:
+            std::cout << "MATCH_INTRO_SUCCESS\n";
             sendTime = static_cast<ServerTimeMs>(
                 duration_cast<std::chrono::milliseconds>(
                     std::chrono::steady_clock::now().time_since_epoch()).count());
@@ -355,16 +363,18 @@ namespace tomato
         int16_t byteSize = writer.GetByteSize();
         std::memcpy(rawBuffer.data(), &byteSize, sizeof(uint16_t));
 
-        server_->Send(rawBuffer.data(), byteSize);
+        server_->Send(rawBuffer.data(), byteSize);  
     }
 
     void NetworkService::HandleMatchIntroPacket(NetBitReader& reader)
     {
+        uint8_t readMyId{ 0 };
         uint16_t readMatchId{ 0 };
+
         reader.ReadInt(readMatchId, std::numeric_limits<uint16_t>::max());
         matchID_ = readMatchId;
         std::cout << "[MATCH ID = " << matchID_ << "]\n";
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 2; i++)
         {
             uint8_t readPlayerId{ 0 }, rname{};
             uint16_t readNameSize{};
@@ -380,21 +390,22 @@ namespace tomato
                 readName += rname;
             }
             reader.ReadInt(addr, std::numeric_limits<uint32_t>::max());
-            tomato::SocketAddress readAddr(addr, 0);
-            //std::cout << readAddr.ToString() << '\n';
-            if (SocketAddress::CheckMyAddress(readAddr))
-            {
-                playerID_ = readPlayerId;
-                std::cout << "[My PlayerID = " << int(playerID_) << "]\n";
-                connected.set(playerID_, true);
-            }
-
-            //std::cout << int(readSize) << " " << int(readType) << " " << int(readMatchId) << " " << int(readPlayerId) << '\n';
-            //std::cout << readName << " -> "  << readAddr.ToString() << '\n';
+           
+            //@TODO : Add Port number
+            tomato::SocketAddress readAddr(addr, 9001);
 
             conn.try_emplace(readPlayerId, 0, readMatchId, readPlayerId, readName, readAddr);
+            addToId.try_emplace(readAddr, readPlayerId);
         }
+
+        reader.ReadInt(readMyId, std::numeric_limits<uint8_t>::max());
+
+        playerID_ = readMyId;
+        std::cout << "[My PlayerID = " << int(playerID_) << "]\n";
+        connected.set(playerID_, true);
+        //@TODO : if playerId != 0
     }
+
     void NetworkService::HandleServerTimeSyncPacket(NetBitReader& reader)
     {
         recvTime = static_cast<ServerTimeMs>(

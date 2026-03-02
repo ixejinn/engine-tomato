@@ -7,8 +7,8 @@
 #include "tomato/ecs/systems/System.h"
 #include "tomato/input/InputTypes.h"
 #include "tomato/Logger.h"
-#include "/yj/engine-tomato/contents/GameState.h"
-#include "/yj/engine-tomato/contents/TestState.h"
+#include "/Users/jung/Desktop/engine-tomato/contents/GameState.h"
+#include "/Users/jung/Desktop/engine-tomato/contents/TestState.h"
 
 namespace tomato
 {
@@ -117,7 +117,7 @@ namespace tomato
         //inputRecorder_.UpdateInputAxis(keyEvents_, tick_);
 
         char c = inputRecorder_.TMP_UpdateInputAxis(keyEvents_, tick_);
-#if 0
+#if 1
         switch (c)
         {
         case 1: //Match request
@@ -141,8 +141,10 @@ namespace tomato
             network_.SendTCPPacket(TCPPacketType::MATCH_INTRO_FAILED);
             break;
         }
-#elif 1
-        SocketAddress myAddr("192.168.31.234", 9000);
+#elif 0
+        SocketAddress myAddr("192.168.45.239", 9000);
+        //SocketAddress myAddr("192.168.45.192", 9001);
+        //SocketAddress myAddr("172.24.160.1", 9001);
         switch (c)
         {
         case 1: //Match request
@@ -174,7 +176,7 @@ namespace tomato
 
         while (simLimit--) {
             systemManager_.Simulate(*this, SimContext{tick_});
-            //network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
+            network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
             ++tick_;
 
             if (rollbackManager_)

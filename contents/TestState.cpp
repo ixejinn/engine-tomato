@@ -11,7 +11,7 @@ void TestState::Init(tomato::World& world)
 {
     std::cout << "TEST STATE\n";
     tmt::Registry& registry = world.GetRegistry();
-
+#if 1
     const auto me = world.CreateEntity();
 
     registry.emplace<tomato::PositionComponent>(me);
@@ -39,6 +39,9 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::JumpComponent>(other);
 
     registry.emplace<tomato::SpriteComponent>(other, (uint16_t)0, (uint16_t)0);
+#elif 0
+    
+#endif
 }
 
 void TestState::Exit() {}

@@ -28,7 +28,7 @@ namespace tomato
         inputRecord.held = static_cast<InputIntent>(value);
     }
 
-    void InputNetMessage::Handler(Engine& engine, SocketAddress& fromAddr)
+    void InputNetMessage::Handler(Engine& engine, const SocketAddress& fromAddr)
     {
         engine.SetInputData(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
         engine.SetLatestTick(inputRecord.tick);

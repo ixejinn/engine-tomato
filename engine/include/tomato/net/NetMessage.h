@@ -25,7 +25,7 @@ namespace tomato
          * Deserialize()를 호출해 멤버 필드를 채운 뒤,
          * Handler()를 호출해 처리한다.
          */
-        void Read(NetBitReader& reader, Engine& engine, SocketAddress& fromAddr)
+        void Read(NetBitReader& reader, Engine& engine, const SocketAddress& fromAddr)
         {
             Deserialize(reader);
             Handler(engine, fromAddr);
@@ -55,7 +55,7 @@ namespace tomato
          * @warning Must remains symmetric with Serialize().
          */
         virtual void Deserialize(NetBitReader&) = 0;
-        virtual void Handler(Engine&, SocketAddress&) = 0;
+        virtual void Handler(Engine&, const SocketAddress&) = 0;
     };
 }
 

@@ -86,7 +86,7 @@ namespace tomato
         MemoryPool<RawBuffer, 128> bufferPool_;
         SPSCQueue<Packet, 128> pendingPackets_;
 
-        std::bitset<1> connected{ "0" };
+        std::bitset<2> connected{ "00" };
         std::unordered_map<PlayerId, NetConnection> conn;
         std::unordered_map<SocketAddress, PlayerId> addToId;
 
