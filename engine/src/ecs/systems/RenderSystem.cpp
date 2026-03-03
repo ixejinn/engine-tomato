@@ -95,10 +95,13 @@ namespace tomato
                 mesh->Bind();
             }
 
-            shader->SetUniformInt("uTexture", 0);
-            shader->SetUniformVec4("uColor", render.color);
             shader->SetUniformMat4("uModel", mtx.matrix);
             shader->SetUniformMat4("uViewProj", viewProjection);
+            shader->SetUniformMat3("uNormal", glm::transpose(glm::inverse(glm::mat3(mtx.matrix))));
+
+            shader->SetUniformInt("uTexture", 0);
+            shader->SetUniformVec3("uLightPos", glm::vec3(0, 10, 0));
+            shader->SetUniformVec4("uColor", render.color);
 
             mesh->Draw();
         }

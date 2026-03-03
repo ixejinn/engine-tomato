@@ -15,7 +15,7 @@ namespace tomato
     struct ScaleComponent { Vector3 scale{1.f, 1.f, 1.f}; };
 
     // Local to World
-    struct WorldMatrixComponent { Matrix matrix; };
+    struct WorldMatrixComponent { Matrix4 matrix; };
 }
 
 #endif //TOMATO_TRANSFORM_H

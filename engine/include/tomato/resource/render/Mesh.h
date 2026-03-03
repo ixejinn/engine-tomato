@@ -11,7 +11,11 @@ namespace tomato
     struct Vertex
     {
         Vector3 position;
+        Vector3 normal;
         Vector2 uv;
+
+        Vertex() = default;
+        Vertex(Vector3 pos, Vector3 n, Vector2 uv) : position(pos), normal(n), uv(uv) {}
     };
 
     class Mesh
@@ -50,6 +54,17 @@ namespace tomato
         void Draw() const;
 
     private:
+        /**
+        * @brief Sets CCW vertex list of Plain
+        * 
+        * v0---v3
+        * |  / |
+        * | /  |
+        * v1---v2
+        */
+        void Plain(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3,
+            std::vector<Vertex>& vertices, const size_t vOffset,
+            std::vector<unsigned int>& indices, const size_t iOffset);
         void SetMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 
         /// Stores the state related to vertex attribute settings.

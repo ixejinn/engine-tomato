@@ -54,6 +54,16 @@ namespace tomato
         glUniform1f(glGetUniformLocation(programId_, name), value);
     }
 
+    void Shader::SetUniformVec3(const char* name, float v0, float v1, float v2) const
+    {
+        glUniform3f(glGetUniformLocation(programId_, name), v0, v1, v2);
+    }
+
+    void Shader::SetUniformVec3(const char* name, Vector3 value) const
+    {
+        glUniform3fv(glGetUniformLocation(programId_, name), 1, glm::value_ptr(value));
+    }
+
     void Shader::SetUniformVec4(const char* name, float v0, float v1, float v2, float v3) const
     {
         glUniform4f(glGetUniformLocation(programId_, name), v0, v1, v2, v3);
@@ -64,7 +74,12 @@ namespace tomato
         glUniform4fv(glGetUniformLocation(programId_, name), 1, glm::value_ptr(value));
     }
 
-    void Shader::SetUniformMat4(const char* name, Matrix value) const
+    void Shader::SetUniformMat3(const char* name, Matrix3 value) const
+    {
+        glUniformMatrix3fv(glGetUniformLocation(programId_, name), 1, GL_FALSE, glm::value_ptr(value));
+    }
+
+    void Shader::SetUniformMat4(const char* name, Matrix4 value) const
     {
         glUniformMatrix4fv(glGetUniformLocation(programId_, name), 1, GL_FALSE, glm::value_ptr(value));
     }

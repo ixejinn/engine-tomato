@@ -26,9 +26,15 @@ namespace tomato
         void SetUniformBool(const char* name, bool value) const;
         void SetUniformInt(const char* name, int value) const;
         void SetUniformFloat(const char* name, float value) const;
+
+
+        void SetUniformVec3(const char* name, float v0, float v1, float v2) const;
+        void SetUniformVec3(const char* name, Vector3 value) const;
         void SetUniformVec4(const char* name, float v0, float v1, float v2, float v3) const;
         void SetUniformVec4(const char* name, Vector4 value) const;
-        void SetUniformMat4(const char* name, Matrix value) const;
+
+        void SetUniformMat3(const char* name, Matrix3 value) const;
+        void SetUniformMat4(const char* name, Matrix4 value) const;
 
     private:
         enum Type

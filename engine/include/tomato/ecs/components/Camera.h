@@ -18,7 +18,7 @@ namespace tomato
         float degree{45.f};
         float zNear{0.1f};
         float zFar{100.f};
-        Matrix viewProjection{1.f};
+        Matrix4 viewProjection{1.f};
 	};
 }
 

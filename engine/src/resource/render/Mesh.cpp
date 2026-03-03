@@ -1,6 +1,8 @@
 ﻿#include "tomato/resource/render/Mesh.h"
 #include "tomato/resource/AssetRegistry.h"
 
+#include <glm/glm.hpp>
+
 namespace tomato
 {
     void Mesh::Create()
@@ -23,74 +25,41 @@ namespace tomato
         switch (type)
         {
             case PrimitiveType::PLAIN:
-                vertices = {
-                        {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}}, // 좌하단
-                        {{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}}, // 우하단
-                        {{ 0.5f,  0.5f, 0.0f}, {1.0f, 1.0f}}, // 우상단
-                        {{-0.5f,  0.5f, 0.0f}, {0.0f, 1.0f}}, // 좌상단
-                };
+            {
+                vertices.resize(4 * 1);
+                indices.resize(3 * 2 * 1);
 
-                indices = {
-                        0, 1, 2,  // 첫 번째 삼각형
-                        2, 3, 0   // 두 번째 삼각형
-                };
+                glm::vec3 v0{ -0.5f,  0.5f, 0.0f };
+                glm::vec3 v1{ -0.5f, -0.5f, 0.0f };
+                glm::vec3 v2{  0.5f, -0.5f, 0.0f };
+                glm::vec3 v3{  0.5f,  0.5f, 0.0f };
+
+                Plain(v0, v1, v2, v3, vertices, 0, indices, 0);
+            }
                 break;
 
             case PrimitiveType::CUBE:
-                vertices = {
-                        // 벽면
-                        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-                        {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-                        {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
-                        {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
+            {
+                vertices.resize(4 * 6);
+                indices.resize(3 * 2 * 6);
 
-                        {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-                        {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
-                        {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
-                        {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
+                glm::vec3 v0{ -0.5f,  0.5f, -0.5f };
+                glm::vec3 v1{ -0.5f,  0.5f,  0.5f };
+                glm::vec3 v2{  0.5f,  0.5f,  0.5f };
+                glm::vec3 v3{  0.5f,  0.5f, -0.5f };
 
-                        {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
-                        {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
-                        {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
-                        {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}},
+                glm::vec3 v4{ -0.5f, -0.5f, -0.5f };
+                glm::vec3 v5{ -0.5f, -0.5f,  0.5f };
+                glm::vec3 v6{  0.5f, -0.5f,  0.5f };
+                glm::vec3 v7{  0.5f, -0.5f, -0.5f };
 
-                        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
-                        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-                        {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
-                        {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}},
-
-                        // 바닥면
-                        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
-                        {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
-                        {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
-                        {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
-
-                        // 윗면
-                        {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f}},
-                        {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f}},
-                        {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
-                        {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}},
-                };
-
-                indices = {
-                        0, 1, 2,
-                        2, 3, 0,
-
-                        4, 5, 6,
-                        6, 7, 4,
-
-                        8, 9, 10,
-                        10, 11, 8,
-
-                        12, 13, 14,
-                        14, 15, 12,
-
-                        16, 17, 18,
-                        18, 19, 16,
-
-                        20, 21, 22,
-                        22, 23, 20
-                };
+                Plain(v0, v1, v2, v3, vertices, 4 * 0, indices, 3 * 2 * 0); // top
+                Plain(v1, v5, v6, v2, vertices, 4 * 1, indices, 3 * 2 * 1);
+                Plain(v2, v6, v7, v3, vertices, 4 * 2, indices, 3 * 2 * 2);
+                Plain(v3, v7, v4, v0, vertices, 4 * 3, indices, 3 * 2 * 3);
+                Plain(v0, v4, v5, v1, vertices, 4 * 4, indices, 3 * 2 * 4);
+                Plain(v5, v4, v7, v6, vertices, 4 * 5, indices, 3 * 2 * 5); // bottom
+            }
                 break;
         }
 
@@ -114,6 +83,25 @@ namespace tomato
         glDrawElements(GL_TRIANGLES, vertexCnt_, GL_UNSIGNED_INT, nullptr);
     }
 
+    void Mesh::Plain(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3,
+        std::vector<Vertex>& vertices, const size_t vOffset,
+        std::vector<unsigned int>& indices, const size_t iOffset)
+    {
+        const glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+        
+        vertices[vOffset + 0] = Vertex(v0, normal, { 0.0f, 1.0f });
+        vertices[vOffset + 1] = Vertex(v1, normal, { 0.0f, 0.0f });
+        vertices[vOffset + 2] = Vertex(v2, normal, { 1.0f, 0.0f });
+        vertices[vOffset + 3] = Vertex(v3, normal, { 1.0f, 1.0f });
+
+        indices[iOffset + 0] = vOffset + 0;    // triangle v0 → v1 → v3
+        indices[iOffset + 1] = vOffset + 1;
+        indices[iOffset + 2] = vOffset + 3;
+        indices[iOffset + 3] = vOffset + 3;    // triangle v3 → v1 → v2
+        indices[iOffset + 4] = vOffset + 1;
+        indices[iOffset + 5] = vOffset + 2;
+    }
+
     void Mesh::SetMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     {
         vertexCnt_ = (int)indices.size();
@@ -134,9 +122,13 @@ namespace tomato
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
+        // struct Vertex::normal
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, normal)));
+
         // struct Vertex::uv
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, uv)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, uv)));
 
         // Bind element buffer object
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
