@@ -28,7 +28,9 @@ namespace tomato
 		// Returns true if data was received, false otherwise.
 		bool RecvPacket(void* buffer, int& receivedBytes, SocketAddress& outFromAddress);
 
+		const uint16_t& GetPort() const { return port; }
 	private:
+		uint16_t port{ 9001 };
 		SocketPtr socket_;
 	};
 

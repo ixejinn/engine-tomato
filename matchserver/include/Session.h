@@ -23,6 +23,8 @@ namespace TCP
 		std::unique_ptr<TCPPacket> ParsePacket();
 		void ConsumeSendBuffer(int len);
 
+		void SetPort(uint16_t inPort) { addr.SetPort(inPort); }
+
 		const tomato::TCPSocketPtr& GetSocket() const { return socket; }
 		const tomato::SocketAddress& GetSocketAddress() const { return addr; }
 		std::vector<uint8_t>& GetRecvBuffer() { return recvBuffer; }

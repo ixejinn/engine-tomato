@@ -20,9 +20,11 @@ public:
 	std::unique_ptr<TCPPacket> AppendRecvBuffer(const SessionId& client, const uint8_t* inData, const int& len);
 	void AppendSendBuffer(const SessionId& client, const uint8_t* inData, const int& len);
 
+	void SetSessionPort(SessionId& id, uint16_t inPort);
 	void GetWritableSockets(std::vector<tomato::TCPSocketPtr>& outVector);
 	SessionId GetSessionId(const tomato::TCPSocketPtr& client) { return socketToId[client]; }
 	TCP::Session* GetSession(const tomato::TCPSocketPtr& socket);
+	const tomato::SocketAddress& GetAddress(const SessionId& id);
 
 	// For UDP
 	void GenerateSession(const tomato::SocketAddress&); 
@@ -31,7 +33,6 @@ public:
 	void UpdateLastRecv(const SessionId&);
 
 	SessionId GetSessionId(const tomato::SocketAddress& addr) { return addrToSessionId[addr]; }
-	const tomato::SocketAddress& GetAddress(const SessionId& id);
 
 private:
 	std::unordered_map<SessionId, TCP::Session> tcpSessions;

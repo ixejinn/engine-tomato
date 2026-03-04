@@ -97,6 +97,13 @@ void SessionManager::AppendSendBuffer(const SessionId& client, const uint8_t* in
 		it->second.AppendSendBuffer(inData, len);
 }
 
+void SessionManager::SetSessionPort(SessionId& id, uint16_t inPort)
+{
+	auto it = tcpSessions.find(id);
+	if (it != tcpSessions.end())
+		it->second.addr.SetPort(inPort);
+}
+
 void SessionManager::GetWritableSockets(std::vector<tomato::TCPSocketPtr>& outVector)
 {
 	//for (auto& session : tcpSessions)

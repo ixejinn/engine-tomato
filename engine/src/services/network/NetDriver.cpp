@@ -22,7 +22,6 @@ namespace tomato
         socket_ = Socket::CreateSocket();
 
         // INADDR_ANY allows receiving packets from any Network Interface Controller.
-        uint32_t port = 9001;
         SocketAddress myAddr((uint32_t)INADDR_ANY, port);
         if (socket_->Bind(myAddr) != NO_ERROR)
         {

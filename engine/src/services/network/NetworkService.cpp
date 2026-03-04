@@ -10,70 +10,18 @@ namespace tomato
 	NetworkService::NetworkService(Engine& engine)
     : engine_(engine), playerID_(0), netState_(NetworkServiceState::NSS_Uninitialized)
     {
-#if 0
-        InitSocket();
-
-        playerToName[0] = "yejin";
-        playerToSocket[0] = SocketAddress{"192.168.55.165", 7777};
-        socketToPlayer[playerToSocket[0]] = 0;
-
-//        playerToName[1] = "yujung";
-//        playerToSocket[1] = SocketAddress{"192.168.31.234", 7777};
-//        socketToPlayer[playerToSocket[1]] = 1;
-
-        playerToName[1] = "yejin2";
-        playerToSocket[1] = SocketAddress{"192.168.55.88", 7777};
-        socketToPlayer[playerToSocket[1]] = 1;
-#elif 1
-        
         //test code
         ConnectToServer();
         isNetThreadRunning_ = true;
-        //SocketAddress address[4] = { {"192.168.55.165", 0}, {"192.168.31.234", 0},  {"192.168.55.88", 0} };
-        //conn.try_emplace(0, 0, 0, 0, "yejin", address[0]);
-        //conn.try_emplace(1, 0, 0, 1, "yejin2", address[2]);
-        //
-        //addToId[address[0]] = 0;
-        //addToId[address[2]] = 1;
-#endif
     }
 
-    NetworkService::~NetworkService()
-    {
-    }
-
-    // !!! FOR TEST !!!
-    void NetworkService::ReadIncomingData()
-    {
-        //std::cout << "ReadData\n";
-        char buffer[512] = { '\0' };
-        SocketAddress fromAddr;
-        int readByteCount{};
-
-        if (driver_.RecvPacket(buffer, readByteCount, fromAddr))
-        {
-            buffer[readByteCount] = '\0';
-            std::cout << "[" << fromAddr.ToString() << "] : " << buffer << '\n';
-        }
-    }
-
-    void NetworkService::SendOutgoingData(const SocketAddress& inToAddress)
-    {
-        //std::cout << "SendData\n";
-        //std::string str;
-        ////while (true){
-        //std::cin >> str;
-
-        //int sentByteCount = socket_->SendTo(str.c_str(), (int)str.size(), inToAddress);
-        //std::cout << sentByteCount << std::endl;
-        ////}
-    }
-    // !!! FOR TEST !!!
+    NetworkService::~NetworkService() {}
 
     void NetworkService::ConnectToServer()
     {
         server_ = TCPSocket::CreateTCPSocket();
         int err = server_->Connect({ "192.168.45.239", 7777 });
+
         if (err == NO_ERROR)
             std::cout << "Connect to Server\n";
         else if (err == -WSAECONNREFUSED)
@@ -88,7 +36,6 @@ namespace tomato
     void NetworkService::NetThreadLoop()
     {
         SocketAddress fromAddr;
-        //isNetThreadRunning_ = true;
         while (isNetThreadRunning_)
         {
             RawBuffer* buffer = bufferPool_.Allocate();
@@ -100,29 +47,9 @@ namespace tomato
         }
     }
 
-    /*
-    void NetworkService::Dispatch()
-    {
-        SocketAddress fromAddr;
-
-        isNetThreadRunning_ = true;
-        while (isNetThreadRunning_)
-        {
-            RawBuffer* buffer = bufferPool_.Allocate();
-            int receivedBytes = socket_->ReceiveFrom(buffer, MAX_PACKET_SIZE, fromAddr);
-            //std::cout << "NetworkService::Dispatch() " << engine_.GetTick() << "tick | " << receivedBytes << "\n";
-
-            if (receivedBytes > 0)
-            {
-                pendingPackets_.Emplace(buffer, receivedBytes, fromAddr);
-            }
-            else
-                bufferPool_.Deallocate(buffer);
-        }
-    }
-    */
     void NetworkService::ProcessPendingPacket()
     {
+        /*
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
         while (!pendingPackets_.Empty())
         {
@@ -143,6 +70,7 @@ namespace tomato
             bufferPool_.Deallocate(packet.buffer);
         }
         // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
+        */
     }
 
     void NetworkService::ProcessQueuedUDPPacket()
@@ -247,9 +175,15 @@ namespace tomato
     bool NetworkService::HandleWelcomePacket(const SocketAddress& inToAddress)
     {
         PlayerId id = GetPlayerID(inToAddress);
-        connected.set(id, true);
+        peerConnected[id] = true;
+        
+        for (const auto& peer : peerConnected)
+        {
+            if (!peer)
+                return false;
+        }
 
-        return connected.all();
+        return true;
     }
 
     void NetworkService::TCPNetRecvThreadLoop()
@@ -337,9 +271,12 @@ namespace tomato
         {
         case TCPPacketType::MATCH_REQUEST:
         {
+            // name size + name + udp port number
             writer.WriteInt(static_cast<uint16_t>(name_.size()), std::numeric_limits<uint16_t>::max());
             for (int i = 0; i < name_.size(); i++)
                 writer.WriteInt(static_cast<uint8_t>(name_[i]), std::numeric_limits<uint8_t>::max());
+            writer.WriteInt(static_cast<uint16_t>(driver_.GetPort()), std::numeric_limits<uint16_t>::max());
+            
             break;
         }
 
@@ -368,16 +305,19 @@ namespace tomato
 
     void NetworkService::HandleMatchIntroPacket(NetBitReader& reader)
     {
-        uint8_t readMyId{ 0 };
+        uint8_t readMyId{ 0 }, readPlayerNum{ 0 };
         uint16_t readMatchId{ 0 };
 
         reader.ReadInt(readMatchId, std::numeric_limits<uint16_t>::max());
         matchID_ = readMatchId;
+        reader.ReadInt(readPlayerNum, std::numeric_limits<uint8_t>::max());
+        peerConnected.resize(readPlayerNum);
+
         std::cout << "[MATCH ID = " << matchID_ << "]\n";
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < readPlayerNum; i++)
         {
             uint8_t readPlayerId{ 0 }, rname{};
-            uint16_t readNameSize{};
+            uint16_t readNameSize{}, readPort{};
             std::string readName{};
             uint32_t addr{ 0 };
 
@@ -390,9 +330,9 @@ namespace tomato
                 readName += rname;
             }
             reader.ReadInt(addr, std::numeric_limits<uint32_t>::max());
-           
-            //@TODO : Add Port number
-            tomato::SocketAddress readAddr(addr, 9001);
+            reader.ReadInt(readPort, std::numeric_limits<uint16_t>::max());
+
+            tomato::SocketAddress readAddr(addr, readPort);
 
             conn.try_emplace(readPlayerId, 0, readMatchId, readPlayerId, readName, readAddr);
             addToId.try_emplace(readAddr, readPlayerId);
@@ -402,7 +342,7 @@ namespace tomato
 
         playerID_ = readMyId;
         std::cout << "[My PlayerID = " << int(playerID_) << "]\n";
-        connected.set(playerID_, true);
+        peerConnected[playerID_] = true;
         //@TODO : if playerId != 0
     }
 

@@ -205,7 +205,7 @@ void NetworkService::ProcessPacket(const TCPPacketType& header, tomato::NetBitRe
 void NetworkService::HandlePacketRequest(const TCPPacketType& header, tomato::NetBitReader& reader, SessionId& client)
 {
 	//패킷 읽어서 해석 x 그냥 리퀘스트 커맨드 구조체로 큐에 넣어줌
-	uint16_t nameSize{};
+	uint16_t nameSize{}, port{};
 	std::string name{};
 	uint8_t tmp;
 	MatchId matchId{0};
@@ -216,13 +216,18 @@ void NetworkService::HandlePacketRequest(const TCPPacketType& header, tomato::Ne
 	{
 	case TCPPacketType::MATCH_REQUEST:
 	{
+		// name size + name + udp port number
 		reader.ReadInt(nameSize, std::numeric_limits<uint16_t>::max());
 		for(int i = 0; i < nameSize; i++)
 		{
 			reader.ReadInt(tmp, std::numeric_limits<uint8_t>::max());
 			name += tmp;
 		}
-		MatchRequestQueue.Emplace(client, addr, name, matchId, MatchRequestAction::Enqueue);
+		reader.ReadInt(port, std::numeric_limits<uint16_t>::max());
+
+		sessionMgr_.SetSessionPort(client, port);
+
+		MatchRequestQueue.Emplace(client, sessionMgr_.GetAddress(client), name, matchId, MatchRequestAction::Enqueue);
 		break;
 	}
 
@@ -315,12 +320,11 @@ void NetworkService::TCPRecvThreadLoop()
 	bool tmpRun = true;
 	while (tmpRun)
 	{
-		//readBlockSockets.clear();
-		//readBlockSockets.push_back(listenSocket);
 		if (!tomato::SocketUtil::Select(&readBlockSockets, &readableSockets,
 			nullptr, nullptr, nullptr, nullptr))
 			continue;
 
+		std::vector<tomato::TCPSocketPtr> disconnectedSockets;
 		for (const tomato::TCPSocketPtr& socket : readableSockets)
 		{
 			if (socket == listenSocket)
@@ -331,7 +335,9 @@ void NetworkService::TCPRecvThreadLoop()
 				{
 					readBlockSockets.push_back(newSocket);
 					sessionMgr_.GenerateSession(newSocket, newClientAddress);
-					std::cout << "New Connect\n";
+
+					std::cout << "[New Connect] " << newClientAddress.ToString() <<
+						" | session num." << sessionMgr_.GetSessionId(newSocket) << '\n';
 				}
 			}
 			else
@@ -345,12 +351,23 @@ void NetworkService::TCPRecvThreadLoop()
 					std::cout << "GetMessage from " << id << '\n';
 					ProcessDataFromClient(id, segment, dataReceived);
 				}
-				else if (dataReceived == 0)
+				else if (dataReceived <= 0)
 				{
-					std::cout << "Disconnected\n";
+					std::cout << "[Disconnected] " << sessionMgr_.GetAddress(id).ToString() << " | session num." << id << '\n';
+					
+					for (const tomato::TCPSocketPtr& readSocket : readBlockSockets)
+					{
+						if (readSocket == socket)
+							continue;
+
+						disconnectedSockets.push_back(readSocket);
+					}
+					readBlockSockets = disconnectedSockets;
 					sessionMgr_.RemoveSession(id);
 				}
 			}
+			readableSockets = readBlockSockets;
 		}
-	}
+		
+		
 }

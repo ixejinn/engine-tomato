@@ -72,56 +72,13 @@ MatchState Match::CollectNetConnection(const MatchRequest* matchRequest)
 		(conn + i)->name = (matchRequest + i)->name;
 		(conn + i)->addr = (matchRequest + i)->address;
 	}
-#if 0
-		int len{};
-		tomato::SocketAddress address;
-		//if ((matchRequest + i)->socket->GetSocketAddress(address, len) == 0)
-		//	(conn + i)->addr = address;
-		else
-			return MatchState::Failed;
-#elif 0
-		tomato::SocketAddress addr[4];
-		addr[0] = { "192.168.55.165", 7777 };
-		addr[1] = { "192.168.55.166", 7777 };
-		addr[2] = { "192.168.55.167", 7777 };
-		//addr[3] = { "192.168.55.168", 7777 };
-		addr[3] = { "192.168.31.234", 7777 };
-		(conn + i)->addr = { "192.168.31.234", 7777 };
-	}
-#endif
 
 	return MatchState::InfoSent;
 }
 
 MatchState Match::RequestToSendNetConnection(tomato::SPSCQueue<SendCommandPtr, 256>& sendRequestQ, const MatchRequest* matchRequest)
 {
-#if 0
-	RawBuffer buf{};
-	tomato::NetBitWriter writer{ &buf };
-	writer.WriteInt(static_cast<uint16_t>(0), std::numeric_limits<uint16_t>::max()); //packet len
-	writer.WriteInt(static_cast<uint16_t>(TCPPacketType::MATCH_INTRO), static_cast<uint16_t>(TCPPacketType::COUNT));
-	writer.WriteInt(static_cast<uint16_t>(ctx_.matchId), std::numeric_limits<uint16_t>::max());
-	
-	for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
-	{
-		writer.WriteInt(static_cast<uint8_t>(conn[i].playerId), std::numeric_limits<uint8_t>::max());
-		writer.WriteInt(static_cast<uint16_t>(conn[i].name.size()), std::numeric_limits<uint16_t>::max());
-		for (int j = 0; j < conn[i].name.size(); j++)
-			writer.WriteInt(static_cast<uint8_t>(conn[i].name[j]), std::numeric_limits<uint8_t>::max());
-		writer.WriteInt(static_cast<uint32_t>(conn[i].addr.GetIPv4()), std::numeric_limits<uint32_t>::max());
-	}
-	uint16_t size = writer.GetByteSize();
-
-	memcpy(buf.data(), &size, sizeof(uint16_t));
-
-	for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
-	{
-		auto sendCmd = std::make_unique<SendRequestCommand>((matchRequest + i)->sessionId, size);
-		std::memcpy(sendCmd.get()->data.data(), buf.data(), size);
-
-		sendRequestQ.Emplace(std::move(sendCmd));
-	}
-#elif 1
+	//len + type + match id + player num + connection * player num + player id
 	for (int i = 0; i < MatchConstants::MAX_MATCH_PLAYER; i++)
 	{
 		RawBuffer buf{};
@@ -129,6 +86,7 @@ MatchState Match::RequestToSendNetConnection(tomato::SPSCQueue<SendCommandPtr, 2
 		writer.WriteInt(static_cast<uint16_t>(0), std::numeric_limits<uint16_t>::max()); //packet len
 		writer.WriteInt(static_cast<uint16_t>(TCPPacketType::MATCH_INTRO), static_cast<uint16_t>(TCPPacketType::COUNT));
 		writer.WriteInt(static_cast<uint16_t>(ctx_.matchId), std::numeric_limits<uint16_t>::max());
+		writer.WriteInt(static_cast<uint16_t>(MatchConstants::MAX_MATCH_PLAYER), std::numeric_limits<uint8_t>::max());
 
 		for (int k = 0; k < MatchConstants::MAX_MATCH_PLAYER; k++)
 		{
@@ -137,7 +95,7 @@ MatchState Match::RequestToSendNetConnection(tomato::SPSCQueue<SendCommandPtr, 2
 			for (int j = 0; j < conn[k].name.size(); j++)
 				writer.WriteInt(static_cast<uint8_t>(conn[k].name[j]), std::numeric_limits<uint8_t>::max());
 			writer.WriteInt(static_cast<uint32_t>(conn[k].addr.GetIPv4()), std::numeric_limits<uint32_t>::max());
-			//@TODO : Add Port number
+			writer.WriteInt(static_cast<uint16_t>(conn[k].addr.GetPort()), std::numeric_limits<uint16_t>::max());
 		}
 
 		writer.WriteInt(static_cast<uint8_t>(conn[i].playerId), std::numeric_limits<uint8_t>::max());
@@ -151,7 +109,6 @@ MatchState Match::RequestToSendNetConnection(tomato::SPSCQueue<SendCommandPtr, 2
 		sendRequestQ.Emplace(std::move(sendCmd));
 	}
 
-#endif
 	return MatchState::WaitPeerReady;
 }
 

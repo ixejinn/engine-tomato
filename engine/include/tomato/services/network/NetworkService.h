@@ -36,15 +36,12 @@ namespace tomato
 		explicit NetworkService(Engine& engine);
         ~NetworkService();
 
-        // !!! FOR TEST !!!
-		void ReadIncomingData();
-		void SendOutgoingData(const SocketAddress& inToAddress);
+        // !!! FOR TEST !!
         void SetNetState(NetworkServiceState state) { netState_ = state; }
         // !!! FOR TEST !!!
         
         void ConnectToServer();
 
-        //void Dispatch();
         void NetThreadLoop();
         void ProcessPendingPacket();
         void ProcessQueuedUDPPacket();
@@ -86,7 +83,7 @@ namespace tomato
         MemoryPool<RawBuffer, 128> bufferPool_;
         SPSCQueue<Packet, 128> pendingPackets_;
 
-        std::bitset<2> connected{ "00" };
+        std::vector<bool> peerConnected;
         std::unordered_map<PlayerId, NetConnection> conn;
         std::unordered_map<SocketAddress, PlayerId> addToId;
 

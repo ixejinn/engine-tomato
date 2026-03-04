@@ -15,8 +15,6 @@ namespace tomato
 	class SocketAddress
 	{
 	public:
-		static bool CheckMyAddress(const SocketAddress& inAddress);
-
         SocketAddress(uint32_t inAddress, uint16_t inPort)
 		{
 			GetAsSockAddrIn()->sin_family = AF_INET;
@@ -51,6 +49,8 @@ namespace tomato
 				GetAsSockAddrIn()->sin_port == other.GetAsSockAddrIn()->sin_port) &&
 				(GetIPv4Ref() == other.GetIPv4Ref());
 		}
+
+		void SetPort(uint16_t inPort) { GetAsSockAddrIn()->sin_port = htons(inPort); }
 
 		// unordered_map / unordered_set 사용을 위한 해시 생성
 		// IPv4 / Port / AddressFamily 조합 기반
