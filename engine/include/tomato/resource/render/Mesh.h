@@ -62,9 +62,9 @@ namespace tomato
         * | /  |
         * v1---v2
         */
-        void Plain(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3,
-            std::vector<Vertex>& vertices, const size_t vOffset,
-            std::vector<unsigned int>& indices, const size_t iOffset);
+        static void Plain(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3,
+                          std::vector<Vertex>& vertices, size_t vOffset,
+                          std::vector<unsigned int>& indices, size_t iOffset);
         void SetMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 
         /// Stores the state related to vertex attribute settings.

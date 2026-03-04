@@ -46,45 +46,45 @@ namespace tomato
 
     void Shader::SetUniformInt(const char* name, int value) const
     {
-        glUniform1i(glGetUniformLocation(programId_, name), value);
+        glProgramUniform1i(programId_, glGetUniformLocation(programId_, name), value);
     }
 
     void Shader::SetUniformFloat(const char* name, float value) const
     {
-        glUniform1f(glGetUniformLocation(programId_, name), value);
+        glProgramUniform1f(programId_, glGetUniformLocation(programId_, name), value);
     }
 
     void Shader::SetUniformVec3(const char* name, float v0, float v1, float v2) const
     {
-        glUniform3f(glGetUniformLocation(programId_, name), v0, v1, v2);
+        glProgramUniform3f(programId_, glGetUniformLocation(programId_, name), v0, v1, v2);
     }
 
     void Shader::SetUniformVec3(const char* name, Vector3 value) const
     {
-        glUniform3fv(glGetUniformLocation(programId_, name), 1, glm::value_ptr(value));
+        glProgramUniform3fv(programId_, glGetUniformLocation(programId_, name), 1, glm::value_ptr(value));
     }
 
     void Shader::SetUniformVec4(const char* name, float v0, float v1, float v2, float v3) const
     {
-        glUniform4f(glGetUniformLocation(programId_, name), v0, v1, v2, v3);
+        glProgramUniform4f(programId_, glGetUniformLocation(programId_, name), v0, v1, v2, v3);
     }
 
     void Shader::SetUniformVec4(const char* name, Vector4 value) const
     {
-        glUniform4fv(glGetUniformLocation(programId_, name), 1, glm::value_ptr(value));
+        glProgramUniform4fv(programId_, glGetUniformLocation(programId_, name), 1, glm::value_ptr(value));
     }
 
     void Shader::SetUniformMat3(const char* name, Matrix3 value) const
     {
-        glUniformMatrix3fv(glGetUniformLocation(programId_, name), 1, GL_FALSE, glm::value_ptr(value));
+        glProgramUniformMatrix3fv(programId_, glGetUniformLocation(programId_, name), 1, GL_FALSE, glm::value_ptr(value));
     }
 
     void Shader::SetUniformMat4(const char* name, Matrix4 value) const
     {
-        glUniformMatrix4fv(glGetUniformLocation(programId_, name), 1, GL_FALSE, glm::value_ptr(value));
+        glProgramUniformMatrix4fv(programId_, glGetUniformLocation(programId_, name), 1, GL_FALSE, glm::value_ptr(value));
     }
 
-    void Shader::CheckCompileErrors(GLuint shader, Type type)
+    void Shader::CheckCompileErrors(const GLuint shader, const Type type)
     {
         int success;
         char infoLog[512];

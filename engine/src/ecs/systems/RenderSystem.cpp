@@ -53,7 +53,7 @@ namespace tomato
                 engine.SetCurrentCamera(curCam);
         }
         
-        if (cam = engine.GetWorld().GetRegistry().try_get<CameraComponent>(curCam))
+        if ((cam = engine.GetWorld().GetRegistry().try_get<CameraComponent>(curCam)))
             viewProjection = cam->viewProjection;
         else
         {

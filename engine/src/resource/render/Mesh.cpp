@@ -29,29 +29,28 @@ namespace tomato
                 vertices.resize(4 * 1);
                 indices.resize(3 * 2 * 1);
 
-                glm::vec3 v0{ -0.5f,  0.5f, 0.0f };
-                glm::vec3 v1{ -0.5f, -0.5f, 0.0f };
-                glm::vec3 v2{  0.5f, -0.5f, 0.0f };
-                glm::vec3 v3{  0.5f,  0.5f, 0.0f };
+                glm::vec3 v0{-0.5f,  0.5f, 0.0f};
+                glm::vec3 v1{-0.5f, -0.5f, 0.0f};
+                glm::vec3 v2{ 0.5f, -0.5f, 0.0f};
+                glm::vec3 v3{ 0.5f,  0.5f, 0.0f};
 
                 Plain(v0, v1, v2, v3, vertices, 0, indices, 0);
             }
                 break;
-
             case PrimitiveType::CUBE:
             {
                 vertices.resize(4 * 6);
                 indices.resize(3 * 2 * 6);
 
-                glm::vec3 v0{ -0.5f,  0.5f, -0.5f };
-                glm::vec3 v1{ -0.5f,  0.5f,  0.5f };
-                glm::vec3 v2{  0.5f,  0.5f,  0.5f };
-                glm::vec3 v3{  0.5f,  0.5f, -0.5f };
+                glm::vec3 v0{-0.5f,  0.5f, -0.5f};
+                glm::vec3 v1{-0.5f,  0.5f,  0.5f};
+                glm::vec3 v2{ 0.5f,  0.5f,  0.5f};
+                glm::vec3 v3{ 0.5f,  0.5f, -0.5f};
 
-                glm::vec3 v4{ -0.5f, -0.5f, -0.5f };
-                glm::vec3 v5{ -0.5f, -0.5f,  0.5f };
-                glm::vec3 v6{  0.5f, -0.5f,  0.5f };
-                glm::vec3 v7{  0.5f, -0.5f, -0.5f };
+                glm::vec3 v4{-0.5f, -0.5f, -0.5f};
+                glm::vec3 v5{-0.5f, -0.5f,  0.5f};
+                glm::vec3 v6{ 0.5f, -0.5f,  0.5f};
+                glm::vec3 v7{ 0.5f, -0.5f, -0.5f};
 
                 Plain(v0, v1, v2, v3, vertices, 4 * 0, indices, 3 * 2 * 0); // top
                 Plain(v1, v5, v6, v2, vertices, 4 * 1, indices, 3 * 2 * 1);
@@ -61,6 +60,9 @@ namespace tomato
                 Plain(v5, v4, v7, v6, vertices, 4 * 5, indices, 3 * 2 * 5); // bottom
             }
                 break;
+            case PrimitiveType::COUNT:
+                TMT_WARN << "Invalid primitive type";
+                break;
         }
 
         SetMesh(vertices, indices);
@@ -69,7 +71,7 @@ namespace tomato
     Mesh::~Mesh()
     {
         glDeleteVertexArrays(1, &vao_);
-        glDeleteBuffers(3, &vbo_);
+        glDeleteBuffers(1, &vbo_);
         glDeleteBuffers(1, &ebo_);
     }
 
@@ -104,34 +106,51 @@ namespace tomato
 
     void Mesh::SetMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     {
-        vertexCnt_ = (int)indices.size();
+        vertexCnt_ = static_cast<int>(indices.size());
 
         // Generate vertex array object and buffer object names
-        glGenVertexArrays(1, &vao_);
-        glGenBuffers(1, &vbo_);
-        glGenBuffers(1, &ebo_);
+        // glGenVertexArrays(1, &vao_);
+        // glGenBuffers(1, &vbo_);
+        // glGenBuffers(1, &ebo_);
+        glCreateVertexArrays(1, &vao_);
+        glCreateBuffers(1, &vbo_);
+        glCreateBuffers(1, &ebo_);
 
         // Bind vertex array object
-        glBindVertexArray(vao_);
+        // glBindVertexArray(vao_);
 
         // Bind and set buffer object
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+        // glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+        // glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertices.size() * sizeof(Vertex)), vertices.data(), GL_STATIC_DRAW);
+        glNamedBufferData(vbo_, static_cast<GLsizeiptr>(vertices.size() * sizeof(Vertex)), vertices.data(), GL_STATIC_DRAW);
 
         // struct Vertex::position
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+        // glEnableVertexAttribArray(0);
+        // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+        glVertexArrayVertexBuffer(vao_, 0, vbo_, 0, sizeof(Vertex));
+
+        glEnableVertexArrayAttrib(vao_, 0);
+        glVertexArrayAttribBinding(vao_, 0, 0);
+        glVertexArrayAttribFormat(vao_, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
 
         // struct Vertex::normal
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, normal)));
+        // glEnableVertexAttribArray(1);
+        // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>((offsetof(Vertex, normal))));
+        glEnableVertexArrayAttrib(vao_, 1);
+        glVertexArrayAttribBinding(vao_, 1, 0);
+        glVertexArrayAttribFormat(vao_, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
 
         // struct Vertex::uv
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, uv)));
+        // glEnableVertexAttribArray(2);
+        // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>((offsetof(Vertex, uv))));
+        glEnableVertexArrayAttrib(vao_, 2);
+        glVertexArrayAttribBinding(vao_, 2, 0);
+        glVertexArrayAttribFormat(vao_, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
 
         // Bind element buffer object
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
+        // glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(indices.size() * sizeof(unsigned int)), indices.data(), GL_STATIC_DRAW);
+        glNamedBufferData(ebo_, static_cast<GLsizeiptr>(indices.size() * sizeof(unsigned int)), indices.data(), GL_STATIC_DRAW);
+        glVertexArrayElementBuffer(vao_, ebo_);
     }
 }

@@ -63,9 +63,7 @@ namespace tomato
         glTextureParameteri(textureId_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         int width, height, actualCh;
-        unsigned char* image = stbi_load(filename, &width, &height, &actualCh, format_.channels);
-
-        if (image)
+        if (unsigned char* image = stbi_load(filename, &width, &height, &actualCh, format_.channels))
         {
             if (format_.channels != 0 && actualCh > format_.channels)
                 TMT_WARN << "Data loss occurs: " << filename;
@@ -92,7 +90,8 @@ namespace tomato
 
     void Texture::Bind() const
     {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureId_);
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, textureId_);
+        glBindTextureUnit(0, textureId_);
     }
 }
