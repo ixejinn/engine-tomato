@@ -108,49 +108,37 @@ namespace tomato
     {
         vertexCnt_ = static_cast<int>(indices.size());
 
-        // Generate vertex array object and buffer object names
-        // glGenVertexArrays(1, &vao_);
-        // glGenBuffers(1, &vbo_);
-        // glGenBuffers(1, &ebo_);
+        // Generate vertex array object and buffer objects
         glCreateVertexArrays(1, &vao_);
         glCreateBuffers(1, &vbo_);
         glCreateBuffers(1, &ebo_);
 
-        // Bind vertex array object
-        // glBindVertexArray(vao_);
-
-        // Bind and set buffer object
-        // glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-        // glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertices.size() * sizeof(Vertex)), vertices.data(), GL_STATIC_DRAW);
+        // Upload vertex data to VBO
         glNamedBufferData(vbo_, static_cast<GLsizeiptr>(vertices.size() * sizeof(Vertex)), vertices.data(), GL_STATIC_DRAW);
-
-        // struct Vertex::position
-        // glEnableVertexAttribArray(0);
-        // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+        // Bind VBO to vertex binding slot 0 of VAO
         glVertexArrayVertexBuffer(vao_, 0, vbo_, 0, sizeof(Vertex));
 
+        // Vertex attribute 0: Vertex::position
+        // Enable attribute slot in shader
         glEnableVertexArrayAttrib(vao_, 0);
+        // Link attribute 0 to vertex binding slot 0 (where VBO is bound)
         glVertexArrayAttribBinding(vao_, 0, 0);
+        // Define the data layout (starting at Vertex::position offset)
         glVertexArrayAttribFormat(vao_, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, position));
 
-        // struct Vertex::normal
-        // glEnableVertexAttribArray(1);
-        // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>((offsetof(Vertex, normal))));
+        // Vertex attribute 1: Vertex::normal
         glEnableVertexArrayAttrib(vao_, 1);
         glVertexArrayAttribBinding(vao_, 1, 0);
         glVertexArrayAttribFormat(vao_, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
 
-        // struct Vertex::uv
-        // glEnableVertexAttribArray(2);
-        // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void *>((offsetof(Vertex, uv))));
+        // Vertex attribute 2: Vertex::uv
         glEnableVertexArrayAttrib(vao_, 2);
         glVertexArrayAttribBinding(vao_, 2, 0);
         glVertexArrayAttribFormat(vao_, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, uv));
 
-        // Bind element buffer object
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-        // glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(indices.size() * sizeof(unsigned int)), indices.data(), GL_STATIC_DRAW);
+        // Upload index(element) data to EBO
         glNamedBufferData(ebo_, static_cast<GLsizeiptr>(indices.size() * sizeof(unsigned int)), indices.data(), GL_STATIC_DRAW);
+        // Bind EBO to element binding slot of VAO
         glVertexArrayElementBuffer(vao_, ebo_);
     }
 }

@@ -25,7 +25,12 @@ namespace tomato
     curShader_(GetAssetID(Shader::PrimitiveName)),
     curTexture_(GetAssetID(Texture::PrimitiveName))
     {
+        // Enable depth test
         glEnable(GL_DEPTH_TEST);
+
+        // Enable color blending and set blend function for alpha transparency
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         AssetRegistry<Mesh>::GetInstance().Init();
         AssetRegistry<Texture>::GetInstance().Init();

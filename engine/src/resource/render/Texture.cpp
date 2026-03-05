@@ -43,6 +43,7 @@ namespace tomato
     {
         glCreateTextures(GL_TEXTURE_2D, 1, &textureId_);
 
+        // Create 1x1 solid white texture for default shading
         GLubyte white[4] = {255, 255, 255, 255};
         glTextureStorage2D(textureId_, 1, format_.internalFormat, 1, 1);
         glTextureSubImage2D(textureId_, 0, 0, 0, 1, 1, format_.format, format_.type, white);
@@ -52,6 +53,7 @@ namespace tomato
     {
         stbi_set_flip_vertically_on_load(true);
 
+        // Create 2D texture
         glCreateTextures(GL_TEXTURE_2D, 1, &textureId_);
 
         // Set wrapping options
@@ -68,13 +70,24 @@ namespace tomato
             if (format_.channels != 0 && actualCh > format_.channels)
                 TMT_WARN << "Data loss occurs: " << filename;
 
-            glTextureStorage2D(textureId_, 1, format_.internalFormat, width, height);
+            // Allocate immutable storage for the texture
+            auto levels = static_cast<GLsizei>(std::floor(std::log2(std::max(width, height))) + 1);    // for mipmaps
+            glTextureStorage2D(textureId_, levels, format_.internalFormat, width, height);
+
+            // Get current alignment to restore it later
+            GLint prevAlign = 0;
+            glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevAlign);
+            // Set to 1 byte alignment to handle any image format
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+            // Upload pixel data to allocated storage
             glTextureSubImage2D(textureId_, 0, 0, 0, width, height, format_.format, format_.type, image);
 
-            glGenerateTextureMipmap(textureId_);
+            // Restore previous alignment
+            glPixelStorei(GL_UNPACK_ALIGNMENT, prevAlign);
 
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            // Generate mipmaps for texture
+            glGenerateTextureMipmap(textureId_);
 
             stbi_image_free(image);
         }
@@ -90,8 +103,7 @@ namespace tomato
 
     void Texture::Bind() const
     {
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_2D, textureId_);
+        // Bind texture to unit 0
         glBindTextureUnit(0, textureId_);
     }
 }

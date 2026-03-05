@@ -41,7 +41,7 @@ namespace tomato
 
     void Shader::SetUniformBool(const char* name, bool value) const
     {
-        SetUniformInt(name, (int)value);
+        SetUniformInt(name, static_cast<int>(value));
     }
 
     void Shader::SetUniformInt(const char* name, int value) const
