@@ -2,6 +2,7 @@
 #define TOMATO_INPUTCONSTANTS_H
 
 #include <cstdint>
+#include <ostream>
 
 namespace tomato
 {
@@ -157,6 +158,12 @@ namespace tomato
     inline bool HasIntent(const InputIntent x, const InputIntent intent)
     {
         return (x & intent) != InputIntent::NONE;
+    }
+
+    inline std::ostream& operator <<(std::ostream& out, const InputIntent x)
+    {
+        out << static_cast<uint16_t>(x);
+        return out;
     }
 }
 

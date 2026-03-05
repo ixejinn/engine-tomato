@@ -11,8 +11,12 @@ namespace tomato
 
     void InputRecorder::UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick)
     {
-        prev_ = curr_;
-        curr_.tick = tick;
+        if (curr_.tick != tick)
+        {
+            prev_ = curr_;
+            curr_.tick = tick;
+            curr_.down = InputIntent::NONE;
+        }
 
         for (const auto& event : events)
         {
@@ -24,9 +28,12 @@ namespace tomato
             if (event.action == KeyAction::RELEASE)
                 curr_.held &= ~keyIntents_[event.key];
             else             // KeyAction::PRESS
+            {
+                if (!HasIntent(prev_.held, keyIntents_[event.key]))
+                    curr_.down |= keyIntents_[event.key];
                 curr_.held |= keyIntents_[event.key];
+            }
         }
-        curr_.down = ~prev_.held & curr_.held;
     }
 
     void InputRecorder::InitKeyActionMap()

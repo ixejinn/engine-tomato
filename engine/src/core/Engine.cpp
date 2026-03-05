@@ -98,11 +98,11 @@ namespace tomato
         inputTimelines_[network_.GetPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
 
         // ---------- Example for using debug key
-        // Bind key and intent
-        inputRecorder_.BindInputIntent(Key::K_1, InputIntent::TEST_1);
-        // Print if key was pressed
-        if (inputRecorder_.IsPress(InputIntent::TEST_1))
-            TMT_DEBUG << "Key 1 press at " << tick_;
+//        // Bind key and intent
+//        inputRecorder_.BindInputIntent(Key::K_1, InputIntent::TEST_1);
+//        // Print if key was pressed
+//        if (inputRecorder_.IsPress(InputIntent::TEST_1))
+//            TMT_DEBUG << "Key 1 press at " << tick_;
     }
 
     void Engine::Simulate()
