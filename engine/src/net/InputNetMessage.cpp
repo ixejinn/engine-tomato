@@ -11,7 +11,7 @@ namespace tomato
     void InputNetMessage::Serialize(NetBitWriter& writer, Engine& engine)
     {
         uint32_t tick = engine.GetTick();
-        inputRecord = engine.GetInputTimeline()[engine.GetNetworkService().GetPlayerID()][tick];
+        inputRecord = engine.GetInputTimeline()[engine.GetNetworkService().GetMyPlayerID()][tick];
         writer.WriteInt(tick, std::numeric_limits<uint32_t>::max());
         writer.WriteInt(static_cast<uint16_t>(inputRecord.down), static_cast<uint16_t>(InputIntent::COUNT));
         writer.WriteInt(static_cast<uint16_t>(inputRecord.held), static_cast<uint16_t>(InputIntent::COUNT));
@@ -30,7 +30,7 @@ namespace tomato
 
     void InputNetMessage::Handler(Engine& engine, const SocketAddress& fromAddr)
     {
-        engine.SetInputData(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
+        engine.SetInputData(engine.GetNetworkService().GetPeerPlayerID(fromAddr), inputRecord);
         engine.SetLatestTick(inputRecord.tick);
     }
 }

@@ -7,8 +7,7 @@
 #include "tomato/ecs/systems/System.h"
 #include "tomato/input/InputTypes.h"
 #include "tomato/Logger.h"
-#include "/Users/jung/Desktop/engine-tomato/contents/GameState.h"
-#include "/Users/jung/Desktop/engine-tomato/contents/TestState.h"
+#include "/yj/engine-tomato/contents/TestState.h"
 
 namespace tomato
 {
@@ -32,7 +31,8 @@ namespace tomato
         while (!window_.ShouldClose() && isRunning_)
         {
             ProcessNetPackets();
-            Rollback();
+            if (network_.GetNetState() == NetworkServiceState::NSS_Playing)
+                Rollback();
 
             ProcessKeyEvents();
 
@@ -164,7 +164,7 @@ namespace tomato
             break;
         }
 #endif
-        inputTimelines_[network_.GetPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
+        inputTimelines_[network_.GetMyPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
     }
 
     void Engine::Simulate()
@@ -176,7 +176,8 @@ namespace tomato
 
         while (simLimit--) {
             systemManager_.Simulate(*this, SimContext{tick_});
-            network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
+            //if(network_.GetNetState() == NetworkServiceState::NSS_Playing)
+                network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
             ++tick_;
 
             if (rollbackManager_)
@@ -197,7 +198,7 @@ namespace tomato
     void Engine::ProcessNetPackets()
     {
         latestTick_ = tick_;
-        //network_.ProcessPendingPacket();
+        
         network_.ProcessQueuedUDPPacket();
         network_.ProcessQueuedTCPPacket();
     }

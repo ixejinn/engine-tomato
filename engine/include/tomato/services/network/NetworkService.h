@@ -36,17 +36,14 @@ namespace tomato
 		explicit NetworkService(Engine& engine);
         ~NetworkService();
 
-        // !!! FOR TEST !!
         void SetNetState(NetworkServiceState state) { netState_ = state; }
-        // !!! FOR TEST !!!
         
         void ConnectToServer();
 
         void NetThreadLoop();
-        void ProcessPendingPacket();
         void ProcessQueuedUDPPacket();
         void ProcessUDPPacket(const UDPPacketType& type, NetBitReader& reader, const SocketAddress& inToAddress);
-        //void SendPacket(uint32_t messageType);
+    
         void BuildUDPPacket(NetBitWriter& writer, UDPPacketType messageType);
         void BroadcastToPeers(const void* buffer);
         void SendUDPPacket(UDPPacketType messageType, SendPolicy policy, const SocketAddress* inToAddress = nullptr);
@@ -63,8 +60,8 @@ namespace tomato
         void HandleMatchStartPacket(NetBitReader& reader);
 
 
-        PlayerId GetPlayerID() const { return playerID_; }
-        PlayerId GetPlayerID(const SocketAddress& addr) { return addToId[addr]; }
+        PlayerId GetMyPlayerID() const { return playerID_; }
+        PlayerId GetPeerPlayerID(const SocketAddress& addr);
 
         NetworkServiceState GetNetState() const { return netState_; }
         std::atomic<bool> isNetThreadRunning_{false};

@@ -17,6 +17,7 @@ namespace tomato
 	public:
         SocketAddress(uint32_t inAddress, uint16_t inPort)
 		{
+			memset(&sockAddr_, 0, sizeof(sockAddr_));
 			GetAsSockAddrIn()->sin_family = AF_INET;
 			GetIPv4Ref() = htonl(inAddress);
 			GetAsSockAddrIn()->sin_port = htons(inPort);
@@ -26,6 +27,7 @@ namespace tomato
 		// inet_addr 사용 -> IPv6 미지원
 		SocketAddress(const char* inAddress, uint16_t inPort)
 		{
+			memset(&sockAddr_, 0, sizeof(sockAddr_));
 			GetAsSockAddrIn()->sin_family = AF_INET;
 			GetIPv4Ref() = inet_addr(inAddress);
 			GetAsSockAddrIn()->sin_port = htons(inPort);
@@ -38,6 +40,7 @@ namespace tomato
 
 		SocketAddress()
 		{
+			memset(&sockAddr_, 0, sizeof(sockAddr_));
 			GetAsSockAddrIn()->sin_family = AF_INET;
 			GetIPv4Ref() = INADDR_ANY;
 			GetAsSockAddrIn()->sin_port = 0; //automatically allocated
@@ -50,8 +53,6 @@ namespace tomato
 				(GetIPv4Ref() == other.GetIPv4Ref());
 		}
 
-		void SetPort(uint16_t inPort) { GetAsSockAddrIn()->sin_port = htons(inPort); }
-
 		// unordered_map / unordered_set 사용을 위한 해시 생성
 		// IPv4 / Port / AddressFamily 조합 기반
 		size_t GetHash() const
@@ -60,6 +61,8 @@ namespace tomato
 				((static_cast<uint32_t>(GetAsSockAddrIn()->sin_port)) << 13) |
 				sockAddr_.sa_family;
 		}
+
+		void SetPort(uint16_t inPort) { GetAsSockAddrIn()->sin_port = htons(inPort); }
 
 		uint32_t			GetSize()			const { return sizeof(sockaddr); }
 		std::string			ToString()			const;

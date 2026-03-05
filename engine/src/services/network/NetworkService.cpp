@@ -20,12 +20,14 @@ namespace tomato
     void NetworkService::ConnectToServer()
     {
         server_ = TCPSocket::CreateTCPSocket();
-        int err = server_->Connect({ "192.168.45.239", 7777 });
+        int err = server_->Connect({ EngineConfig::SERVER_ADDRESS, EngineConfig::PORT_NUM });
 
         if (err == NO_ERROR)
             std::cout << "Connect to Server\n";
+
         else if (err == -WSAECONNREFUSED)
             std::cout << "Not activated Match server\n";
+
         else
             std::cout << err << '\n';
 
@@ -45,32 +47,6 @@ namespace tomato
             else
                 bufferPool_.Deallocate(buffer);
         }
-    }
-
-    void NetworkService::ProcessPendingPacket()
-    {
-        /*
-        // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
-        while (!pendingPackets_.Empty())
-        {
-            Packet packet;
-            pendingPackets_.Dequeue(packet);
-            NetBitReader reader(packet.buffer->data(), packet.size);
-
-            uint32_t messageType = -1;
-            reader.ReadInt(messageType, 4);   // 예비로 비트 2개만 확인하게 함
-
-            if (messageType == 0)
-            {
-                InputNetMessage tmp;
-                tmp.Read(reader, engine_, packet.addr);
-                //std::cout << "NetworkService::ProcessPendingPacket() " << engine_.GetTick() << "\n";
-            }
-
-            bufferPool_.Deallocate(packet.buffer);
-        }
-        // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
-        */
     }
 
     void NetworkService::ProcessQueuedUDPPacket()
@@ -109,6 +85,7 @@ namespace tomato
                 SendTCPPacket(TCPPacketType::MATCH_INTRO_SUCCESS);
                 netState_ = NetworkServiceState::NSS_Lobby;
             }
+
             //TODO@ timeout
             break;
 
@@ -119,7 +96,6 @@ namespace tomato
             break;
         }
         }
-
     }
 
     void NetworkService::BuildUDPPacket(NetBitWriter& writer, UDPPacketType messageType)
@@ -174,7 +150,7 @@ namespace tomato
 
     bool NetworkService::HandleWelcomePacket(const SocketAddress& inToAddress)
     {
-        PlayerId id = GetPlayerID(inToAddress);
+        PlayerId id = GetPeerPlayerID(inToAddress);
         peerConnected[id] = true;
         
         for (const auto& peer : peerConnected)
@@ -310,10 +286,11 @@ namespace tomato
 
         reader.ReadInt(readMatchId, std::numeric_limits<uint16_t>::max());
         matchID_ = readMatchId;
+        std::cout << "[MATCH ID = " << matchID_ << "]\n";
+
         reader.ReadInt(readPlayerNum, std::numeric_limits<uint8_t>::max());
         peerConnected.resize(readPlayerNum);
 
-        std::cout << "[MATCH ID = " << matchID_ << "]\n";
         for (int i = 0; i < readPlayerNum; i++)
         {
             uint8_t readPlayerId{ 0 }, rname{};
@@ -336,6 +313,9 @@ namespace tomato
 
             conn.try_emplace(readPlayerId, 0, readMatchId, readPlayerId, readName, readAddr);
             addToId.try_emplace(readAddr, readPlayerId);
+
+            std::cout << "[Add Connection]\nmatch id\tplayer id\tname\taddr\n" <<
+                '\t' << readMatchId << '\t' << int(readPlayerId) << '\t' << readName << '\t' << readAddr.ToString() << '\n';
         }
 
         reader.ReadInt(readMyId, std::numeric_limits<uint8_t>::max());
@@ -343,7 +323,6 @@ namespace tomato
         playerID_ = readMyId;
         std::cout << "[My PlayerID = " << int(playerID_) << "]\n";
         peerConnected[playerID_] = true;
-        //@TODO : if playerId != 0
     }
 
     void NetworkService::HandleServerTimeSyncPacket(NetBitReader& reader)
@@ -403,6 +382,15 @@ namespace tomato
             std::cout << "[Now] " << localSteadyTimeNow << "\n[Start Time] " << localStartTime << '\n';
             netState_ = NetworkServiceState::NSS_Starting;
         }
+    }
+
+    PlayerId NetworkService::GetPeerPlayerID(const SocketAddress& addr)
+    {
+        auto it = addToId.find(addr);
+        if (it == addToId.end())
+            throw std::runtime_error("address not found");
+
+        return it->second;
     }
 
 //    void NetworkService::SendPacket(uint32_t messageType)
