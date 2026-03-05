@@ -25,6 +25,8 @@ namespace tomato
 
         void UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick);
 
+        InputAxis GetCurrKeyState(Key key) const { return keyStates_[key]; }
+
         void BindInputIntent(Key key, InputIntent intent) { keyIntents_[key] = intent; }
         InputIntent GetBoundInputIntent(Key key) { return keyIntents_[key]; }
 

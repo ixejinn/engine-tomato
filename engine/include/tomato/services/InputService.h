@@ -28,6 +28,7 @@ namespace tomato
 
     private:
         static void EnqueueKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
+        static void EnqueueMouseButtonEvent(GLFWwindow* w, int button, int action, int mods);
 
         std::queue<KeyEvent> keyEvents_;
     };
