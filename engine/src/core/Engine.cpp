@@ -79,6 +79,7 @@ namespace tomato
     {
         tick_ = 0;
         start_ = std::chrono::steady_clock::now();
+        adder_ = std::chrono::milliseconds::zero();
 
         if (rollbackManager_)
             rollbackManager_->Capture(*world_, 0);
