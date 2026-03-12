@@ -7,23 +7,32 @@
 
 namespace tomato
 {
+	enum class NetMode
+	{
+		NM_ListenServer,
+		NM_Client
+	};
 	class TCPNetDriver
 	{
 	public:
-		TCPNetDriver();
-		TCPNetDriver(SocketAddress& inAddress);
+		explicit TCPNetDriver(NetMode mode);
 		~TCPNetDriver();
 
-		bool InitTCPSocket();
+		bool InitListenServerMode();
+		bool InitClientMode();
 
 		int SendPacket(uint8_t* buffer, int size);
 		int RecvPacket(uint8_t* buffer, int size);
 
-		//int GetSocketAddress();
 		const TCPSocketPtr GetSocket() const { return socket_; }
-	private:
 
+		bool IsConnectedToServer() const { return connectedToServer; }
+	private:
+		
+		NetMode mode_;
 		TCPSocketPtr socket_;
+
+		bool connectedToServer = false;
 	};
 
 }

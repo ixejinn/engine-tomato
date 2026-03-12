@@ -1,7 +1,7 @@
 ﻿#include "Match.h"
 #include <iostream>
 #include <tomato/net/NetBitWriter.h>
-#include "SessionManager.h" //for test
+
 Match::Match(const MatchContext& ctx) : ctx_(ctx), timer_(0.f) {}
 
 MatchUpdateResult Match::Update(float dt, tomato::SPSCQueue<SendCommandPtr, 256>& sendRequestQ)
@@ -29,8 +29,6 @@ MatchUpdateResult Match::Update(float dt, tomato::SPSCQueue<SendCommandPtr, 256>
 	{
 	// 모든 피어들의 피어간 연결 성공 패킷이 다 도착할 때까지 대기
 	// 일정 시간이 지나면 timeout으로 Failed 처리
-		//std::cout << "WaitPeerReady" << '\n';
-		//std::cout << timer_ << '\n';
 		if (peerAck.all())
 		{
 			ctx_.state = MatchState::AllReady;

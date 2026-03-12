@@ -12,7 +12,7 @@
 namespace tomato
 {
     Engine::Engine(WindowService& window)
-    : window_(window), input_(window), network_(*this), systemManager_(SystemManager{})
+    : window_(window), input_(window), network_(*this, NetMode::NM_Client), systemManager_(SystemManager{})
     {
         window_.SetWindowUserPointer(&input_);
         keyEvents_.reserve(MAX_KEY_EVENTS_NUM);
@@ -26,8 +26,7 @@ namespace tomato
 
     void Engine::Run()
     {
-        std::thread th(&NetworkService::NetThreadLoop, &network_);
-        std::thread tcpRecvTh(&NetworkService::TCPNetRecvThreadLoop, &network_);
+        network_.ThreadStart();
         while (!window_.ShouldClose() && isRunning_)
         {
             ProcessNetPackets();
@@ -43,10 +42,7 @@ namespace tomato
             if (nextState_)
                 ChangeState();
         }
-
-        //network_.isNetThreadRunning_ = false;
-        //th.join();
-        tcpRecvTh.join();
+        network_.ThreadStop();
     }
 
     void Engine::SetInputData(uint8_t playerID, const InputRecord &record)
@@ -87,6 +83,7 @@ namespace tomato
             rollbackManager_->Capture(*world_, 0);
     }
 
+    //@TEST CODE
     void Engine::TryStartGame()
     {
         if (network_.GetNetState() == NetworkServiceState::NSS_Starting)

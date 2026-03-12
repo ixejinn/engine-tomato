@@ -7,38 +7,17 @@
 
 namespace tomato
 {
-	NetworkService::NetworkService(Engine& engine)
-    : engine_(engine), playerID_(0), netState_(NetworkServiceState::NSS_Uninitialized)
-    {
-        //test code
-        ConnectToServer();
-        isNetThreadRunning_ = true;
-    }
+	NetworkService::NetworkService(Engine& engine, NetMode mode)
+    : engine_(engine), server_(mode), playerID_(0), netState_(NetworkServiceState::NSS_Uninitialized)
+    {}
 
     NetworkService::~NetworkService() {}
-
-    void NetworkService::ConnectToServer()
-    {
-        server_ = TCPSocket::CreateTCPSocket();
-        int err = server_->Connect({ EngineConfig::SERVER_ADDRESS, EngineConfig::PORT_NUM });
-
-        if (err == NO_ERROR)
-            std::cout << "Connect to Server\n";
-
-        else if (err == -WSAECONNREFUSED)
-            std::cout << "Not activated Match server\n";
-
-        else
-            std::cout << err << '\n';
-
-        TCPRecvThreadRunning_ = true;
-    }
 
     // use network thread
     void NetworkService::NetThreadLoop()
     {
         SocketAddress fromAddr;
-        while (isNetThreadRunning_)
+        while (UDPRecvThreadRunning_)
         {
             RawBuffer* buffer = bufferPool_.Allocate();
             int receivedBytes;
@@ -164,10 +143,10 @@ namespace tomato
 
     void NetworkService::TCPNetRecvThreadLoop()
     {
+        uint8_t segment[MAX_PACKET_SIZE]{};
         while (TCPRecvThreadRunning_)
         {
-            uint8_t segment[MAX_PACKET_SIZE]{};
-            int received = server_->Receive(segment, MAX_PACKET_SIZE);
+            int received = server_.RecvPacket(segment, MAX_PACKET_SIZE);
             if (received > 0) //parsing
             {
                 recvBuffer.insert(recvBuffer.end(), segment, segment + received);
@@ -276,7 +255,7 @@ namespace tomato
         int16_t byteSize = writer.GetByteSize();
         std::memcpy(rawBuffer.data(), &byteSize, sizeof(uint16_t));
 
-        server_->Send(rawBuffer.data(), byteSize);  
+        server_.SendPacket(rawBuffer.data(), byteSize);  
     }
 
     void NetworkService::HandleMatchIntroPacket(NetBitReader& reader)
@@ -393,41 +372,22 @@ namespace tomato
         return it->second;
     }
 
-//    void NetworkService::SendPacket(uint32_t messageType)
-//    {
-//        //RawBuffer* rawBuffer = bufferPool_.Allocate();
-//        RawBuffer rawBuffer;
-//        NetBitWriter writer{&rawBuffer};
-//
-//        writer.WriteInt(messageType, 4);
-//
-//        // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
-//        if (messageType == 0)
-//        {
-//            InputNetMessage tmp;
-//            tmp.Write(writer, engine_);
-//        }
-//
-//#if 0
-//        //std::cout << "NetworkService::SendPacket " << engine_.GetTick() << "\n";
-//        for (auto& playerAddr : playerToSocket)
-//        {
-//            if (playerAddr.first == playerID_)
-//                continue;
-//            socket_->SendTo(rawBuffer.data(), MAX_PACKET_SIZE, playerAddr.second);
-//            //std::cout << "NetworkService::SendPacket " << engine_.GetTick() << "\n";
-//        }
-//        // !!! 테스트 코드 NetMessageRegistry 만들면 수정해야 함 !!!
-//
-////        bufferPool_.Deallocate(rawBuffer);
-//#elif 1
-//        for (auto it = conn.begin(); it != conn.end(); it++)
-//        {
-//            if (it->second.playerId == playerID_)
-//                continue;
-//
-//            driver_.SendPacket(messageType, it->second.addr);
-//        }
-//#endif
-//    }
+    void NetworkService::ThreadStart()
+    {
+        TCPRecvThread = std::thread(&NetworkService::TCPNetRecvThreadLoop, this);
+        UDPRecvThread = std::thread(&NetworkService::NetThreadLoop, this);
+
+        if(server_.IsConnectedToServer())
+            TCPRecvThreadRunning_ = true;
+        UDPRecvThreadRunning_ = true;
+    }
+
+    void NetworkService::ThreadStop()
+    {
+        TCPRecvThreadRunning_ = false;
+        UDPRecvThreadRunning_ = false;
+
+        TCPRecvThread.join();
+        UDPRecvThread.join();
+    }
 }

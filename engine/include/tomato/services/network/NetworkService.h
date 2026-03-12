@@ -6,13 +6,13 @@
 #include <unordered_map>
 #include <string>
 #include <atomic>
+#include <thread>
 
 #include "tomato/tomato_packet_types.h"
 #include "tomato/services/network/WinsockContext.h"
-#include "tomato/services/network/Socket.h"         // SocketPtr socket_
-#include "tomato/services/network/TCPSocket.h"
 #include "tomato/services/network/NetDriver.h"
 #include "tomato/services/network/NetConnection.h"
+#include "tomato/services/network/TCPNetDriver.h"
 #include "tomato/containers/MemoryPool.h"
 #include "tomato/containers/SPSCQueue.h"
 
@@ -33,12 +33,10 @@ namespace tomato
 	class NetworkService
 	{
 	public:
-		explicit NetworkService(Engine& engine);
+		explicit NetworkService(Engine& engine, NetMode mode);
         ~NetworkService();
 
         void SetNetState(NetworkServiceState state) { netState_ = state; }
-        
-        void ConnectToServer();
 
         void NetThreadLoop();
         void ProcessQueuedUDPPacket();
@@ -59,20 +57,21 @@ namespace tomato
         void HandleServerTimeSyncPacket(NetBitReader& reader);
         void HandleMatchStartPacket(NetBitReader& reader);
 
+        void ThreadStart();
+        void ThreadStop();
 
         PlayerId GetMyPlayerID() const { return playerID_; }
         PlayerId GetPeerPlayerID(const SocketAddress& addr);
 
         NetworkServiceState GetNetState() const { return netState_; }
-        std::atomic<bool> isNetThreadRunning_{false};
 
 	private:
         WinsockContext winsock_;
         NetDriver driver_;
-        TCPSocketPtr server_;
+        TCPNetDriver server_;
 
-        bool TCPRecvThreadRunning_{ false };
-        //bool TCPRecvThreadRunning_{ false };
+        std::thread TCPRecvThread, UDPRecvThread;
+        bool TCPRecvThreadRunning_{ false }, UDPRecvThreadRunning_{ false };
 
         std::vector<uint8_t> recvBuffer;
         SPSCQueue<std::unique_ptr<TCPPacket>, 128> pendingTCPPackets_;
