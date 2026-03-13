@@ -7,6 +7,7 @@
 #include "tomato/ecs/systems/System.h"
 #include "tomato/input/InputTypes.h"
 #include "tomato/Logger.h"
+#include "tomato/event/EventDispatcher.h"
 #include "tomato/net/tomato_message_type.h"
 
 namespace tomato
@@ -37,6 +38,7 @@ namespace tomato
             Rollback();
 
             ProcessKeyEvents();
+            EventDispatcher::GetInstance().Update();
 
             Simulate();
             Render();

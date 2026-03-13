@@ -26,6 +26,12 @@ namespace tomato
 
         void DrainKeyEvents(std::vector<KeyEvent>& out);
 
+        struct TEvent
+        {
+            float value;
+        };
+        void TestEvent(const TEvent& e);
+
     private:
         static void EnqueueKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
         static void EnqueueMouseButtonEvent(GLFWwindow* w, int button, int action, int mods);

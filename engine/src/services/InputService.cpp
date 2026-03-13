@@ -1,6 +1,7 @@
 #include "tomato/services/InputService.h"
 #include "tomato/services/WindowService.h"
 #include "tomato/Logger.h"
+#include "tomato/event/EventDispatcher.h"
 
 #include <GLFW/glfw3.h>
 
@@ -176,12 +177,21 @@ namespace tomato
         glfwGetCursorPos(w, &xPos, &yPos);
         input->keyEvents_.emplace(Key::MouseX, a, (float)xPos);
         input->keyEvents_.emplace(Key::MouseY, a, (float)yPos);
+
+        EventDispatcher::GetInstance().Enqueue<TEvent>(TEvent{static_cast<float>(xPos)});
+    }
+
+    void InputService::TestEvent(const TEvent& e)
+    {
+        TMT_DEBUG << "Test event " << e.value;
     }
 
     InputService::InputService(WindowService& window)
     {
         glfwSetKeyCallback(window.GetHandle(), EnqueueKeyEvent);
         glfwSetMouseButtonCallback(window.GetHandle(), EnqueueMouseButtonEvent);
+
+        EventDispatcher::GetInstance().Connect<TEvent, &InputService::TestEvent>(*this);
     }
 
     void InputService::DrainKeyEvents(std::vector<KeyEvent>& out)
