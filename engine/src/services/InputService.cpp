@@ -178,20 +178,23 @@ namespace tomato
         input->keyEvents_.emplace(Key::MouseX, a, (float)xPos);
         input->keyEvents_.emplace(Key::MouseY, a, (float)yPos);
 
-        EventDispatcher::GetInstance().Enqueue<TEvent>(TEvent{static_cast<float>(xPos)});
+        //EventDispatcher::GetInstance().Enqueue<TEvent>(TEvent{static_cast<float>(xPos)});
+//        input->signal_.Publish(xPos);
     }
 
-    void InputService::TestEvent(const TEvent& e)
-    {
-        TMT_DEBUG << "Test event " << e.value;
-    }
+//    bool InputService::TestEvent(const TEvent& e)
+//    {
+//        TMT_DEBUG << "Test event " << e.value;
+//        return e.value > 1000;
+//    }
 
     InputService::InputService(WindowService& window)
     {
         glfwSetKeyCallback(window.GetHandle(), EnqueueKeyEvent);
         glfwSetMouseButtonCallback(window.GetHandle(), EnqueueMouseButtonEvent);
 
-        EventDispatcher::GetInstance().Connect<TEvent, &InputService::TestEvent>(*this);
+        //EventDispatcher::GetInstance().Connect<TEvent, &InputService::TestEvent>(*this);
+//        signal_.Connect<&InputService::TestEvent>(*this);
     }
 
     void InputService::DrainKeyEvents(std::vector<KeyEvent>& out)

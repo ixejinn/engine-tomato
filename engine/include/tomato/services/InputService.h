@@ -5,6 +5,8 @@
 #include <vector>
 #include "tomato/input/InputTypes.h"    // KeyEvent
 
+//#include "tomato/event/EventSignal.h"
+
 struct GLFWwindow;
 
 namespace tomato
@@ -25,12 +27,6 @@ namespace tomato
         static KeyAction ConvertActionGLFW(int glfwAction);
 
         void DrainKeyEvents(std::vector<KeyEvent>& out);
-
-        struct TEvent
-        {
-            float value;
-        };
-        void TestEvent(const TEvent& e);
 
     private:
         static void EnqueueKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);

@@ -61,6 +61,7 @@ set(ENGINE_HEADERS
         include/tomato/resource/AssetRegistry.h
         include/tomato/resource/tomato_resource.h
         include/tomato/event/EventDispatcher.h
+        include/tomato/event/EventSignal.h
 )
 
 set(ENGINE_SOURCES
