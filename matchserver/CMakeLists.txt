@@ -4,11 +4,14 @@ add_executable(matchserver
         src/Match.cpp
         src/MatchManager.cpp
         src/SessionManager.cpp
-        src/NetworkService.cpp "src/Session.cpp")
+        src/NetworkService.cpp
+        src/Session.cpp
+)
 
 target_link_libraries(matchserver
         PRIVATE
         engine
+        project_options
 )
 target_include_directories(matchserver
         PRIVATE

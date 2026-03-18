@@ -20,7 +20,7 @@ namespace tomato
     void InputNetMessage::Build(Engine& engine)
     {
         tick = engine.GetTick();
-        inputRecord = engine.GetInputTimeline()[engine.GetNetworkService().GetPlayerID()][tick];
+        inputRecord = engine.GetInputTimeline()[engine.GetNetworkService().GetMyPlayerID()][tick];
     }
 
     void InputNetMessage::Deserialize(NetBitReader& reader)
@@ -34,9 +34,9 @@ namespace tomato
         inputRecord.held = static_cast<InputIntent>(value);
     }
 
-    void InputNetMessage::Apply(SocketAddress& fromAddr, Engine& engine)
+    void InputNetMessage::Apply(const SocketAddress& fromAddr, Engine& engine)
     {
-        engine.SetInputData(engine.GetNetworkService().GetPlayerID(fromAddr), inputRecord);
+        engine.SetInputData(engine.GetNetworkService().GetPeerPlayerID(fromAddr), inputRecord);
         engine.SetLatestTick(inputRecord.tick);
     }
 }

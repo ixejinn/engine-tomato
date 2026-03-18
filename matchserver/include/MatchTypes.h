@@ -9,8 +9,8 @@
 
 namespace MatchConstants
 {
-	constexpr int			MAX_MATCH_PLAYER = 4;
-	constexpr float			CONNECT_TIMEOUT_SEC = 2.0f;
+	constexpr uint8_t		MAX_MATCH_PLAYER = 1;
+	constexpr float			CONNECT_TIMEOUT_SEC = 10.0f;
 	constexpr ServerTimeMs	START_SERVER_TIME = 10000;
 }
 
@@ -28,6 +28,8 @@ enum class MatchRequestAction : uint8_t
 struct MatchRequestCommand
 {
 	SessionId sessionId;
+	tomato::SocketAddress address;
+	std::string name;
 	MatchId matchId;
 	MatchRequestAction action;
 };
@@ -45,8 +47,9 @@ using SendCommandPtr = std::unique_ptr<SendRequestCommand>;
 
 struct MatchRequest
 {
-	tomato::TCPSocketPtr socket = nullptr;
 	SessionId sessionId;
+	tomato::SocketAddress address;
+	std::string name;
 	RequestId requestId;
 	ServerTimeMs enqueueTime;
 	int retryCount;

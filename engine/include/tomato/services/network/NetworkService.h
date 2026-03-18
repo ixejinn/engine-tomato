@@ -1,16 +1,18 @@
 #ifndef TOMATO_NETWORKSERVICE_H
 #define TOMATO_NETWORKSERVICE_H
 
+#include <bitset>
 #include <map>
 #include <unordered_map>
 #include <string>
 #include <atomic>
+#include <thread>
 
 #include "tomato/tomato_packet_types.h"
-#include "tomato/services/network/CoreNetwork.h"
 #include "tomato/services/network/WinsockContext.h"
-#include "tomato/services/network/Socket.h"         // SocketPtr socket_
-#include "tomato/services/network/SocketAddress.h"  // map<..SocketAddress..> ..
+#include "tomato/services/network/NetDriver.h"
+#include "tomato/services/network/NetConnection.h"
+#include "tomato/services/network/TCPNetDriver.h"
 #include "tomato/containers/MemoryPool.h"
 #include "tomato/containers/SPSCQueue.h"
 
@@ -18,56 +20,77 @@ namespace tomato
 {
     class Engine;
 
-    struct Packet
+    // Represents current network state of the client during match flow.
+    enum class NetworkServiceState : uint8_t
     {
-        RawBuffer* buffer{nullptr};
-        std::size_t size;
-        SocketAddress addr;
-
-        Packet() = default;
-        Packet(RawBuffer* bufPtr, std::size_t size, SocketAddress addr)
-        : buffer(bufPtr), size(size), addr(addr) {}
+        NSS_Uninitialized,  
+        NSS_Hello,          // Received MATCH_INTRO, attempting peer connections
+        NSS_Lobby,          // All peers connected, waiting for match start
+        NSS_Starting,       // Received MATCH_START, waiting for start tick
+        NSS_Playing,        // Match in progress
     };
 
 	class NetworkService
 	{
 	public:
-		explicit NetworkService(Engine& engine);
+		explicit NetworkService(Engine& engine, NetMode mode);
         ~NetworkService();
 
-        // !!! FOR TEST !!!
-		void ReadIncomingData();
-		void SendOutgoingData(const SocketAddress& inToAddress);
-        // !!! FOR TEST !!!
+        void SetNetState(NetworkServiceState state) { netState_ = state; }
 
-		bool InitSocket();
+        void NetThreadLoop();
+        void ProcessQueuedUDPPacket();
+        void ProcessUDPPacket(const UDPPacketType& type, NetBitReader& reader, const SocketAddress& inToAddress);
+    
+        void BuildUDPPacket(NetBitWriter& writer, UDPPacketType messageType);
+        void BroadcastToPeers(const void* buffer);
+        void SendUDPPacket(UDPPacketType messageType, SendPolicy policy, const SocketAddress* inToAddress = nullptr);
+        
+        bool HandleWelcomePacket(const SocketAddress& inToAddress);
 
-        void Dispatch();
-        //void NetThreadLoop();
-        void ProcessPendingPacket();
-        void SendPacket(uint32_t messageType);
-        //void SendMessage(uint32_t messageType, const SocketAddress& inToAddress);
+        void TCPNetRecvThreadLoop();
+        void ProcessQueuedTCPPacket();
+        void ProcessTCPPacket(const TCPPacketType& header, NetBitReader& reader);
+        void SendTCPPacket(TCPPacketType messageType);
 
-        uint32_t GetPlayerID() const { return playerID_; }
-        uint32_t GetPlayerID(SocketAddress& addr)
-        { return socketToPlayer[addr]; }
+        void HandleMatchIntroPacket(NetBitReader& reader);
+        void HandleServerTimeSyncPacket(NetBitReader& reader);
+        void HandleMatchStartPacket(NetBitReader& reader);
 
-        std::atomic<bool> isNetThreadRunning_{false};
+        void ThreadStart();
+        void ThreadStop();
+
+        PlayerId GetMyPlayerID() const { return playerID_; }
+        PlayerId GetPeerPlayerID(const SocketAddress& addr);
+
+        NetworkServiceState GetNetState() const { return netState_; }
 
 	private:
         WinsockContext winsock_;
-        //NetDriver driver_;
+        NetDriver driver_;
+        TCPNetDriver server_;
+
+        std::thread TCPRecvThread, UDPRecvThread;
+        bool TCPRecvThreadRunning_{ false }, UDPRecvThreadRunning_{ false };
+
+        std::vector<uint8_t> recvBuffer;
+        SPSCQueue<std::unique_ptr<TCPPacket>, 128> pendingTCPPackets_;
+
         MemoryPool<RawBuffer, 128> bufferPool_;
         SPSCQueue<Packet, 128> pendingPackets_;
 
-        //std::unordered_map<uint32_t, NetConnection> conn;
-		std::map<uint32_t, std::string> playerToName;
-		std::map<uint32_t, SocketAddress> playerToSocket;
-		std::unordered_map<SocketAddress, uint32_t> socketToPlayer;
+        std::vector<bool> peerConnected;
+        std::unordered_map<PlayerId, NetConnection> conn;
+        std::unordered_map<SocketAddress, PlayerId> addToId;
 
-		SocketPtr socket_;
-		std::string name_;
-		uint32_t playerID_;
+        NetworkServiceState netState_;
+        std::string name_ = "testing";
+        PlayerId playerID_{ 0 };
+        MatchId matchID_{ 0 };
+
+        ServerTimeMs sendTime{ 0 }, recvTime{ 0 };
+        ServerTimeMs serverTimeOffset{ 0 }, localStartTime{ 0 };
+        //uint32_t estimatedServerTick{ 0 }, estimatedStartTick{ 0 };
 
         Engine& engine_;
 	};

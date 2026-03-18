@@ -24,6 +24,7 @@ namespace tomato
         InputRecorder();
 
         void UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick);
+        char TMP_UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick);
 
         InputAxis GetCurrKeyState(Key key) const { return keyStates_[key]; }
 
@@ -32,6 +33,8 @@ namespace tomato
 
         const InputRecord& GetCurrInputRecord() const { return curr_; }
         bool IsPress(InputIntent intent) const { return ((curr_.down & intent) == InputIntent::NONE ? false : true); }
+
+        float GetKeyStates(Key key) const { return keyStates_[key].value; }
 
     private:
         void InitKeyActionMap();

@@ -10,6 +10,7 @@
 #include <tomato/containers/SPSCQueue.h>
 #include <tomato/net/NetBitReader.h>
 #include <tomato/net/NetBitWriter.h>
+#include <thread>
 
 struct Packet;
 struct MatchRequest;
@@ -20,8 +21,9 @@ class MatchManager;
 class NetworkService
 {
 public:
-	NetworkService(SessionManager& sessionMgr, MatchManager& matchMgr, tomato::SPSCQueue<MatchRequestCommand, 128>& requestQ, tomato::SPSCQueue<SendCommandPtr, 256>& netSendRequestQ)
+	NetworkService(tomato::NetMode mode, SessionManager& sessionMgr, MatchManager& matchMgr, tomato::SPSCQueue<MatchRequestCommand, 128>& requestQ, tomato::SPSCQueue<SendCommandPtr, 256>& netSendRequestQ)
 		:
+		tcpDriver_(mode),
 		sessionMgr_(sessionMgr),
 		matchMgr_(matchMgr),
 		MatchRequestQueue(requestQ),
@@ -32,16 +34,8 @@ public:
 	void AddNetMassage(PacketPtr& packets);
 	//////////////////////////////////////
 
+	void Update();
 
-	void Update(float dt);
-
-	void ProcessPendingPacket();
-	void ProcessPacketMatchReq(tomato::NetBitReader& reader, SessionId sessionId);
-	void OnPacket();
-
-	void NetRecvThreadLoop();
-
-	//TCP
 	void ProcessNetSendRequest();
 	void ProcessSendPacket();
 
@@ -50,10 +44,13 @@ public:
 	void HandlePacketRequest(const TCPPacketType& header, tomato::NetBitReader& reader, SessionId& client);
 	void HandlePacketTimeSync(const TCPPacketType& header, tomato::NetBitReader& reader, SessionId& client);
 	void ProcessDataFromClient(const SessionId& sessionId, const uint8_t* data, const int len);
+	
 	void TCPRecvThreadLoop();
+	void ThreadStart();
+	void ThreadStop();
+
 private:
 	tomato::WinsockContext winsock_;
-	tomato::NetDriver driver_;
 	tomato::TCPNetDriver tcpDriver_;
 
 	SessionManager& sessionMgr_;
@@ -63,6 +60,9 @@ private:
 	tomato::SPSCQueue<Packet, 256> NetRecvQueue;
 	tomato::SPSCQueue<MatchRequestCommand, 128>& MatchRequestQueue;
 	tomato::SPSCQueue<SendCommandPtr, 256>& NetSendRequestQueue;
+	
+	std::thread recvThread;
+	bool isThreadRunning = false;
 
 	MatchId testMatchId = 0;
 };

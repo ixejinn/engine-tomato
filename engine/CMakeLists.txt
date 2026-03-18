@@ -80,6 +80,7 @@ set(ENGINE_SOURCES
         src/services/WindowService.cpp
         src/services/network/NetDriver.cpp
         src/services/network/TCPNetDriver.cpp
+        src/services/network/NetConnection.cpp
         src/services/network/NetworkService.cpp
         src/services/network/Socket.cpp
         src/services/network/TCPSocket.cpp
@@ -102,12 +103,6 @@ add_library(engine STATIC
         ${ENGINE_HEADERS}
         ${ENGINE_SOURCES}
         ${EXTERNAL_SOURCES}
-)
-
-target_compile_definitions(engine
-        PUBLIC
-        WIN32_LEAN_AND_MEAN
-        NOMINMAX
 )
 
 target_include_directories(engine
@@ -137,6 +132,7 @@ target_link_libraries(engine
         glfw
         glm
         EnTT
+        project_options
 
         PRIVATE
         opengl32    # OpenGL

@@ -97,13 +97,23 @@ void SessionManager::AppendSendBuffer(const SessionId& client, const uint8_t* in
 		it->second.AppendSendBuffer(inData, len);
 }
 
+void SessionManager::SetSessionPort(SessionId& id, uint16_t inPort)
+{
+	auto it = tcpSessions.find(id);
+	if (it != tcpSessions.end())
+		it->second.addr.SetPort(inPort);
+}
+
 void SessionManager::GetWritableSockets(std::vector<tomato::TCPSocketPtr>& outVector)
 {
+	//for (auto& session : tcpSessions)
+	//{
+	//	if (!session.second.sendBuffer.empty())
+	//		outVector.push_back(session.second.GetSocket());
+	//}
+
 	for (auto& session : tcpSessions)
-	{
-		if (!session.second.sendBuffer.empty())
-			outVector.push_back(session.second.GetSocket());
-	}
+		outVector.push_back(session.second.GetSocket());
 }
 
 TCP::Session* SessionManager::GetSession(const tomato::TCPSocketPtr& socket)
@@ -113,4 +123,11 @@ TCP::Session* SessionManager::GetSession(const tomato::TCPSocketPtr& socket)
 		return &it->second;
 	
 	return nullptr;
+}
+
+const tomato::SocketAddress& SessionManager::GetAddress(const SessionId& id)
+{
+	auto it = tcpSessions.find(id);
+	if (it != tcpSessions.end())
+		return it->second.addr;
 }

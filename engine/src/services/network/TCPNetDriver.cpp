@@ -3,28 +3,22 @@
 #include "tomato/net/NetBitWriter.h"
 #include "tomato/net/InputNetMessage.h"
 #include "tomato/Logger.h"
-
+#include "tomato/EngineConfig.h"
 
 namespace tomato
 {
-	TCPNetDriver::TCPNetDriver()
+	TCPNetDriver::TCPNetDriver(NetMode mode) : mode_(mode)
 	{
-		InitTCPSocket();
+		if (mode_ == NetMode::NM_ListenServer)
+			InitListenServerMode();
+
+		else if (mode_ == NetMode::NM_Client)
+			InitClientMode();
 	}
 
-	TCPNetDriver::TCPNetDriver(SocketAddress& inAddress)
-	{
-		if (inAddress.GetIPv4() == (uint32_t)INADDR_ANY)
-			InitTCPSocket();
-		else
-			socket_->Accept(inAddress);
-	}
+	TCPNetDriver::~TCPNetDriver(){}
 
-	TCPNetDriver::~TCPNetDriver()
-	{	
-	}
-
-	bool TCPNetDriver::InitTCPSocket()
+	bool TCPNetDriver::InitListenServerMode()
 	{
 		socket_ = TCPSocket::CreateTCPSocket();
 
@@ -40,8 +34,32 @@ namespace tomato
 
 		TMT_INFO << "Initializing TCP NetDriver at " << myAddr.ToString();
 		socket_->Listen();
+
 		TMT_INFO << "START TO LISTEN....";
+
 		return true;
+	}
+
+	bool TCPNetDriver::InitClientMode()
+	{
+		socket_ = TCPSocket::CreateTCPSocket();
+		int err = socket_->Connect({ EngineConfig::SERVER_ADDRESS, EngineConfig::PORT_NUM });
+
+		if (err == NO_ERROR)
+		{
+			std::cout << "Connect to Server\n";
+			connectedToServer = true;
+
+			return true;
+		}
+
+		else if (err == -WSAECONNREFUSED)
+			std::cout << "Not activated Match server\n";
+
+		else
+			std::cout << err << '\n';
+
+		return false;
 	}
 
 	int TCPNetDriver::SendPacket(uint8_t* buffer, int size)

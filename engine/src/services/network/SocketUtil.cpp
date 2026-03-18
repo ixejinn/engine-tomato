@@ -33,7 +33,11 @@ namespace tomato
 		fd_set* writePtr = FillSetFromVector(write, inWriteSet, nfds);
 		fd_set* exceptPtr = FillSetFromVector(except, inExceptSet, nfds);
 
-		int toRet = select(nfds + 1, readPtr, writePtr, exceptPtr, nullptr);
+		timeval timeout;
+		timeout.tv_sec = 0;
+		timeout.tv_usec = 10000;
+
+		int toRet = select(nfds + 1, readPtr, writePtr, exceptPtr, &timeout);
 		if (toRet > 0)
 		{
 			FillVectorFromSet(outReadSet, inReadSet, read);

@@ -22,9 +22,12 @@ namespace tomato
         socket_ = Socket::CreateSocket();
 
         // INADDR_ANY allows receiving packets from any Network Interface Controller.
-        uint32_t port = 7777;
         SocketAddress myAddr((uint32_t)INADDR_ANY, port);
-        socket_->Bind(myAddr);
+        if (socket_->Bind(myAddr) != NO_ERROR)
+        {
+            std::cout << socket_->Bind(myAddr) << '\n';
+            return false;
+        }
 
         TMT_INFO << "Initializing UDP NetDriver at " << myAddr.ToString();
 
@@ -37,28 +40,18 @@ namespace tomato
         return true;
     }
     
-    void NetDriver::SendPacket(uint32_t messageType, const SocketAddress& inToAddress)
+    bool NetDriver::SendPacket(const void* buffer, int& byteSentCount, const SocketAddress& inToAddress)
 	{
-        RawBuffer rawBuffer;
-        NetBitWriter writer{ &rawBuffer };
+        byteSentCount = socket_->SendTo(buffer, MAX_PACKET_SIZE, inToAddress);
+        if (byteSentCount >= 0)
+            return true;
 
-        writer.WriteInt(messageType, 4);
-
-        // !!! �׽�Ʈ �ڵ� NetMessageRegistry ����� �����ؾ� �� !!!
-        if (messageType == 0)
-        {
-            InputNetMessage tmp;
-            //tmp.Write(writer, engine_);
-        }
-
-        socket_->SendTo(rawBuffer.data(), MAX_PACKET_SIZE, inToAddress);
-        //std::cout << "NetworkService::SendPacket " << engine_.GetTick() << "\n";
-        // !!! �׽�Ʈ �ڵ� NetMessageRegistry ����� �����ؾ� �� !!!
+        return false;
 	}
 
-	bool NetDriver::RecvPacket(RawBuffer* buffer, int size, SocketAddress& outFromAddress)
+	bool NetDriver::RecvPacket(void* buffer, int& receivedBytes, SocketAddress& outFromAddress)
 	{
-        int receivedBytes = socket_->ReceiveFrom(buffer, MAX_PACKET_SIZE, outFromAddress);
+        receivedBytes = socket_->ReceiveFrom(buffer, MAX_PACKET_SIZE, outFromAddress);
         if (receivedBytes > 0)
             return true;
         

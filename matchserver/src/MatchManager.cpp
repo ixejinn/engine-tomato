@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "MatchManager.h"
 #include <chrono>
 #include <tomato/net/NetBitWriter.h>
@@ -41,7 +40,7 @@ void MatchManager::ProcessMatchRequest()
 		MatchRequestQueue.Dequeue(reqCommand);
 
 		if (reqCommand.action == MatchRequestAction::Enqueue)
-			HandleEnqueue(reqCommand.sessionId);
+			HandleEnqueue(reqCommand.sessionId, reqCommand.address, reqCommand.name);
 		
 		if (reqCommand.action == MatchRequestAction::Cancel)
 			HandleCancel(reqCommand.sessionId);
@@ -54,11 +53,12 @@ void MatchManager::ProcessMatchRequest()
 	}
 }
 
-void MatchManager::HandleEnqueue(const SessionId& client)
+void MatchManager::HandleEnqueue(const SessionId& client, const tomato::SocketAddress& inAddress, const std::string& name)
 {
 	MatchRequest mRequest{
-		.socket = nullptr,
 		.sessionId = client,
+		.address = inAddress,
+		.name = name,
 		.requestId = 0,
 		.enqueueTime = 0,
 		//duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -84,11 +84,14 @@ void MatchManager::HandleCancel(const SessionId& client)
 
 void MatchManager::HandleIntroResult(const SessionId& client, MatchId& matchId, const int& set)
 {
+	
+	std::cout << __FUNCTION__ << '\n';
 	auto it = matches.find(matchId);
 	if (it != matches.end())
 	{
 		int idx = it->second.GetPlayerId(client);
 		if (idx < 0) return;
+		std::cout << __FUNCTION__ << '\n';
 		it->second.SetPeerAck(idx, set);
 	}
 }
@@ -161,7 +164,7 @@ void MatchManager::ProcessMatchResult(float dt)
 		{
 			//SendPacket for game start
 			//then, Remove from matches
-
+			std::cout << "[MatchState::ALLREADY] Match ReadyToStart\n";
 			ServerTimeMs serverSteadyTime = static_cast<ServerTimeMs>(
 				duration_cast<std::chrono::milliseconds>(
 					std::chrono::steady_clock::now().time_since_epoch()
@@ -217,6 +220,7 @@ void MatchManager::ReQueing(const MatchId& matchId)
 			MatchRequest reRequest
 			{
 				.sessionId = (request + i)->sessionId,
+				.name = (request + i)->name,
 				.requestId = (request + i)->requestId,
 				.enqueueTime = static_cast<ServerTimeMs>(
 					duration_cast<std::chrono::milliseconds>(

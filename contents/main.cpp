@@ -5,6 +5,7 @@
 #include "tomato/ecs/components/Movement.h"
 
 #include "TestState.h"
+#include "GameState.h"
 
 int main() {
     tmt::WindowService window(1600, 900, "TOMATO");

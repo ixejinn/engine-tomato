@@ -8,6 +8,8 @@ namespace tomato
     struct EngineConfig
     {
         static constexpr int MAX_PLAYER_NUM{4};
+        static constexpr const char* SERVER_ADDRESS = "192.168.31.234";
+        static constexpr uint16_t PORT_NUM = 7777;
     };
 }
 

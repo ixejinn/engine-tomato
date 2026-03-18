@@ -24,7 +24,7 @@ namespace tomato
          * @param engine Engine instance to apply the message.
          * @param fromAddr Source address of the received datagram.
          */
-        void Read(NetBitReader& reader, Engine& engine, SocketAddress& fromAddr)
+        void Read(NetBitReader& reader, Engine& engine, const SocketAddress& fromAddr)
         {
             Deserialize(reader);
             Apply(fromAddr, engine);
@@ -35,7 +35,7 @@ namespace tomato
          * @param reader Bit reader containing the message payload.
          * @param fromAddr Source address of the received datagram.
          */
-        void Read(NetBitReader& reader, SocketAddress& fromAddr)
+        void Read(NetBitReader& reader, const SocketAddress& fromAddr)
         {
             Deserialize(reader);
             Apply(fromAddr);
@@ -80,8 +80,8 @@ namespace tomato
          */
         virtual void Deserialize(NetBitReader&) = 0;
 
-        virtual void Apply(SocketAddress&, Engine&) {};
-        virtual void Apply(SocketAddress&) {};
+        virtual void Apply(const SocketAddress&, Engine&) {};
+        virtual void Apply(const SocketAddress&) {};
     };
 }
 
