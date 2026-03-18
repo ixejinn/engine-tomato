@@ -1,6 +1,8 @@
 #include "tomato/services/network/NetConnection.h"
 #include "tomato/net/NetBitReader.h"
 #include "tomato/net/NetBitWriter.h"
+#include <limits>
+#include <cstdint>
 
 namespace tomato
 {
