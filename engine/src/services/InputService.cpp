@@ -1,5 +1,7 @@
 #include "tomato/services/InputService.h"
 #include "tomato/services/WindowService.h"
+#include "tomato/input/InputRecorder.h"
+#include "tomato/Engine.h"
 #include "tomato/Logger.h"
 #include "tomato/event/EventDispatcher.h"
 
@@ -144,22 +146,24 @@ namespace tomato
         }
     }
 
-    void InputService::EnqueueKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods)
+    void InputService::OnKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods)
     {
         Key k = ConvertKeyGLFW(key);
         KeyAction a = ConvertActionGLFW(action);
 
         if (a >= KeyAction::COUNT)
         {
-            TMT_WARN << "Invalid KeyAction " << action;
+            TMT_WARN << "KeyAction of " << static_cast<int>(k) << " is invalid";
             return;
         }
 
-        auto* input = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->input;
-        input->keyEvents_.emplace(k, a, a == KeyAction::RELEASE ? 0.f : 1.f);
+        auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
+        auto& input = engine->GetInputService();
+        input.keySignal_.Collect(input.collector,
+                               KeyEvent{k, a, a == KeyAction::RELEASE ? 0.f : 1.f, engine->GetTick()});
     }
 
-    void InputService::EnqueueMouseButtonEvent(GLFWwindow* w, int button, int action, int mods)
+    void InputService::OnMouseButtonEvent(GLFWwindow* w, int button, int action, int mods)
     {
         Key k = ConvertKeyGLFW(button);
         KeyAction a = ConvertActionGLFW(action);
@@ -170,39 +174,22 @@ namespace tomato
             return;
         }
 
-        auto* input = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->input;
-        input->keyEvents_.emplace(k, a, a == KeyAction::RELEASE ? 0.f : 1.f);
+        auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
+        auto& input = engine->GetInputService();
 
         double xPos(0), yPos(0);
         glfwGetCursorPos(w, &xPos, &yPos);
-        input->keyEvents_.emplace(Key::MouseX, a, (float)xPos);
-        input->keyEvents_.emplace(Key::MouseY, a, (float)yPos);
 
-        //EventDispatcher::GetInstance().Enqueue<TEvent>(TEvent{static_cast<float>(xPos)});
-//        input->signal_.Publish(xPos);
+        input.mouseSignal_.Collect(input.collector,
+                                   MouseEvent{k, a, a == KeyAction::RELEASE ? 0.f : 1.f, engine->GetTick(), static_cast<float>(xPos), static_cast<float>(yPos)});
     }
 
-//    bool InputService::TestEvent(const TEvent& e)
-//    {
-//        TMT_DEBUG << "Test event " << e.value;
-//        return e.value > 1000;
-//    }
-
-    InputService::InputService(WindowService& window)
+    InputService::InputService(WindowService& window, InputRecorder& recorder)
     {
-        glfwSetKeyCallback(window.GetHandle(), EnqueueKeyEvent);
-        glfwSetMouseButtonCallback(window.GetHandle(), EnqueueMouseButtonEvent);
+        glfwSetKeyCallback(window.GetHandle(), OnKeyEvent);
+        glfwSetMouseButtonCallback(window.GetHandle(), OnMouseButtonEvent);
 
-        //EventDispatcher::GetInstance().Connect<TEvent, &InputService::TestEvent>(*this);
-//        signal_.Connect<&InputService::TestEvent>(*this);
-    }
-
-    void InputService::DrainKeyEvents(std::vector<KeyEvent>& out)
-    {
-        while (!keyEvents_.empty())
-        {
-            out.push_back(keyEvents_.front());
-            keyEvents_.pop();
-        }
+        keySignal_.Connect<&InputRecorder::UpdateInputKey>(recorder);
+        mouseSignal_.Connect<&InputRecorder::UpdateInputMouse>(recorder);
     }
 }

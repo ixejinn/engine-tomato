@@ -7,15 +7,13 @@ struct GLFWwindow;
 
 namespace tomato
 {
-    class WindowService;
-    class InputService;
+    class Engine;
 
     struct WindowData
     {
-        WindowService* window;
-        InputService* input;
+        Engine* engine;
 
-        WindowData(WindowService* w, InputService* i) : window(w), input(i) {}
+        WindowData(Engine* e) : engine(e) {}
     };
 
     /**
@@ -44,7 +42,7 @@ namespace tomato
         [[nodiscard]] bool ShouldClose() const;
         void RequestClose();
 
-        void SetWindowUserPointer(InputService* input);
+        void SetWindowUserPointer(Engine* e);
 
         /**
          * @brief Swaps the front and back buffers.

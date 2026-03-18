@@ -1,4 +1,5 @@
 #include "tomato/services/WindowService.h"
+#include "tomato/Engine.h"
 #include "tomato/Logger.h"
 #include <stdexcept>
 #include <glad/glad.h>
@@ -8,13 +9,13 @@ namespace tomato
 {
     void WindowService::OnFramebufferSizeChanged(GLFWwindow* window, int width, int height)
     {
-        auto* self = static_cast<WindowData*>(glfwGetWindowUserPointer(window))->window;
-        self->width_ = width;
-        self->height_ = height;
+        auto& self = static_cast<Engine *>(glfwGetWindowUserPointer(window))->GetWindowService();
+        self.width_ = width;
+        self.height_ = height;
 
         glViewport(0, 0, width, height);
 
-        TMT_DEBUG << self->width_ << ", " << self->height_;
+        TMT_DEBUG << width << ", " << height;
     }
 
     void WindowService::PollEvents() { glfwPollEvents(); }
@@ -67,9 +68,9 @@ namespace tomato
     bool WindowService::ShouldClose() const { return glfwWindowShouldClose(handle_); }
     void WindowService::RequestClose() { glfwSetWindowShouldClose(handle_, GLFW_TRUE); }
 
-    void WindowService::SetWindowUserPointer(InputService* input)
+    void WindowService::SetWindowUserPointer(Engine* e)
     {
-        data_ = std::make_unique<WindowData>(this, input);
+        data_ = std::make_unique<WindowData>(e);
         glfwSetWindowUserPointer(handle_, data_.get());
     }
 

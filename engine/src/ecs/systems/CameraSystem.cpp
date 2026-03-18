@@ -31,7 +31,7 @@ namespace tomato
             };
 
             glm::mat4 projection{1.f};
-            auto& window = engine.GetWindow();
+            auto& window = engine.GetWindowService();
             switch (cam.mode)
             {
                 case PERSPECTIVE:

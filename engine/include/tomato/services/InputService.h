@@ -5,13 +5,14 @@
 #include <vector>
 #include "tomato/input/InputTypes.h"    // KeyEvent
 
-//#include "tomato/event/EventSignal.h"
+#include "tomato/event/EventSignal.h"
 
 struct GLFWwindow;
 
 namespace tomato
 {
     class WindowService;
+    class InputRecorder;
 
     /**
      * @brief Translates raw platform input into engine-level input actions.
@@ -21,18 +22,21 @@ namespace tomato
     class InputService
     {
     public:
-        explicit InputService(WindowService& window);
+        explicit InputService(WindowService& window, InputRecorder& recorder);
 
         static Key ConvertKeyGLFW(int glfwKey);
         static KeyAction ConvertActionGLFW(int glfwAction);
 
-        void DrainKeyEvents(std::vector<KeyEvent>& out);
-
     private:
-        static void EnqueueKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
-        static void EnqueueMouseButtonEvent(GLFWwindow* w, int button, int action, int mods);
+        static void OnKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
+        static void OnMouseButtonEvent(GLFWwindow* w, int button, int action, int mods);
 
-        std::queue<KeyEvent> keyEvents_;
+        EventSignal<KeyEvent> keySignal_;
+        EventSignal<MouseEvent> mouseSignal_;
+        struct InputEventCollector
+        {
+            bool operator()(int ret) { return !ret; }   // 리스너 함수에서 true가 반환되면 계속
+        } collector;
     };
 }
 

@@ -12,19 +12,28 @@ namespace tomato
     };
 
     /**
-     * @brief A raw input event for a single key/button.
+     * @brief A input event for a single key.
      */
     struct KeyEvent
     {
-        KeyEvent(Key k, KeyAction a, float v) : key(k), action(a), value(v) {}
+        KeyEvent(Key k, KeyAction a, float v, uint32_t t) : key(k), action(a), value(v), tick(t) {}
 
         Key key;
         KeyAction action;
-        
+
         float value;
 
-        /// Indicates whether this event has been consumed by the UI layer.
-        bool consumed{false};
+        uint32_t tick;
+    };
+
+    /**
+     * @brief A input event for a mouse.
+     */
+    struct MouseEvent : public KeyEvent
+    {
+        MouseEvent(Key k, KeyAction a, float v, uint32_t t, float x, float y) : KeyEvent(k, a, v, t), xPos(x), yPos(y) {}
+
+        float xPos, yPos;
     };
 }
 

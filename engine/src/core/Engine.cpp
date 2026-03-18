@@ -13,10 +13,9 @@
 namespace tomato
 {
     Engine::Engine(WindowService& window)
-    : window_(window), input_(window), network_(*this), systemManager_(SystemManager{}), curCam_(entt::null)
+    : window_(window), input_(window, inputRecorder_), network_(*this), systemManager_(SystemManager{}), curCam_(entt::null)
     {
-        window_.SetWindowUserPointer(&input_);
-        keyEvents_.reserve(MAX_KEY_EVENTS_NUM);
+        window_.SetWindowUserPointer(this);
 
         ChangeState();
     }
@@ -37,11 +36,13 @@ namespace tomato
             ProcessNetPackets();
             Rollback();
 
-            ProcessKeyEvents();
+            ProcessInputEvents();
             EventDispatcher::GetInstance().Update();
 
             Simulate();
             Render();
+
+            inputRecorder_.ResetInputRecords(tick_);
         }
 
         network_.isNetThreadRunning_ = false;
@@ -87,22 +88,16 @@ namespace tomato
             rollbackManager_->Capture(*world_, 0);
     }
 
-    void Engine::ProcessKeyEvents()
+    void Engine::ProcessInputEvents()
     {
-        keyEvents_.clear();
-
         window_.TMP_CheckEscapeKey();   //TODO: !!! 나중에 지울 것 !!!
         WindowService::PollEvents();
-
-        input_.DrainKeyEvents(keyEvents_);
-        //TODO: UI가 우선 소비 (소비하면 consumed = true)
-        inputRecorder_.UpdateInputAxis(keyEvents_, tick_);
 
         inputTimelines_[network_.GetPlayerID()].SetData(tick_, inputRecorder_.GetCurrInputRecord());
 
         // ---------- Example for using debug key
 //        // Bind key and intent
-//        inputRecorder_.BindInputIntent(Key::K_1, InputIntent::TEST_1);
+//        inputRecorder_.BindInputIntent(Key::RightMouseButton, InputIntent::TEST_1);
 //        // Print if key was pressed
 //        if (inputRecorder_.IsPress(InputIntent::TEST_1))
 //            TMT_DEBUG << "Key 1 press at " << tick_;
