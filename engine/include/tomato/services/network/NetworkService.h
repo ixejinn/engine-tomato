@@ -90,7 +90,7 @@ namespace tomato
 
         ServerTimeMs sendTime{ 0 }, recvTime{ 0 };
         ServerTimeMs serverTimeOffset{ 0 }, localStartTime{ 0 };
-        uint32_t estimatedServerTick{ 0 }, estimatedStartTick{ 0 };
+        //uint32_t estimatedServerTick{ 0 }, estimatedStartTick{ 0 };
 
         Engine& engine_;
 	};

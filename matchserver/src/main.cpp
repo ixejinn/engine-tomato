@@ -79,8 +79,8 @@ void PushPacket(SessionManager& sm, NetworkService& ns)
 }
 int main()
 {
-	MatchServer server;
-	server.Run();
+	auto server = std::make_unique<MatchServer>();
+	server->Run();
 
 	return 0;
 }

@@ -318,12 +318,12 @@ namespace tomato
         serverTimeOffset = serverSteady - (sendTime + (rtt / 2));
 
         //estimatedServerTime = localSteadyNow + offset
-        ServerTimeMs estimatedServerTime = static_cast<ServerTimeMs>(
+        /*ServerTimeMs estimatedServerTime = static_cast<ServerTimeMs>(
             duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now().time_since_epoch()).count()) + serverTimeOffset;
+                std::chrono::steady_clock::now().time_since_epoch()).count()) + serverTimeOffset;*/
 
-        estimatedServerTick = floor(estimatedServerTime / 16.67f);
-        engine_.SetServerTicks(estimatedServerTick);
+        /*estimatedServerTick = floor(estimatedServerTime / 16.67f);
+        engine_.SetServerTicks(estimatedServerTick);*/
 
         //std::cout << "[Server Tick] " << int(estimatedServerTick) << "\n[Local Tick] " << int(engine_.GetTick()) << '\n';
     }
@@ -335,10 +335,10 @@ namespace tomato
             ServerTimeMs serverStartTime{};
             reader.ReadInt(serverStartTime, std::numeric_limits<ServerTimeMs>::max());
 
-            estimatedStartTick = floor(serverStartTime / 16.67f );
-            engine_.SetStartTicks(estimatedStartTick);
-
+            /*estimatedStartTick = floor(serverStartTime / 16.67f );
+            engine_.SetStartTicks(estimatedStartTick);*/
             //std::cout << "[Start Tick] " << int(estimatedStartTick) << '\n';
+            
             //@TODO : Calculate server tick, inform start tick to engine
             ServerTimeMs localSteadyTimeNow = static_cast<ServerTimeMs>(
                 duration_cast<std::chrono::milliseconds>(

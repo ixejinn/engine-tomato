@@ -7,7 +7,7 @@
 #include "tomato/ecs/systems/System.h"
 #include "tomato/input/InputTypes.h"
 #include "tomato/Logger.h"
-#include "/yj/engine-tomato/contents/TestState.h"
+//#include "/yj/engine-tomato/contents/TestState.h"
 
 namespace tomato
 {
@@ -96,7 +96,7 @@ namespace tomato
             if (static_cast<int32_t>(now - localStartTime) >= 0)
             {
                 network_.SetNetState(NetworkServiceState::NSS_Playing);
-                SetNextState(std::make_unique<TestState>());
+                //SetNextState(std::make_unique<TestState>());
                 std::cout << now << "\n##### Game Start #####\n\n";
             }
         }
@@ -173,7 +173,7 @@ namespace tomato
 
         while (simLimit--) {
             systemManager_.Simulate(*this, SimContext{tick_});
-            //if(network_.GetNetState() == NetworkServiceState::NSS_Playing)
+            if(network_.GetNetState() == NetworkServiceState::NSS_Playing)
                 network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
             ++tick_;
 

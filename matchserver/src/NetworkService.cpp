@@ -39,14 +39,14 @@ void NetworkService::ProcessSendPacket()
 		if (sent > 0)
 		{
 			std::cout << __FUNCTION__ << '\n';
-			
-			tomato::NetBitReader rd{ session->sendBuffer.data(), static_cast<int16_t>(session->sendBuffer.size()) };
-			uint16_t readSize{ 0 }, readType{ 0 };
+			//
+			//tomato::NetBitReader rd{ session->sendBuffer.data(), static_cast<int16_t>(session->sendBuffer.size()) };
+			//uint16_t readSize{ 0 }, readType{ 0 };
 
-			rd.ReadInt(readSize, std::numeric_limits<uint16_t>::max());
-			rd.ReadInt(readType, static_cast<uint16_t>(TCPPacketType::COUNT));
+			//rd.ReadInt(readSize, std::numeric_limits<uint16_t>::max());
+			//rd.ReadInt(readType, static_cast<uint16_t>(TCPPacketType::COUNT));
 
-			std::cout << int(readSize) << "type : " << int(readType) << '\n';
+			//std::cout << int(readSize) << "type : " << int(readType) << '\n';
 
 			session->ConsumeSendBuffer(sent);
 		}
@@ -62,12 +62,12 @@ void NetworkService::ProcessNetSendRequest()
 
 		sessionMgr_.AppendSendBuffer(sendCommand->sessionId, sendCommand->data.data(), sendCommand->size);
 
-		tomato::NetBitReader rd{ sendCommand->data.data(), static_cast<int16_t>(sendCommand->size) };
-		uint16_t readSize{ 0 }, readType{ 0 };
-		rd.ReadInt(readSize, std::numeric_limits<uint16_t>::max());
-		rd.ReadInt(readType, static_cast<uint16_t>(TCPPacketType::COUNT));
+		//tomato::NetBitReader rd{ sendCommand->data.data(), static_cast<int16_t>(sendCommand->size) };
+		//uint16_t readSize{ 0 }, readType{ 0 };
+		//rd.ReadInt(readSize, std::numeric_limits<uint16_t>::max());
+		//rd.ReadInt(readType, static_cast<uint16_t>(TCPPacketType::COUNT));
 		std::cout << __FUNCTION__ << '\n';
-		std::cout << sendCommand->sessionId << " " << int(readSize) << " " << int(readType) << '\n';
+		//std::cout << sendCommand->sessionId << " " << int(readSize) << " " << int(readType) << '\n';
 	}
 }
 
