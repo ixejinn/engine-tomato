@@ -89,6 +89,8 @@ namespace tomato
         COUNT
     };
 
+
+
     inline bool IsButton(Key key) { return key < Key::AXIS_BEGIN; }
 
     enum class KeyAction

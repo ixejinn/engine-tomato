@@ -23,15 +23,19 @@ namespace tomato
     public:
         InputRecorder();
 
-        void UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick);
         char TMP_UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick);
+
+        bool UpdateInputKey(const KeyEvent& event);
+        bool UpdateInputMouse(const MouseEvent& event);
 
         InputAxis GetCurrKeyState(Key key) const { return keyStates_[key]; }
 
         void BindInputIntent(Key key, InputIntent intent) { keyIntents_[key] = intent; }
         InputIntent GetBoundInputIntent(Key key) { return keyIntents_[key]; }
 
+        void ResetInputRecords(uint32_t tick);
         const InputRecord& GetCurrInputRecord() const { return curr_; }
+
         bool IsPress(InputIntent intent) const { return ((curr_.down & intent) == InputIntent::NONE ? false : true); }
 
         float GetKeyStates(Key key) const { return keyStates_[key].value; }

@@ -14,10 +14,9 @@
 namespace tomato
 {
     Engine::Engine(WindowService& window)
-    : window_(window), input_(window), network_(*this, NetMode::NM_Alone), systemManager_(SystemManager{}), curCam_(entt::null)
+    : window_(window), input_(window, inputRecorder_), network_(*this, NetMode::NM_Alone), systemManager_(SystemManager{}), curCam_(entt::null)
     {
-        window_.SetWindowUserPointer(&input_);
-        keyEvents_.reserve(MAX_KEY_EVENTS_NUM);
+        window_.SetWindowUserPointer(this);
 
         ChangeState();
     }
@@ -35,14 +34,15 @@ namespace tomato
                 ChangeState();
 
             ProcessNetPackets();
-            if (network_.GetNetState() == NetworkServiceState::NSS_Playing)
                 Rollback();
 
-            ProcessKeyEvents();
+            ProcessInputEvents();
             EventDispatcher::GetInstance().Update();
 
             Simulate();
             Render();
+
+            inputRecorder_.ResetInputRecords(tick_);
 
             TryStartGame();
         }
@@ -107,17 +107,10 @@ namespace tomato
         }
     }
 
-    void Engine::ProcessKeyEvents()
+    void Engine::ProcessInputEvents()
     {
-        keyEvents_.clear();
-
         window_.TMP_CheckEscapeKey();   //TODO: !!! 나중에 지울 것 !!!
         WindowService::PollEvents();
-
-        input_.DrainKeyEvents(keyEvents_);
-
-        //TODO: UI가 우선 소비 (소비하면 consumed = true)
-        inputRecorder_.UpdateInputAxis(keyEvents_, tick_);
 
         // ---------- Example for using debug key
         /*

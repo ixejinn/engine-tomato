@@ -1,6 +1,8 @@
 #include "tomato/input/InputRecorder.h"
 #include "tomato/services/InputService.h" // KeyEvent
 #include "tomato/tomato_math.h"
+#include "tomato/Logger.h"
+
 #include <iostream>
 
 namespace tomato
@@ -10,22 +12,12 @@ namespace tomato
         InitKeyActionMap();
     }
 
-    void InputRecorder::UpdateInputAxis(std::vector<KeyEvent>& events, uint32_t tick)
+    bool InputRecorder::UpdateInputKey(const KeyEvent& event)
     {
-        if (curr_.tick != tick)
+        keyStates_[event.key].value = event.value;
+
+        if (keyIntents_[event.key] != InputIntent::NONE)
         {
-            prev_ = curr_;
-            curr_.tick = tick;
-            curr_.down = InputIntent::NONE;
-        }
-
-        for (const auto& event : events)
-        {
-            if (event.consumed)
-                continue;
-
-            keyStates_[event.key].value = event.value;
-
             if (event.action == KeyAction::RELEASE)
                 curr_.held &= ~keyIntents_[event.key];
             else             // KeyAction::PRESS
@@ -34,6 +26,39 @@ namespace tomato
                     curr_.down |= keyIntents_[event.key];
                 curr_.held |= keyIntents_[event.key];
             }
+        }
+
+        return true;
+    }
+
+    bool InputRecorder::UpdateInputMouse(const MouseEvent& event)
+    {
+        keyStates_[event.key].value = event.value;
+        keyStates_[Key::MouseX].value = event.xPos;
+        keyStates_[Key::MouseY].value = event.yPos;
+
+        if (keyIntents_[event.key] != InputIntent::NONE)
+        {
+            if (event.action == KeyAction::RELEASE)
+                curr_.held &= ~keyIntents_[event.key];
+            else             // KeyAction::PRESS
+            {
+                if (!HasIntent(prev_.held, keyIntents_[event.key]))
+                    curr_.down |= keyIntents_[event.key];
+                curr_.held |= keyIntents_[event.key];
+            }
+        }
+
+        return true;
+    }
+
+    void InputRecorder::ResetInputRecords(uint32_t tick)
+    {
+        if (curr_.tick != tick)
+        {
+            prev_ = curr_;
+            curr_.tick = tick;
+            curr_.down = InputIntent::NONE;
         }
     }
 
@@ -44,9 +69,6 @@ namespace tomato
 
         for (const auto& event : events)
         {
-            if (event.consumed)
-                continue;
-
             if (event.action == KeyAction::RELEASE)
             {
                 keyStates_[event.key].value = 0;

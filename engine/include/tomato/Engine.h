@@ -37,7 +37,9 @@ namespace tomato
 
         void Run();
 
-        const WindowService& GetWindow() const { return window_; }
+        WindowService& GetWindowService() const { return window_; }
+
+        InputService& GetInputService() { return input_; }
 
         const PlayerInputTimelines& GetInputTimeline() const { return inputTimelines_; }
         void SetInputData(uint8_t playerID, const InputRecord &record);
@@ -79,7 +81,8 @@ namespace tomato
 
         void TryStartGame();
 
-        void ProcessKeyEvents();
+        void ProcessInputEvents();
+        
         void Simulate();
         void Render();
 
@@ -89,7 +92,7 @@ namespace tomato
         WindowService& window_;
 
         InputService input_;
-        std::vector<KeyEvent> keyEvents_;
+        InputRecorder inputRecorder_;
 
         PlayerInputTimelines inputTimelines_;
 
@@ -102,8 +105,6 @@ namespace tomato
 
         std::unique_ptr<World> world_{nullptr};
         SystemManager systemManager_;
-
-        InputRecorder inputRecorder_;
 
         std::unique_ptr<RollbackManagerB> rollbackManager_{nullptr};
 
