@@ -14,7 +14,7 @@
 namespace tomato
 {
     Engine::Engine(WindowService& window)
-    : window_(window), input_(window), network_(*this, NetMode::NM_Client), systemManager_(SystemManager{}), curCam_(entt::null)
+    : window_(window), input_(window), network_(*this, NetMode::NM_Alone), systemManager_(SystemManager{}), curCam_(entt::null)
     {
         window_.SetWindowUserPointer(&input_);
         keyEvents_.reserve(MAX_KEY_EVENTS_NUM);
