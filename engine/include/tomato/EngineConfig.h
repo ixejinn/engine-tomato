@@ -1,6 +1,8 @@
 #ifndef TOMATO_ENGINECONFIG_H
 #define TOMATO_ENGINECONFIG_H
 
+#include <cstdint>
+
 namespace tomato
 {
     // 나중에 현재 EngineConfig → EngineLimits로 바꾸고
