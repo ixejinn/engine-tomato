@@ -38,6 +38,17 @@ FetchContent_Declare(entt
 )
 FetchContent_MakeAvailable(entt)
 
+# FreeType
+FetchContent_Declare(freetype
+		GIT_REPOSITORY https://github.com/freetype/freetype.git
+		GIT_TAG        VER-2-14-2
+)
+set(FT_WITH_ZLIB OFF CACHE BOOL "" FORCE)
+set(FT_WITH_BZIP2 OFF CACHE BOOL "" FORCE)
+set(FT_WITH_PNG OFF CACHE BOOL "" FORCE)
+set(FT_WITH_HARFBUZZ OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(freetype)
+
 add_library(project_options INTERFACE)
 
 target_compile_definitions(project_options

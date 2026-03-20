@@ -62,7 +62,8 @@ set(ENGINE_HEADERS
         include/tomato/resource/tomato_resource.h
         include/tomato/event/EventDispatcher.h
         include/tomato/event/EventSignal.h
-)
+        include/tomato/resource/render/Font.h
+        include/tomato/FontContext.h)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -112,6 +113,7 @@ target_include_directories(engine
 #        PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/external
         ${CMAKE_CURRENT_LIST_DIR}/external/glad/include
+        ${freetype_SOURCE_DIR}/include
 )
 
 if (NOT TARGET glfw)
@@ -137,4 +139,5 @@ target_link_libraries(engine
         PRIVATE
         opengl32    # OpenGL
         ws2_32      # Winsock API
+        freetype
 )
