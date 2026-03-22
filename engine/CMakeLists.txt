@@ -60,10 +60,12 @@ set(ENGINE_HEADERS
         include/tomato/RegistryEntry.h
         include/tomato/resource/AssetRegistry.h
         include/tomato/resource/tomato_resource.h
+        include/tomato/resource/render/Font.h
+        include/tomato/resource/render/TextureAtlas.h
         include/tomato/event/EventDispatcher.h
         include/tomato/event/EventSignal.h
-        include/tomato/resource/render/Font.h
-        include/tomato/FontContext.h)
+        include/tomato/FontContext.h
+)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -74,9 +76,11 @@ set(ENGINE_SOURCES
         src/ecs/systems/TransformSystem.cpp
         src/ecs/SystemManager.cpp
         src/ecs/SystemRegistry.cpp
+        src/resource/render/Font.cpp
         src/resource/render/Mesh.cpp
         src/resource/render/Shader.cpp
         src/resource/render/Texture.cpp
+        src/resource/render/TextureAtlas.cpp
         src/services/InputService.cpp
         src/services/WindowService.cpp
         src/services/network/NetDriver.cpp

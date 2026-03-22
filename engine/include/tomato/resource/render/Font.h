@@ -9,10 +9,10 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include "tomato/resource/render/TextureAtlas.h"
+
 namespace tomato
 {
-	class TextureAtlas;
-
 	struct Glyph
 	{
 		glm::ivec2 size;
@@ -23,22 +23,37 @@ namespace tomato
 		glm::vec2 uvMax;
 	};
 
+	/**
+	 * @class Font
+	 * @brief Manages FreeType face loading and glyph generation.
+	 * * Note:
+	 * - When rendering text, you must use a specialized Font Shader.
+	 * - A Projection Matrix (e.g., Orthographic) is required to calculate
+	 * the correct text position on the screen.
+ */
 	class Font
 	{
 	public:
-		Font();
+		constexpr static const char* PrimitiveName = "assets/fonts/SpoqaHanSansNeo-Medium.ftf";
 
-		void SetFontSize(int size);
+		static void Create(const char* path = PrimitiveName);
+
+		//void SetFontSize(int size);
 		
 		const Glyph& GetGlyph(char32_t codepoint);
 
 	private:
-		const Glyph& GetGlyph(char32_t codepoint);
+		const Glyph& LoadGlyph(char32_t codepoint);
 
 	private:
+		Font(const char* path = PrimitiveName);
+		~Font();
+
 		FT_Face face;
 		TextureAtlas* atlas;
 		std::unordered_map<char32_t, Glyph> glyphs;
+
+		uint32_t baseSize{ 48 };
 	};
 
 }

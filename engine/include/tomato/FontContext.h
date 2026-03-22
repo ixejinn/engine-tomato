@@ -22,10 +22,15 @@ public:
 		FT_Done_FreeType(library_);
 	}
 
-	FT_Library GetLibrary() const noexcept { return library_; }
+	FT_Library Get() const noexcept { return library_; }
+	static FontContext& GetInstance()
+	{
+		static FontContext instance;
+		return instance;
+	}
 
 private:
-	FT_Library library_;
+	FT_Library library_ = nullptr;
 };
 
 #endif // !TOMATO_FONTCONTEXT_H
