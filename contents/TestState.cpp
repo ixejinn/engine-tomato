@@ -20,7 +20,7 @@ void TestState::Init(tomato::World& world)
     tmt::Registry& registry = world.GetRegistry();
 
     const auto cam = world.CreateEntity();
-    registry.emplace<tomato::PositionComponent>(cam, glm::vec3(0.f, 15.f, 30.f));
+    registry.emplace<tomato::PositionComponent>(cam, glm::vec3(0.f, 7.5f, 15.f));
     registry.emplace<tomato::RotationComponent>(cam, glm::vec3(-30.f, 0.f, 0.f));
     registry.emplace<tomato::CameraComponent>(cam);
     registry.emplace<tomato::MainCameraTag>(cam);
@@ -39,15 +39,15 @@ void TestState::Init(tomato::World& world)
 
     registry.emplace<tomato::RenderComponent>(me,
                                               tmt::Vector4(1.f, 1.f, 0.f, 1.f),
-                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
+                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::SPHERE)),
                                               tmt::GetAssetID(tmt::Shader::PrimitiveName),
                                               //tmt::GetAssetID("assets/WATER_GAME_LOGO.png"));
                                               tmt::GetAssetID(tmt::Texture::PrimitiveName));
 
     const auto east = world.CreateEntity();
 
-    registry.emplace<tomato::PositionComponent>(east, tmt::Vector3{ 10, 0, 0 });
-    registry.emplace<tomato::RotationComponent>(east);
+    registry.emplace<tomato::PositionComponent>(east, tmt::Vector3{ 5, 0, 0 });
+    registry.emplace<tomato::RotationComponent>(east, tmt::Vector3{90, 0, 0});
     registry.emplace<tomato::ScaleComponent>(east, (glm::vec3{1.f, 1.f, 1.f }));
     registry.emplace<tomato::WorldMatrixComponent>(east);
 
@@ -58,46 +58,49 @@ void TestState::Init(tomato::World& world)
 
     registry.emplace<tomato::RenderComponent>(east,
                                               tmt::Vector4(0.f, 0.f, 1.f, 1.f),
-                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
+                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::SPHERE
+
+
+                                              )),
                                               tmt::GetAssetID(tmt::Shader::PrimitiveName),
                                               tmt::GetAssetID(tmt::Texture::PrimitiveName));
 
     const auto west = world.CreateEntity();
 
-    registry.emplace<tomato::PositionComponent>(west, tmt::Vector3{ -10, 0, 0 });
-    registry.emplace<tomato::RotationComponent>(west);
+    registry.emplace<tomato::PositionComponent>(west, tmt::Vector3{ -5, 0, 0 });
+    registry.emplace<tomato::RotationComponent>(west, tmt::Vector3{-90, 0, 0});
     registry.emplace<tomato::ScaleComponent>(west, (glm::vec3{ 1.f, 1.f, 1.f }));
     registry.emplace<tomato::WorldMatrixComponent>(west);
 
     registry.emplace<tomato::RenderComponent>(west,
         tmt::Vector4(1.f, 1.f, 1.f, 1.f),
-        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
+        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::SPHERE)),
         tmt::GetAssetID(tmt::Shader::PrimitiveName),
         tmt::GetAssetID(tmt::Texture::PrimitiveName));
 
     const auto south = world.CreateEntity();
 
-    registry.emplace<tomato::PositionComponent>(south, tmt::Vector3{ 0, 0, 10 });
+    registry.emplace<tomato::PositionComponent>(south, tmt::Vector3{ 0, 0, 5 });
     registry.emplace<tomato::RotationComponent>(south);
     registry.emplace<tomato::ScaleComponent>(south, (glm::vec3{ 1.f, 1.f, 1.f }));
     registry.emplace<tomato::WorldMatrixComponent>(south);
 
     registry.emplace<tomato::RenderComponent>(south,
         tmt::Vector4(1.f, 0.f, 0.f, 1.f),
-        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
+        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::SPHERE)),
         tmt::GetAssetID(tmt::Shader::PrimitiveName),
         tmt::GetAssetID(tmt::Texture::PrimitiveName));
 
     const auto north = world.CreateEntity();
 
-    registry.emplace<tomato::PositionComponent>(north, tmt::Vector3{ 0, 0, -10 });
+    registry.emplace<tomato::PositionComponent>(north, tmt::Vector3{ 0, 0, -5 });
     registry.emplace<tomato::RotationComponent>(north);
     registry.emplace<tomato::ScaleComponent>(north, (glm::vec3{ 1.f, 1.f, 1.f }));
     registry.emplace<tomato::WorldMatrixComponent>(north);
 
     registry.emplace<tomato::RenderComponent>(north,
         tmt::Vector4(0.f, 1.f, 0.f, 1.f),
-        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
+        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::SPHERE)),
         tmt::GetAssetID(tmt::Shader::PrimitiveName),
         tmt::GetAssetID(tmt::Texture::PrimitiveName));
 

@@ -25,6 +25,8 @@ namespace tomato
         {
             PLAIN,
             CUBE,
+            SPHERE,
+            CYLINDER,
             COUNT
         };
 
@@ -37,34 +39,60 @@ namespace tomato
                 case PrimitiveType::CUBE:
                 default:
                     return "Mesh_CUBE";
+                case PrimitiveType::SPHERE:
+                    return "Mesh_SPHERE";
+                case PrimitiveType::CYLINDER:
+                    return "Mesh_Cylinder";
             }
         }
 
+        /**
+         * @brief Generates primitive meshes and registers them to the asset registry.
+         */
         static void Create();
         //static void Create(const char* filename);
 
     private:
-        Mesh(PrimitiveType type);
+        explicit Mesh(PrimitiveType type);
         //Mesh(const char* filename);
 
     public:
         ~Mesh();
 
         void Bind() const;
-        void Draw() const;
+        void Draw(bool drawLine = false) const;
 
     private:
+        static void Plain(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+        static void Cube(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+        static void Sphere(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+        static void Cylinder(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+
         /**
-        * @brief Sets CCW vertex list of Plain
-        * 
-        * v0---v3
-        * |  / |
-        * | /  |
-        * v1---v2
-        */
-        static void Plain(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3,
-                          std::vector<Vertex>& vertices, size_t vOffset,
-                          std::vector<unsigned int>& indices, size_t iOffset);
+         * @brief Populates vertex and index buffers for a single face (quad).
+         * @param vertices Reference to the vertex vector to ve populated.
+         * @param indices Reference to the index vector to be populated.
+         *
+         * v0---v3
+         * |  / |
+         * | /  |
+         * v1---v2
+         */
+        static void FillMeshData(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3,
+                                 std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+
+        /**
+         * @brief Populates vertex and index buffers for a single face (triangle).
+         * @param vertices Reference to the vertex vector to ve populated.
+         * @param indices Reference to the index vector to be populated.
+         *
+         *    v0
+         *   /  \
+         * v1---v2
+         */
+        static void FillMeshData(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
+                                 std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+
         void SetMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 
         /// Stores the state related to vertex attribute settings.

@@ -25,41 +25,21 @@ namespace tomato
         switch (type)
         {
             case PrimitiveType::PLAIN:
-            {
-                vertices.resize(4 * 1);
-                indices.resize(3 * 2 * 1);
-
-                glm::vec3 v0{-0.5f,  0.5f, 0.0f};
-                glm::vec3 v1{-0.5f, -0.5f, 0.0f};
-                glm::vec3 v2{ 0.5f, -0.5f, 0.0f};
-                glm::vec3 v3{ 0.5f,  0.5f, 0.0f};
-
-                Plain(v0, v1, v2, v3, vertices, 0, indices, 0);
-            }
+                Plain(vertices, indices);
                 break;
+
             case PrimitiveType::CUBE:
-            {
-                vertices.resize(4 * 6);
-                indices.resize(3 * 2 * 6);
-
-                glm::vec3 v0{-0.5f,  0.5f, -0.5f};
-                glm::vec3 v1{-0.5f,  0.5f,  0.5f};
-                glm::vec3 v2{ 0.5f,  0.5f,  0.5f};
-                glm::vec3 v3{ 0.5f,  0.5f, -0.5f};
-
-                glm::vec3 v4{-0.5f, -0.5f, -0.5f};
-                glm::vec3 v5{-0.5f, -0.5f,  0.5f};
-                glm::vec3 v6{ 0.5f, -0.5f,  0.5f};
-                glm::vec3 v7{ 0.5f, -0.5f, -0.5f};
-
-                Plain(v0, v1, v2, v3, vertices, 4 * 0, indices, 3 * 2 * 0); // top
-                Plain(v1, v5, v6, v2, vertices, 4 * 1, indices, 3 * 2 * 1);
-                Plain(v2, v6, v7, v3, vertices, 4 * 2, indices, 3 * 2 * 2);
-                Plain(v3, v7, v4, v0, vertices, 4 * 3, indices, 3 * 2 * 3);
-                Plain(v0, v4, v5, v1, vertices, 4 * 4, indices, 3 * 2 * 4);
-                Plain(v5, v4, v7, v6, vertices, 4 * 5, indices, 3 * 2 * 5); // bottom
-            }
+                Cube(vertices, indices);
                 break;
+
+            case PrimitiveType::SPHERE:
+                Sphere(vertices, indices);
+                break;
+
+            case PrimitiveType::CYLINDER:
+                Cylinder(vertices, indices);
+                break;
+
             case PrimitiveType::COUNT:
                 TMT_WARN << "Invalid primitive type";
                 break;
@@ -80,28 +60,188 @@ namespace tomato
         glBindVertexArray(vao_);
     }
 
-    void Mesh::Draw() const
+    void Mesh::Draw(bool drawLine) const
     {
-        glDrawElements(GL_TRIANGLES, vertexCnt_, GL_UNSIGNED_INT, nullptr);
+        glDrawElements((drawLine ? GL_LINE_LOOP : GL_TRIANGLES), vertexCnt_, GL_UNSIGNED_INT, nullptr);
     }
 
-    void Mesh::Plain(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3,
-        std::vector<Vertex>& vertices, const size_t vOffset,
-        std::vector<unsigned int>& indices, const size_t iOffset)
+    void Mesh::Plain(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
+    {
+        vertices.reserve(4);    // 4 vertices per plain
+        indices.reserve(6);     // 2 triangles per plain, 3 vertices per triangle
+
+        // v0---v3
+        // |     |
+        // v1---v2
+        glm::vec3 v0{-0.5f,  0.5f, 0.0f};
+        glm::vec3 v1{-0.5f, -0.5f, 0.0f};
+        glm::vec3 v2{ 0.5f, -0.5f, 0.0f};
+        glm::vec3 v3{ 0.5f,  0.5f, 0.0f};
+
+        FillMeshData(v0, v1, v2, v3, vertices, indices);
+    }
+
+    void Mesh::Cube(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
+    {
+        vertices.reserve(24);   // 6 plains per cube
+        indices.reserve(36);
+
+        // top
+        glm::vec3 v0{-0.5f,  0.5f, -0.5f};
+        glm::vec3 v1{-0.5f,  0.5f,  0.5f};
+        glm::vec3 v2{ 0.5f,  0.5f,  0.5f};
+        glm::vec3 v3{ 0.5f,  0.5f, -0.5f};
+
+        // bottom
+        glm::vec3 v4{-0.5f, -0.5f, -0.5f};
+        glm::vec3 v5{-0.5f, -0.5f,  0.5f};
+        glm::vec3 v6{ 0.5f, -0.5f,  0.5f};
+        glm::vec3 v7{ 0.5f, -0.5f, -0.5f};
+
+        FillMeshData(v0, v1, v2, v3, vertices, indices);   // top
+        FillMeshData(v1, v5, v6, v2, vertices, indices);
+        FillMeshData(v2, v6, v7, v3, vertices, indices);
+        FillMeshData(v3, v7, v4, v0, vertices, indices);
+        FillMeshData(v0, v4, v5, v1, vertices, indices);
+        FillMeshData(v5, v4, v7, v6, vertices, indices); // bottom
+    }
+
+    void Mesh::Sphere(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
+    {
+        constexpr int sectorCnt = 8;    // divide sphere by longitude
+        constexpr int stackCnt = 6;     // divide sphere by latitude
+
+        vertices.resize(4 * sectorCnt * (stackCnt - 2) + 3 * sectorCnt * 2);    // pole consists of triangles
+        indices.resize(6 * sectorCnt * (stackCnt - 2) + 3 * sectorCnt * 2);
+
+        const auto pi = glm::pi<float>();
+        const float sectorStep = 2 * pi / sectorCnt;
+        const float stackStep = pi / stackCnt;
+
+        float lon = 0.f;        // longitude
+        float lat = 0.5f * pi;  // latitude
+
+        glm::vec3 northPole{0.f, 0.5f, 0.f};
+        glm::vec3 coords[stackCnt - 1][sectorCnt];
+        glm::vec3 southPole{0.f, -0.5f, 0.f};
+        for (auto& row : coords) {
+            lat -= stackStep;
+            lon = 0.f;
+
+            for (auto& coord : row) {
+                coord = {
+                        glm::cos(lat) * glm::sin(lon),
+                        glm::sin(lat),
+                        glm::cos(lat) * glm::cos(lon)
+                };
+                coord *= 0.5f;
+
+                lon += sectorStep;
+            }
+        }
+
+        auto& northRow = coords[0];
+        for (int j = 0; j < sectorCnt - 1; j++)
+            FillMeshData(northPole, northRow[j], northRow[j + 1], vertices, indices);
+        FillMeshData(northPole, northRow[sectorCnt - 1], northRow[0], vertices, indices);
+
+        for (int i = 1; i < stackCnt - 1; i++) {
+            const int _i = i - 1;
+
+            int j;
+            for (j = 0; j < sectorCnt - 1; j++)
+            {
+                const int j_= j + 1;
+
+                FillMeshData(coords[_i][j], coords[i][j], coords[i][j_], coords[_i][j_], vertices, indices);
+            }
+            FillMeshData(coords[_i][j], coords[i][j], coords[i][0], coords[_i][0], vertices, indices);
+        }
+
+        auto& southRow = coords[stackCnt - 2];
+        for (int j = 0; j < sectorCnt - 1; j++)
+            FillMeshData(southPole, southRow[j + 1], southRow[j], vertices, indices);
+        FillMeshData(southPole, southRow[0], southRow[sectorCnt - 1], vertices, indices);
+    }
+
+    void Mesh::Cylinder(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
+    {
+        constexpr int sectorCnt = 10;
+
+        vertices.resize(4 * sectorCnt + 3 * sectorCnt * 2); // top and bottom consist of triangles
+        indices.resize(6 * sectorCnt + 3 * sectorCnt * 2);
+
+        const auto pi = glm::pi<float>();
+        const float sectorStep = 2 * pi / sectorCnt;
+
+        float lon = 0.f;
+
+        glm::vec3 topCenter{0.f, 0.5f, 0.f};
+        glm::vec3 bottomCenter{0.f, -0.5f, 0.f};
+        glm::vec3 coords[2][sectorCnt];
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < sectorCnt; j++) {
+                coords[i][j] = {
+                        glm::cos(lon),
+                        -2 * i + 1,
+                        -glm::sin(lon)
+                };
+                coords[i][j] *= 0.5f;
+
+                lon += sectorStep;
+            }
+        }
+
+        auto& topCircle = coords[0];
+        auto& bottomCircle = coords[1];
+
+        for (int j = 0; j < sectorCnt - 1; j++)
+        {
+            const int j_ = j + 1;
+            FillMeshData(topCenter, topCircle[j], topCircle[j_], vertices, indices);
+            FillMeshData(bottomCenter, bottomCircle[j_], bottomCircle[j], vertices, indices);
+        }
+        FillMeshData(topCenter, topCircle[sectorCnt - 1], topCircle[0], vertices, indices);
+        FillMeshData(bottomCenter, bottomCircle[0], bottomCircle[sectorCnt - 1], vertices, indices);
+
+        for (int j = 0; j < sectorCnt - 1; j++)
+            FillMeshData(topCircle[j], bottomCircle[j], bottomCircle[j + 1], topCircle[j + 1], vertices, indices);
+        FillMeshData(topCircle[sectorCnt - 1], bottomCircle[sectorCnt - 1], bottomCircle[0], topCircle[0],
+                     vertices, indices);
+    }
+
+    void Mesh::FillMeshData(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3,
+                            std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
     {
         const glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-        
-        vertices[vOffset + 0] = Vertex(v0, normal, { 0.0f, 1.0f });
-        vertices[vOffset + 1] = Vertex(v1, normal, { 0.0f, 0.0f });
-        vertices[vOffset + 2] = Vertex(v2, normal, { 1.0f, 0.0f });
-        vertices[vOffset + 3] = Vertex(v3, normal, { 1.0f, 1.0f });
 
-        indices[iOffset + 0] = vOffset + 0;    // triangle v0 → v1 → v3
-        indices[iOffset + 1] = vOffset + 1;
-        indices[iOffset + 2] = vOffset + 3;
-        indices[iOffset + 3] = vOffset + 3;    // triangle v3 → v1 → v2
-        indices[iOffset + 4] = vOffset + 1;
-        indices[iOffset + 5] = vOffset + 2;
+        const auto vOffset = vertices.size();
+        vertices.emplace_back(v0, normal, glm::vec2{0.f, 1.f});
+        vertices.emplace_back(v1, normal, glm::vec2{0.f, 0.f});
+        vertices.emplace_back(v2, normal, glm::vec2{1.f, 0.f});
+        vertices.emplace_back(v3, normal, glm::vec2{1.f, 1.f});
+
+        indices.emplace_back(vOffset + 1);  // triangle v1 → v3 → v0
+        indices.emplace_back(vOffset + 3);
+        indices.emplace_back(vOffset + 0);
+        indices.emplace_back(vOffset + 1);  // triangle v1 → v2 → v3
+        indices.emplace_back(vOffset + 2);
+        indices.emplace_back(vOffset + 3);
+    }
+
+    void Mesh::FillMeshData(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
+                            std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
+    {
+        const glm::vec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+
+        const auto vOffset = vertices.size();
+        vertices.emplace_back(v0, normal, glm::vec2{0.5f, 1.0f});
+        vertices.emplace_back(v1, normal, glm::vec2{0.f, 0.f});
+        vertices.emplace_back(v2, normal, glm::vec2{1.f, 0.f});
+
+        indices.emplace_back(vOffset + 0);
+        indices.emplace_back(vOffset + 1);
+        indices.emplace_back(vOffset + 2);
     }
 
     void Mesh::SetMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
