@@ -6,7 +6,7 @@ namespace tomato
 	class TextureAtlas
 	{
 	public:
-		TextureAtlas(int w, int h);
+		TextureAtlas(int w = 2048, int h = 2048);
 		~TextureAtlas();
 
 		bool Allocate(int w, int h, int& outX, int& outY); //packing
@@ -19,6 +19,7 @@ namespace tomato
 		int GetWidth() const { return width_; }
 		int GetHeight() const { return height_; }
 
+		bool Empty() const { return isEmpty_; }
 	private:
 		unsigned int textureID_;
 		int width_, height_;
@@ -27,6 +28,8 @@ namespace tomato
 		int currentX_{ 0 };
 		int currentY_{ 0 };
 		int maxRowHeight_{ 0 };
+
+		bool isEmpty_{ true };
 	};
 }
 

@@ -1,8 +1,10 @@
 #include "tomato/resource/render/Font.h"
 #include "tomato/FontContext.h"
 #include "tomato/resource/AssetRegistry.h"
+#include "tomato/resource/AtlasManager.h"
 #include "tomato/Logger.h"
-#include <fstream>
+
+#include <string>
 
 namespace tomato
 {
@@ -10,9 +12,29 @@ namespace tomato
 	{
 		std::unique_ptr<Font> ptr{ new Font(path) };
 
-		const char* assetKey = (path == PrimitiveName) ? "DefaultFont" : path;
+		std::string fullPath(path);
+		
+		// Find the last slash and the last dot
+		size_t lastSlash = fullPath.find_last_of("/\\");
+		size_t lastDot = fullPath.find_last_of(".");
 
-		AssetRegistry<Font>::GetInstance().Register(assetKey, std::move(ptr));
+		// Extract the file name without extension
+		std::string assetKey;
+		if (path == PrimitiveName)
+			assetKey = "DefaultFont";
+		else
+		{
+			size_t start = (lastSlash == std::string::npos) ? 0 : lastSlash + 1;
+			size_t count = (lastDot == std::string::npos || lastDot < start)
+				? std::string::npos : lastDot - start;
+
+			assetKey = fullPath.substr(start, count);
+		}
+
+		// const char* assetKey = (path == PrimitiveName) ? "DefaultFont" : path;
+		// Register using the parsed key
+		AssetRegistry<Font>::GetInstance().Register(assetKey.c_str(), std::move(ptr));
+		
 		TMT_INFO << "Font Registered with key" << assetKey;
 	}
 
@@ -36,28 +58,36 @@ namespace tomato
 			throw std::runtime_error("Failed to load Glyph");
 		}
 
-		// Allocate space in the atlas and upload glyph bitmap (To be implemented)
-		int x, y;
-		if (!atlas->Allocate(face->glyph->bitmap.width, face->glyph->bitmap.rows, x, y))
-			TMT_WARN << "Atlas if full.";
+		FT_GlyphSlot slot = face->glyph;
+		int width = slot->bitmap.width;
+		int rows = slot->bitmap.rows;
 
-		atlas->Upload(x, y, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
-
+		// Allocate space in the atlas and upload glyph bitmap
+		AtlasManager& atlasMgr = AtlasManager::GetInstance();
+		auto res = atlasMgr.RequestAllocate(width, rows);
+		
+		TextureAtlas* atlas = atlasMgr.GetAtlas(res.atlasIndex);
+		atlas->Upload(res.x, res.y, width, rows, slot->bitmap.buffer);
 
 		// Calcuate UV coordinates (Normalized 0.0 to 1.0)
 		// Divide pixel coordinates by atlas size to get normalized values.
-		float uvX = (float)x / atlas->GetWidth();
-		float uvY = (float)y / atlas->GetHeight();
-		float uvW = (float)face->glyph->bitmap.width / atlas->GetWidth();
-		float uvH = (float)face->glyph->bitmap.rows / atlas->GetHeight();
+		float atlasW = static_cast<float>(atlas->GetWidth());
+		float atlasH = static_cast<float>(atlas->GetHeight());
+
+		float uvX = static_cast<float>(res.x) / atlasW;
+		float uvY = static_cast<float>(res.y) / atlasH;
+		float uvW = static_cast<float>(width) / atlasW;
+		float uvH = static_cast<float>(rows) / atlasH;
 
 		Glyph glyph = {
-			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			static_cast<unsigned int>(face->glyph->advance.x >> 6), // Divide by 64 to convert 26.6 fixed-point to pixels (Shift right by 6)
+			glm::ivec2(width, rows),
+			glm::ivec2(slot->bitmap_left, slot->bitmap_top),
+			static_cast<unsigned int>(slot->advance.x >> 6), // Divide by 64 to convert 26.6 fixed-point to pixels (Shift right by 6)
 
-			glm::vec2(uvX, uvY), // UV Start point
-			glm::vec2(uvX + uvW, uvY + uvH) // UV End point
+			glm::vec2(uvX, uvY), // UV Start point (Top-Left)
+			glm::vec2(uvX + uvW, uvY + uvH), // UV End point (Bottom-Right)
+
+			res.atlasIndex
 		};
 
 		return (glyphs[codepoint] = glyph);

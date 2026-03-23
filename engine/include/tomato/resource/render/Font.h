@@ -21,6 +21,8 @@ namespace tomato
 
 		glm::vec2 uvMin;
 		glm::vec2 uvMax;
+
+		int atlasIndex;
 	};
 
 	/**
@@ -50,10 +52,9 @@ namespace tomato
 		~Font();
 
 		FT_Face face;
-		TextureAtlas* atlas;
-		std::unordered_map<char32_t, Glyph> glyphs;
-
 		uint32_t baseSize{ 48 };
+		
+		std::unordered_map<char32_t, Glyph> glyphs;
 	};
 
 }

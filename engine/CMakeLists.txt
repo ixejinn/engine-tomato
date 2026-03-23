@@ -65,7 +65,7 @@ set(ENGINE_HEADERS
         include/tomato/event/EventDispatcher.h
         include/tomato/event/EventSignal.h
         include/tomato/FontContext.h
-)
+ "include/tomato/resource/AtlasManager.h")
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -98,7 +98,7 @@ set(ENGINE_SOURCES
         src/net/InputNetMessage.cpp
         src/input/InputRecorder.cpp
         src/net/NetMessageRegistry.cpp
-)
+ "src/resource/AtlasManager.cpp")
 
 set(EXTERNAL_SOURCES
         external/glad/src/glad.c
