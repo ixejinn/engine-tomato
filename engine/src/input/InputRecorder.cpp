@@ -2,6 +2,7 @@
 #include "tomato/services/InputService.h" // KeyEvent
 #include "tomato/tomato_math.h"
 #include "tomato/Logger.h"
+#include "tomato/utils/BitmaskOperators.h"
 
 #include <iostream>
 
@@ -22,7 +23,7 @@ namespace tomato
                 curr_.held &= ~keyIntents_[event.key];
             else             // KeyAction::PRESS
             {
-                if (!HasIntent(prev_.held, keyIntents_[event.key]))
+                if (!HasFlag(prev_.held, keyIntents_[event.key]))
                     curr_.down |= keyIntents_[event.key];
                 curr_.held |= keyIntents_[event.key];
             }
@@ -43,7 +44,7 @@ namespace tomato
                 curr_.held &= ~keyIntents_[event.key];
             else             // KeyAction::PRESS
             {
-                if (!HasIntent(prev_.held, keyIntents_[event.key]))
+                if (!HasFlag(prev_.held, keyIntents_[event.key]))
                     curr_.down |= keyIntents_[event.key];
                 curr_.held |= keyIntents_[event.key];
             }

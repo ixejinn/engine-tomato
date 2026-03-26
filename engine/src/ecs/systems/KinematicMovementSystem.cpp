@@ -4,6 +4,7 @@
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/Rigidbody.h"
 #include "tomato/ecs/components/Movement.h"
+#include "tomato/utils/BitmaskOperators.h"
 
 #include "tomato/RegistryEntry.h"
 REGISTER_SYSTEM(tomato::SystemPhase::CONTROLLER, KinematicMovementSystem);
@@ -26,13 +27,13 @@ namespace tomato
 
             // Move
             int x = 0, y = 0;
-            if (HasIntent(keypress, InputIntent::UP))
+            if (HasFlag(keypress, InputIntent::UP))
                 y++;
-            if (HasIntent(keypress, InputIntent::DOWN))
+            if (HasFlag(keypress, InputIntent::DOWN))
                 y--;
-            if (HasIntent(keypress, InputIntent::LEFT))
+            if (HasFlag(keypress, InputIntent::LEFT))
                 x--;
-            if (HasIntent(keypress, InputIntent::RIGHT))
+            if (HasFlag(keypress, InputIntent::RIGHT))
                 x++;
             glm::vec2 dir = glm::vec2{x, -y};
             if (glm::length(dir) > 1)
@@ -46,7 +47,7 @@ namespace tomato
             pos.position.z += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
 
             // Jump
-            if (HasIntent(keydown, InputIntent::JUMP) && move.cnt < JUMP_COUNT_MAX)
+            if (HasFlag(keydown, InputIntent::JUMP) && move.cnt < JUMP_COUNT_MAX)
             {
                 // Start jump
                 move.cnt++;

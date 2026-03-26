@@ -7,6 +7,7 @@
 #include "tomato/containers/EnumArray.h"
 #include "tomato/input/InputTypes.h"
 #include "tomato/input/InputRecord.h"
+#include "tomato/utils/BitmaskOperators.h"
 
 namespace tomato
 {
@@ -36,7 +37,7 @@ namespace tomato
         void ResetInputRecords(uint32_t tick);
         const InputRecord& GetCurrInputRecord() const { return curr_; }
 
-        bool IsPress(InputIntent intent) const { return ((curr_.down & intent) == InputIntent::NONE ? false : true); }
+        bool IsPress(InputIntent intent) const { return (HasFlag(curr_.down, intent) ? true : false); }
 
         float GetKeyStates(Key key) const { return keyStates_[key].value; }
 

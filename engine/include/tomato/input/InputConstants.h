@@ -103,7 +103,7 @@ namespace tomato
     /**
      * @brief Bitmask for logical player intents for a single simulation tick.
      */
-    enum class InputIntent : uint16_t
+    enum class InputIntent
     {
         NONE    = 0,
 
@@ -122,51 +122,6 @@ namespace tomato
 
         COUNT
     };
-
-    // bitwise operations for InputIntent flags ------------------------------
-
-    inline InputIntent operator&(const InputIntent l, const InputIntent r)
-    {
-        return static_cast<InputIntent>(static_cast<uint16_t>(l) & static_cast<uint16_t>(r));
-    }
-
-    inline InputIntent operator|(const InputIntent l, const InputIntent r)
-    {
-        return static_cast<InputIntent>(static_cast<uint16_t>(l) | static_cast<uint16_t>(r));
-    }
-
-    inline InputIntent operator~(const InputIntent x)
-    {
-        return static_cast<InputIntent>(~static_cast<uint16_t>(x));
-    }
-
-    inline InputIntent operator^(const InputIntent l, const InputIntent r)
-    {
-        return static_cast<InputIntent>(static_cast<uint16_t>(l) ^ static_cast<uint16_t>(r));
-    }
-
-    inline InputIntent& operator|=(InputIntent& l, const InputIntent r)
-    {
-        l = l | r;
-        return l;
-    }
-
-    inline InputIntent& operator&=(InputIntent& l, const InputIntent r)
-    {
-        l = l & r;
-        return l;
-    }
-
-    inline bool HasIntent(const InputIntent x, const InputIntent intent)
-    {
-        return (x & intent) != InputIntent::NONE;
-    }
-
-    inline std::ostream& operator <<(std::ostream& out, const InputIntent x)
-    {
-        out << static_cast<uint16_t>(x);
-        return out;
-    }
 }
 
 #endif //TOMATO_INPUTCONSTANTS_H

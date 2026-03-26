@@ -62,6 +62,7 @@ set(ENGINE_HEADERS
         include/tomato/resource/tomato_resource.h
         include/tomato/event/EventDispatcher.h
         include/tomato/event/EventSignal.h
+        include/tomato/utils/BitmaskOperators.h
 )
 
 set(ENGINE_SOURCES
