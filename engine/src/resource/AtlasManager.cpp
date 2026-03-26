@@ -18,7 +18,7 @@ namespace tomato
 		CreateNewAtlas();
 		atlases.back()->Allocate(w, h, x, y);
 		
-		return { static_cast<int>(atlases.size() - 1, x, y) };
+		return { static_cast<int>(atlases.size() - 1), x, y };
 	}
 	void AtlasManager::BindAtlas(int index, unsigned int unit)
 	{

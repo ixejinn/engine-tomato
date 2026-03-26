@@ -59,13 +59,15 @@ set(ENGINE_HEADERS
         include/tomato/net/tomato_message_type.h
         include/tomato/RegistryEntry.h
         include/tomato/resource/AssetRegistry.h
+        include/tomato/resource/AtlasManager.h
+        include/tomato/resource/TextRenderer.h
         include/tomato/resource/tomato_resource.h
         include/tomato/resource/render/Font.h
         include/tomato/resource/render/TextureAtlas.h
         include/tomato/event/EventDispatcher.h
         include/tomato/event/EventSignal.h
         include/tomato/FontContext.h
- "include/tomato/resource/AtlasManager.h")
+)
 
 set(ENGINE_SOURCES
         src/core/DefaultState.cpp
@@ -76,6 +78,8 @@ set(ENGINE_SOURCES
         src/ecs/systems/TransformSystem.cpp
         src/ecs/SystemManager.cpp
         src/ecs/SystemRegistry.cpp
+        src/resource/AtlasManager.cpp
+        src/resource/TextRenderer.cpp
         src/resource/render/Font.cpp
         src/resource/render/Mesh.cpp
         src/resource/render/Shader.cpp
@@ -98,7 +102,7 @@ set(ENGINE_SOURCES
         src/net/InputNetMessage.cpp
         src/input/InputRecorder.cpp
         src/net/NetMessageRegistry.cpp
- "src/resource/AtlasManager.cpp")
+)
 
 set(EXTERNAL_SOURCES
         external/glad/src/glad.c
