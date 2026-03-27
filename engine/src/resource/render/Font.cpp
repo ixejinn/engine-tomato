@@ -20,8 +20,8 @@ namespace tomato
 
 		// Extract the file name without extension
 		std::string assetKey;
-		if (path == PrimitiveName)
-			assetKey = "DefaultFont";
+		if (path == defaultPath)
+			assetKey = PrimitiveName;
 		else
 		{
 			size_t start = (lastSlash == std::string::npos) ? 0 : lastSlash + 1;
@@ -31,11 +31,10 @@ namespace tomato
 			assetKey = fullPath.substr(start, count);
 		}
 
-		// const char* assetKey = (path == PrimitiveName) ? "DefaultFont" : path;
 		// Register using the parsed key
 		AssetRegistry<Font>::GetInstance().Register(assetKey.c_str(), std::move(ptr));
 		
-		TMT_INFO << "Font Registered with key" << assetKey;
+		TMT_INFO << "Font Registered with key: " << assetKey;
 	}
 
 	const Glyph& Font::GetGlyph(char32_t codepoint)
@@ -57,7 +56,7 @@ namespace tomato
 			TMT_ERR << "ERROR::FreeType: Failed to load Glyph for: " << (uint32_t)codepoint;
 			throw std::runtime_error("Failed to load Glyph");
 		}
-
+		
 		FT_GlyphSlot slot = face->glyph;
 		int width = slot->bitmap.width;
 		int rows = slot->bitmap.rows;
@@ -104,6 +103,8 @@ namespace tomato
 	}
 	Font::~Font()
 	{
-		FT_Done_Face(face);
+		std::cout << __FUNCTION__ << '\n';
+		if(face)
+			FT_Done_Face(face);
 	}
 }

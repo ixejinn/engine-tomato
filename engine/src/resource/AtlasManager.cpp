@@ -31,6 +31,6 @@ namespace tomato
 	void AtlasManager::CreateNewAtlas()
 	{
 		atlases.push_back(std::make_unique<TextureAtlas>());
-		TMT_DEBUG << "New TextureAtlas created. Current Total: " << atlases.size();
+		TMT_INFO << "New TextureAtlas created. Current Total: " << atlases.size();
 	}
 }

@@ -12,12 +12,14 @@ set(ENGINE_HEADERS
         include/tomato/ecs/components/Rigidbody.h
         include/tomato/ecs/components/Render.h
         include/tomato/ecs/components/Tags.h
+        include/tomato/ecs/components/Text.h
         include/tomato/ecs/components/Transform.h
         include/tomato/ecs/systems/CameraSystem.h
         include/tomato/ecs/systems/KinematicMovementSystem.h
         include/tomato/ecs/systems/RenderSystem.h
         include/tomato/ecs/systems/System.h
         include/tomato/ecs/systems/TransformSystem.h
+        include/tomato/ecs/systems/UISystem.h
         include/tomato/resource/render/Mesh.h
         include/tomato/resource/render/Shader.h
         include/tomato/resource/render/Texture.h

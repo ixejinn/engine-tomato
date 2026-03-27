@@ -12,6 +12,6 @@ int main() {
   
     tmt::Engine engine(window);
     engine.SetRollbackManager<tmt::RollbackSlice<tmt::PositionComponent, tmt::JumpComponent>>();    // State 내부에서 하도록 옮기는게 좋을지도?
-    engine.SetNextState(std::make_unique<GameState>());
+    engine.SetNextState(std::make_unique<TestState>());
     engine.Run();
 }

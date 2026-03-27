@@ -4,6 +4,8 @@
 #include "tomato/resource/render/Shader.h"
 #include "tomato/Logger.h"
 
+#include <codecvt>
+
 namespace tomato
 {
 	TextRenderer::~TextRenderer()
@@ -15,6 +17,13 @@ namespace tomato
 	void TextRenderer::Init(Shader* shader)
 	{
 		shader_ = shader;
+
+		shader_->Use();
+
+		glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
+		shader->SetUniformMat4("projection", projection);
+
+		glUseProgram(0);
 
 		// 1. Create and bind VAO
 		glGenVertexArrays(1, &vao_);
@@ -42,30 +51,48 @@ namespace tomato
 
 		glBindVertexArray(0);
 		
-		TMT_DEBUG << "TextRenderer initialized with reserved capacity: 1000 chars.";
+		TMT_INFO << "TextRenderer initialized with reserved capacity: 1000 chars.";
 	}
 
-	void TextRenderer::DrawText(const std::string& text, float x, float y, float size, glm::vec4& color, Font* font)
+	void TextRenderer::DrawString(const std::u32string& text, float x, float y, float size, const glm::vec4& color, Font* font)
 	{
-		/*shader_->Use();
-		shader_->SetUniformVec3("textColor", color.x, color.y, color.z);
-		glActiveTexture(GL_TEXTURE0);
-		glBindVertexArray(vao_);
+		//std::u32string str = ToUTF32(text);
+		//std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
+		//std::u32string str = convert.from_bytes(text);
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);*/
-		
-		std::string::const_iterator c;
+		std::u32string::const_iterator c;
 		for (c = text.begin(); c != text.end(); c++)
 		{
 			const Glyph& glyph = font->GetGlyph(*c);
 
+			// If the atlas changes, draw the current batch and clear it (Flush).
 			if (currentAtlasIndex_ != -1 && currentAtlasIndex_ != glyph.atlasIndex)
 				Flush();
+
 			currentAtlasIndex_ = glyph.atlasIndex;
 
-			AddQuad(x, y, size, glyph, color);
+			float xpos = x + glyph.bearing.x * size;
+			float ypos = y - (glyph.size.y - glyph.bearing.y) * size;
+			float w = glyph.size.x * size;
+			float h = glyph.size.y * size;
 
-			x += (glyph.advance >> 6) * size;
+			float u1 = glyph.uvMin.x;
+			float v1 = glyph.uvMin.y;
+			float u2 = glyph.uvMax.x;
+			float v2 = glyph.uvMax.y;
+
+			// Generate 6 vertices for two triangles (TL, BL, BR, TL, BR, TR) to form a quad.
+			vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{u1, v1}, color });
+			vertices_.emplace_back(TextVertex{ {xpos, ypos},			{u1, v2}, color });
+			vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{u2, v2}, color });
+
+			vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{u1, v1}, color });
+			vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{u2, v2}, color });
+			vertices_.emplace_back(TextVertex{ {xpos + w, ypos + h},	{u2, v1}, color });
+			//AddQuad(x, y, size, glyph, color);
+
+			// Advance the cursor position for the next character.
+			x += glyph.advance * size;
 		}
 	}
 
@@ -73,8 +100,6 @@ namespace tomato
 	{
 		if (vertices_.empty()) return;
 
-		shader_->Use();
-		//shader_->SetUniformVec3("textColor", color.x, color.y, color.z);
 		AtlasManager::GetInstance().BindAtlas(currentAtlasIndex_);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_);
@@ -84,7 +109,6 @@ namespace tomato
 		glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices_.size()));
 
 		vertices_.clear();
-
 	}
 
 	void TextRenderer::AddQuad(float x, float y, float size, const Glyph& glyph, const glm::vec4& color)
@@ -94,15 +118,23 @@ namespace tomato
 		float w = glyph.size.x * size;
 		float h = glyph.size.y * size;
 
-		vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{0.0f, 0.0f}, color });
-		vertices_.emplace_back(TextVertex{ {xpos, ypos},			{0.0f, 1.0f}, color });
-		vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{1.0f, 1.0f}, color });
+		float u1 = glyph.uvMin.x;
+		float v1 = glyph.uvMin.y;
+		float u2 = glyph.uvMax.x;
+		float v2 = glyph.uvMax.y;
 
-		vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{0.0f, 0.0f}, color });
-		vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{1.0f, 1.0f}, color });
-		vertices_.emplace_back(TextVertex{ {xpos + w, ypos + h},	{1.0f, 0.0f}, color });
+		vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{u1, v1}, color });
+		vertices_.emplace_back(TextVertex{ {xpos, ypos},			{u1, v2}, color });
+		vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{u2, v2}, color });
+
+		vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{u1, v1}, color });
+		vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{u2, v2}, color });
+		vertices_.emplace_back(TextVertex{ {xpos + w, ypos + h},	{u2, v1}, color });
 	}
 
-
-
+	std::u32string TextRenderer::ToUTF32(const std::string& uft8Str)
+	{
+		std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
+		return convert.from_bytes(uft8Str);
+	}
 }

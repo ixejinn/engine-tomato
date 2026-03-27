@@ -36,9 +36,12 @@ namespace tomato
 	class Font
 	{
 	public:
-		constexpr static const char* PrimitiveName = "assets/fonts/SpoqaHanSansNeo-Medium.ftf";
+		constexpr static const char* PrimitiveName = "SpoqaHanSansNeo-Medium";
+		constexpr static const char* defaultPath = "assets/fonts/SpoqaHanSansNeo-Medium.ttf";
 
-		static void Create(const char* path = PrimitiveName);
+		~Font();
+
+		static void Create(const char* path = defaultPath);
 
 		//void SetFontSize(int size);
 		
@@ -48,8 +51,7 @@ namespace tomato
 		const Glyph& LoadGlyph(char32_t codepoint);
 
 	private:
-		Font(const char* path = PrimitiveName);
-		~Font();
+		Font(const char* path = defaultPath);
 
 		FT_Face face;
 		uint32_t baseSize{ 48 };

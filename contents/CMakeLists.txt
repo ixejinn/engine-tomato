@@ -7,6 +7,7 @@ add_executable(contents
 target_link_libraries(contents PRIVATE
         # Force inclusion of all object files in the static library for SystemRegistry
         $<LINK_LIBRARY:WHOLE_ARCHIVE, engine>
+        project_options
 )
 
 # 셰이더 폴더

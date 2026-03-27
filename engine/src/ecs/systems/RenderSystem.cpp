@@ -1,4 +1,4 @@
-#include "tomato/ecs/systems/RenderSystem.h"
+﻿#include "tomato/ecs/systems/RenderSystem.h"
 #include "tomato/Engine.h"
 #include "tomato/tomato_sim.h"
 #include "tomato/services/WindowService.h"
@@ -6,11 +6,13 @@
 #include "tomato/resource/render/Mesh.h"
 #include "tomato/resource/render/Shader.h"
 #include "tomato/resource/render/Texture.h"
+#include "tomato/resource/render/Font.h"
 
 #include "tomato/ecs/components/Camera.h"
 #include "tomato/ecs/components/Tags.h"
 #include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Transform.h"
+#include "tomato/ecs/components/Text.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -23,7 +25,8 @@ namespace tomato
     RenderSystem::RenderSystem() :
     curMesh_(GetAssetID(Mesh::GetName(Mesh::PrimitiveType::PLAIN))),
     curShader_(GetAssetID(Shader::PrimitiveName)),
-    curTexture_(GetAssetID(Texture::PrimitiveName))
+    curTexture_(GetAssetID(Texture::PrimitiveName)),
+    curFont_(GetAssetID(Font::PrimitiveName))
     {
         // Enable depth test
         glEnable(GL_DEPTH_TEST);
@@ -35,10 +38,13 @@ namespace tomato
         AssetRegistry<Mesh>::GetInstance().Init();
         AssetRegistry<Texture>::GetInstance().Init();
         AssetRegistry<Shader>::GetInstance().Init();
+        AssetRegistry<Font>::GetInstance().Init();
+        textRenderer_.Init(AssetRegistry<Shader>::GetInstance().Get(GetAssetID("Font")));
     }
 
 	void RenderSystem::Update(Engine& engine, const SimContext& ctx)
     {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto viewProjection = glm::mat4(1.f);
@@ -110,5 +116,37 @@ namespace tomato
 
             mesh->Draw();
         }
+
+
+        //    textRenderer_.DrawString(U"테스트test입니다.123", 250.0f, 300.0f, 0.5f, glm::vec4(0.3, 0.7f, 0.9f, 1.0f), font);
+        //    textRenderer_.Flush();
+        //}
+
+        //TextComponent Render
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+        shader = AssetRegistry<Shader>::GetInstance().Get(GetAssetID("Font"));
+        shader->Use();
+        shader->SetUniformInt("text", 0);
+
+        auto view = engine.GetWorld().GetRegistry().view<TextComponent, PositionComponent, ScaleComponent>();
+        for (auto [e, text, pos, scale] : view.each())
+        {
+            Font* font = AssetRegistry<Font>::GetInstance().Get(text.font);
+            if (font)
+            {
+                textRenderer_.DrawString(
+                    text.text,
+                    pos.position.x, pos.position.y,
+                    scale.scale.x,
+                    text.color,
+                    font
+                );
+            }
+        }
+        textRenderer_.Flush();
+
+        glEnable(GL_DEPTH_TEST);
     }
 }

@@ -1,4 +1,4 @@
-#include "TestState.h"
+﻿#include "TestState.h"
 #include "tomato/tomato.h"
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/components/Transform.h"
@@ -7,6 +7,7 @@
 #include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Camera.h"
 #include "tomato/ecs/components/Tags.h"
+#include "tomato/ecs/components/Text.h"
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Mesh.h"
 #include "tomato/resource/render/Texture.h"
@@ -113,6 +114,12 @@ void TestState::Init(tomato::World& world)
         tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
         tmt::GetAssetID(tmt::Shader::PrimitiveName),
         tmt::GetAssetID(tmt::Texture::PrimitiveName));
+
+    const auto text = world.CreateEntity();
+    registry.emplace<tomato::TextComponent>(text, U"테스트test입니다.123", glm::vec4{ 0.3, 0.7f, 0.9f, 1.0f });
+    registry.emplace<tomato::PositionComponent>(text, tmt::Vector3{ 250.0f, 300.0f, 0.5f });
+    registry.emplace<tomato::ScaleComponent>(text, (glm::vec3{ 0.5f, 0.5f, 1.f }));
+
 }
 
 void TestState::Exit() {}

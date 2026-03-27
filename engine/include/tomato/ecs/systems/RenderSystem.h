@@ -3,6 +3,7 @@
 
 #include "System.h"
 #include "tomato/resource/tomato_resource.h"
+#include "tomato/resource/TextRenderer.h"
 
 namespace tomato
 {
@@ -17,6 +18,9 @@ namespace tomato
         AssetId curMesh_;
         AssetId curShader_;
         AssetId curTexture_;
+		AssetId curFont_;
+
+		TextRenderer textRenderer_;
 	};
 }
 

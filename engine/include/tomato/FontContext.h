@@ -17,9 +17,15 @@ public:
 		}
 	}
 
-	~FontContext()
+	void ShutDown()
 	{
-		FT_Done_FreeType(library_);
+		std::cout << __FUNCTION__ << '\n';
+
+		if (library_)
+		{
+			FT_Done_FreeType(library_);
+			library_ = nullptr;
+		}
 	}
 
 	FT_Library Get() const noexcept { return library_; }
