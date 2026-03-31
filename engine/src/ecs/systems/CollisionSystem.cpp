@@ -4,6 +4,7 @@
 #include "tomato/Logger.h"
 #include "tomato/ecs/components/Collision.h"
 #include "tomato/ecs/components/Transform.h"
+#include "tomato/utils/BitmaskOperators.h"
 #include <list>
 #include <limits>
 
@@ -23,9 +24,7 @@ namespace tomato
         }
 
         group.sort<AABBComponent>([](const auto& l, const auto& r)
-                                  {
-            return l.min.x < r.min.x;
-                                  });
+                                  { return l.min.x < r.min.x; });
 
         std::list<entt::entity> active;
         float activeMaxX = std::numeric_limits<float>::lowest();
@@ -41,37 +40,59 @@ namespace tomato
             }
             else
             {
+                activeMaxX = std::max(activeMaxX, aabb.max.x);
                 for (auto it = active.begin(); it != active.end();)
                 {
-                    auto& aabb_ = reg.get<AABBComponent>(*it);
-                    auto& col_ = reg.get<ColliderComponent>(*it);
+                    auto& aabbAct = reg.get<AABBComponent>(*it);
+                    auto& colAct = reg.get<ColliderComponent>(*it);
 
-                    if (aabb_.max.x < aabb.min.x)
+                    if (aabbAct.max.x < aabb.min.x)
                     {
                         active.erase(it++);
                         continue;
                     }
 
-                    if (!layerMatrix_.CanCollide(col.layer, col_.layer))
+                    if (!layerMatrix_.CanCollide(col.layer, colAct.layer))
                     {
                         ++it;
                         continue;
                     }
 
-                    if (aabb_.max.y < aabb.min.y || aabb.max.x < aabb_.min.y)
+                    if (aabbAct.max.y < aabb.min.y || aabb.max.y < aabbAct.min.y)
                     {
                         ++it;
                         continue;
                     }
-                    if (aabb_.max.z < aabb.min.z || aabb.max.z < aabb_.min.z)
+                    if (aabbAct.max.z < aabb.min.z || aabb.max.z < aabbAct.min.z)
                     {
                         ++it;
                         continue;
                     }
-
-                    // narrow-phase
 
                     TMT_INFO << "AABB Collision";
+
+                    // narrow-phase
+                    const ColliderType type = col.type | colAct.type;
+                    if (type == (ColliderType::AABB | ColliderType::OBB))
+                        ;
+                    else if (type == (ColliderType::AABB | ColliderType::Sphere))
+                        ;
+                    else if (type == (ColliderType::AABB | ColliderType::Cylinder))
+                        ;
+                    else if (type == ColliderType::OBB)
+                        ;
+                    else if (type == (ColliderType::OBB | ColliderType::Sphere))
+                        ;
+                    else if (type == (ColliderType::OBB | ColliderType::Cylinder))
+                        ;
+                    else if (type == ColliderType::Sphere)
+                        ;
+                    else if (type == (ColliderType::Sphere | ColliderType::Cylinder))
+                        ;
+                    else          // ColliderType::Cylinder
+                        ;
+
+
                     ++it;
                 }
 
@@ -88,7 +109,7 @@ namespace tomato
 
         switch (col.type)
         {
-            case ColliderType::Plain:
+            // case ColliderType::Plain:
             case ColliderType::OBB:
             {
                 auto& rot = reg.get<RotationComponent>(e);
@@ -105,7 +126,7 @@ namespace tomato
                 aabb.min = pos.position - rotatedHalfScale;
             }
                 break;
-            case ColliderType::Circle:
+            // case ColliderType::Circle:
             case ColliderType::Sphere:
             {
                 glm::vec3 radius{col.halfScale.x};

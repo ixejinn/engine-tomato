@@ -13,7 +13,7 @@ namespace tomato
 
 	struct CameraComponent
 	{
-        ProjectionMode mode{PERSPECTIVE};
+        ProjectionMode mode{ORTHOGONAL};
 
         float degree{45.f};
         float zNear{0.1f};

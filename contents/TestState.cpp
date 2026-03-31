@@ -21,20 +21,25 @@ void TestState::Init(tomato::World& world)
     tmt::Registry& registry = world.GetRegistry();
 
     const auto cam = world.CreateEntity();
-    registry.emplace<tomato::PositionComponent>(cam, glm::vec3(0.f, 7.5f, 15.f));
-    registry.emplace<tomato::RotationComponent>(cam, glm::vec3(-30.f, 0.f, 0.f));
+    // registry.emplace<tomato::PositionComponent>(cam, glm::vec3(0.f, 7.5f, 15.f));
+    registry.emplace<tomato::PositionComponent>(cam, glm::vec3(0.f, 1.f, 10.f));
+    // registry.emplace<tomato::RotationComponent>(cam, glm::vec3(-30.f, 0.f, 0.f));
+    registry.emplace<tomato::RotationComponent>(cam, glm::vec3(0.f, 0.f, 0.f));
     registry.emplace<tomato::CameraComponent>(cam);
     registry.emplace<tomato::MainCameraTag>(cam);
+
+    // registry.emplace<tomato::SpeedComponent>(cam, (float)2.f);
+    // registry.emplace<tomato::InputChannelComponent>(cam, (uint8_t)0);
+    // registry.emplace<tomato::JumpComponent>(cam);
 
     const auto me = world.CreateEntity();
 
     registry.emplace<tomato::PositionComponent>(me, tmt::Vector3{0, 0, 0});
     registry.emplace<tomato::RotationComponent>(me/*, glm::vec3(0.f, 0.f, 60.f)*/);
-    registry.emplace<tomato::ScaleComponent>(me, (glm::vec3{1.f, 1.f, 1.f }));
+    registry.emplace<tomato::ScaleComponent>(me, glm::vec3{1.f, 1.f, 1.f });
     registry.emplace<tomato::WorldMatrixComponent>(me);
 
     registry.emplace<tomato::SpeedComponent>(me, (float)2.f);
-
     registry.emplace<tomato::InputChannelComponent>(me, (uint8_t)0);
     registry.emplace<tomato::JumpComponent>(me);
 
@@ -43,7 +48,7 @@ void TestState::Init(tomato::World& world)
 
     registry.emplace<tomato::RenderComponent>(me,
                                               tmt::Vector4(1.f, 1.f, 0.f, 1.f),
-                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::SPHERE)),
+                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
                                               tmt::GetAssetID(tmt::Shader::PrimitiveName),
                                               //tmt::GetAssetID("assets/WATER_GAME_LOGO.png"));
                                               tmt::GetAssetID(tmt::Texture::PrimitiveName));
@@ -65,10 +70,7 @@ void TestState::Init(tomato::World& world)
 
     registry.emplace<tomato::RenderComponent>(east,
                                               tmt::Vector4(0.f, 0.f, 1.f, 1.f),
-                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::SPHERE
-
-
-                                              )),
+                                              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
                                               tmt::GetAssetID(tmt::Shader::PrimitiveName),
                                               tmt::GetAssetID(tmt::Texture::PrimitiveName));
 
@@ -111,18 +113,18 @@ void TestState::Init(tomato::World& world)
         tmt::GetAssetID(tmt::Shader::PrimitiveName),
         tmt::GetAssetID(tmt::Texture::PrimitiveName));
 
-    const auto floor = world.CreateEntity();
-
-    registry.emplace<tomato::PositionComponent>(floor, tmt::Vector3{ 0, -0.6, 0 });
-    registry.emplace<tomato::RotationComponent>(floor);
-    registry.emplace<tomato::ScaleComponent>(floor, (glm::vec3{ 30.f, 0.2f, 30.f }));
-    registry.emplace<tomato::WorldMatrixComponent>(floor);
-
-    registry.emplace<tomato::RenderComponent>(floor,
-        tmt::Vector4(0.5f, 0.5f, 0.5f, 1.f),
-        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
-        tmt::GetAssetID(tmt::Shader::PrimitiveName),
-        tmt::GetAssetID(tmt::Texture::PrimitiveName));
+    // const auto floor = world.CreateEntity();
+    //
+    // registry.emplace<tomato::PositionComponent>(floor, tmt::Vector3{ 0, -0.6, 0 });
+    // registry.emplace<tomato::RotationComponent>(floor);
+    // registry.emplace<tomato::ScaleComponent>(floor, (glm::vec3{ 30.f, 0.2f, 30.f }));
+    // registry.emplace<tomato::WorldMatrixComponent>(floor);
+    //
+    // registry.emplace<tomato::RenderComponent>(floor,
+    //     tmt::Vector4(0.5f, 0.5f, 0.5f, 1.f),
+    //     tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
+    //     tmt::GetAssetID(tmt::Shader::PrimitiveName),
+    //     tmt::GetAssetID(tmt::Texture::PrimitiveName));
 }
 
 void TestState::Exit() {}

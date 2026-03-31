@@ -7,7 +7,7 @@
 
 namespace tomato
 {
-    class AABBComponent;
+    struct AABBComponent;
 
     class CollisionSystem : public System
     {

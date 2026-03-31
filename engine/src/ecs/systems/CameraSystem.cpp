@@ -38,7 +38,12 @@ namespace tomato
                     projection = glm::perspective(glm::radians(cam.degree), (float)window.GetWidth() / window.GetHeight(), cam.zNear, cam.zFar);
                     break;
                 case ORTHOGONAL:
-                    projection = glm::ortho(0.f, (float)window.GetWidth(), 0.f, (float)window.GetHeight(), cam.zNear, cam.zFar);
+                {
+                    const float ratio = (float)window.GetWidth() / (float)window.GetHeight();
+                    float width = ratio * 10;
+                    projection = glm::ortho(-width, width, -10.f, 10.f,
+                        cam.zNear, cam.zFar);
+                }
                     break;
             }
 

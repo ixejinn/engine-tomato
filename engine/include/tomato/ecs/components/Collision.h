@@ -9,6 +9,7 @@ namespace tomato
     struct CollisionEvent;
     struct TriggerEvent;
 
+    // 3D
     struct ColliderComponent
     {
         ColliderType type;
@@ -26,6 +27,25 @@ namespace tomato
         bool isDirty = true;
     };
 
+    // 2D
+    struct Collider2DComponent
+    {
+        Collider2DType type;
+        Vector2 halfScale{0.5f};
+
+        CollisionLayer layer = CollisionLayer::Default;
+
+        bool isTrigger = false;
+    };
+
+    struct AABB2DComponent
+    {
+        Vector2 min;
+        Vector2 max;
+        bool isDirty = true;
+    };
+
+    // Callback function
     using CollisionCallback = std::function<void(CollisionEvent&)>;
     struct OnCollisionComponent
     {
