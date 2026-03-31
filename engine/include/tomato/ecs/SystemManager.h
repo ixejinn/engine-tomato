@@ -35,7 +35,8 @@ namespace tomato
         static constexpr SystemPhase simulationOrder_[] =
                 {
                 SystemPhase::CONTROLLER,
-                SystemPhase::INTEGRATOR
+                SystemPhase::INTEGRATOR,
+                SystemPhase::COLLISION
                 };
 
         static constexpr SystemPhase renderOrder_[] =

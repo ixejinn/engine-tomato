@@ -7,6 +7,7 @@
 #include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Camera.h"
 #include "tomato/ecs/components/Tags.h"
+#include "tomato/ecs/components/Collision.h"
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Mesh.h"
 #include "tomato/resource/render/Texture.h"
@@ -37,6 +38,9 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::InputChannelComponent>(me, (uint8_t)0);
     registry.emplace<tomato::JumpComponent>(me);
 
+    registry.emplace<tomato::ColliderComponent>(me, tmt::ColliderType::AABB);
+    registry.emplace<tomato::AABBComponent>(me);
+
     registry.emplace<tomato::RenderComponent>(me,
                                               tmt::Vector4(1.f, 1.f, 0.f, 1.f),
                                               tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::SPHERE)),
@@ -55,6 +59,9 @@ void TestState::Init(tomato::World& world)
 
     registry.emplace<tomato::InputChannelComponent>(east, (uint8_t)1);
     registry.emplace<tomato::JumpComponent>(east);
+
+    registry.emplace<tomato::ColliderComponent>(east, tmt::ColliderType::AABB);
+    registry.emplace<tomato::AABBComponent>(east);
 
     registry.emplace<tomato::RenderComponent>(east,
                                               tmt::Vector4(0.f, 0.f, 1.f, 1.f),

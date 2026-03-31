@@ -11,6 +11,7 @@ namespace tomato
     {
         CONTROLLER = 0,
         INTEGRATOR,
+        COLLISION,
         RENDER,
         CAMERA,
         COUNT

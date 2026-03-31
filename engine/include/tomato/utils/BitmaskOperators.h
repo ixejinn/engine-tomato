@@ -8,7 +8,7 @@
 namespace tomato
 {
     enum class InputIntent;
-    enum class CollisionLayer;
+    enum class CollisionLayer : uint32_t;
 
     template<typename T>
     struct is_bitmask : std::false_type {};

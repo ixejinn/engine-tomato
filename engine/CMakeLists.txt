@@ -63,6 +63,11 @@ set(ENGINE_HEADERS
         include/tomato/event/EventDispatcher.h
         include/tomato/event/EventSignal.h
         include/tomato/utils/BitmaskOperators.h
+        include/tomato/ecs/components/Collision.h
+        include/tomato/collision/CollisionConstants.h
+        include/tomato/collision/CollisionEvent.h
+        include/tomato/ecs/systems/CollisionSystem.h
+        include/tomato/collision/CollisionLayerMatrix.h
 )
 
 set(ENGINE_SOURCES
@@ -94,6 +99,7 @@ set(ENGINE_SOURCES
         src/net/InputNetMessage.cpp
         src/input/InputRecorder.cpp
         src/net/NetMessageRegistry.cpp
+        src/ecs/systems/CollisionSystem.cpp
 )
 
 set(EXTERNAL_SOURCES
