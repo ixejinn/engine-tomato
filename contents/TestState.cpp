@@ -7,11 +7,8 @@
 #include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Camera.h"
 #include "tomato/ecs/components/Tags.h"
-<<<<<<< HEAD
 #include "tomato/ecs/components/Collision.h"
-=======
 #include "tomato/ecs/components/Text.h"
->>>>>>> yj
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Mesh.h"
 #include "tomato/resource/render/Texture.h"
