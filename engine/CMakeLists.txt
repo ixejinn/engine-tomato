@@ -14,6 +14,7 @@ set(ENGINE_HEADERS
         include/tomato/ecs/components/Tags.h
         include/tomato/ecs/components/Text.h
         include/tomato/ecs/components/Transform.h
+        include/tomato/ecs/components/UI.h
         include/tomato/ecs/systems/CameraSystem.h
         include/tomato/ecs/systems/KinematicMovementSystem.h
         include/tomato/ecs/systems/RenderSystem.h
