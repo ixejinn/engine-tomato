@@ -1,28 +1,43 @@
 set(ENGINE_HEADERS
         include/tomato/DefaultState.h
         include/tomato/Engine.h
+        include/tomato/EngineConfig.h
+        include/tomato/FontContext.h
         include/tomato/Logger.h
+        include/tomato/RegistryEntry.h
         include/tomato/State.h
         include/tomato/tomato.h
+        include/tomato/tomato_math.h
+        include/tomato/tomato_packet_types.h
+        include/tomato/tomato_sim.h
+        include/tomato/containers/MemoryPool.h
+        include/tomato/containers/SPSCQueue.h
+        include/tomato/containers/EnumArray.h
+        include/tomato/containers/Timeline.h
+        include/tomato/ecs/tomato_ecs.h
         include/tomato/ecs/SystemManager.h
         include/tomato/ecs/SystemRegistry.h
         include/tomato/ecs/World.h
         include/tomato/ecs/components/Camera.h
+        include/tomato/ecs/components/Collision.h
         include/tomato/ecs/components/Movement.h
         include/tomato/ecs/components/Rigidbody.h
         include/tomato/ecs/components/Render.h
         include/tomato/ecs/components/Tags.h
+        include/tomato/ecs/components/Text.h
         include/tomato/ecs/components/Transform.h
+        include/tomato/ecs/components/UI.h
         include/tomato/ecs/systems/CameraSystem.h
         include/tomato/ecs/systems/KinematicMovementSystem.h
         include/tomato/ecs/systems/RenderSystem.h
         include/tomato/ecs/systems/System.h
         include/tomato/ecs/systems/TransformSystem.h
+        include/tomato/ecs/systems/UISystem.h
+        include/tomato/ecs/systems/CollisionSystem.h
         include/tomato/resource/render/Mesh.h
         include/tomato/resource/render/Shader.h
         include/tomato/resource/render/Texture.h
         include/tomato/services/InputService.h
-        include/tomato/input/InputTypes.h
         include/tomato/services/WindowService.h
         include/tomato/services/network/CoreNetwork.h
         include/tomato/services/network/Socket.h
@@ -34,40 +49,33 @@ set(ENGINE_HEADERS
         include/tomato/services/network/NetworkService.h
         include/tomato/serialization/BitReader.h
         include/tomato/serialization/BitWriter.h
+        include/tomato/services/network/SocketUtil.h
+        include/tomato/services/network/WinsockContext.h
+        include/tomato/net/tomato_message_type.h
         include/tomato/net/NetBitReader.h
         include/tomato/net/NetBitWriter.h
-        include/tomato/containers/MemoryPool.h
         include/tomato/net/NetMessageRegistry.h
         include/tomato/net/NetMessage.h
         include/tomato/net/InputNetMessage.h
-        include/tomato/containers/SPSCQueue.h
-        include/tomato/EngineConfig.h
         include/tomato/net/rollback/RollbackSlice.h
         include/tomato/net/rollback/RollbackManager.h
-        include/tomato/ecs/tomato_ecs.h
         include/tomato/net/rollback/CoreRollback.h
-        include/tomato/containers/Timeline.h
-        include/tomato/tomato_sim.h
         include/tomato/input/InputRecorder.h
-        include/tomato/containers/EnumArray.h
+        include/tomato/input/InputTypes.h
         include/tomato/input/InputConstants.h
         include/tomato/input/InputRecord.h
-        include/tomato/tomato_math.h
-        include/tomato/services/network/SocketUtil.h
-        include/tomato/services/network/WinsockContext.h
-        include/tomato/tomato_packet_types.h
-        include/tomato/net/tomato_message_type.h
-        include/tomato/RegistryEntry.h
         include/tomato/resource/AssetRegistry.h
+        include/tomato/resource/AtlasManager.h
+        include/tomato/resource/TextRenderer.h
         include/tomato/resource/tomato_resource.h
+        include/tomato/resource/render/Font.h
+        include/tomato/resource/render/TextureAtlas.h
         include/tomato/event/EventDispatcher.h
         include/tomato/event/EventSignal.h
-        include/tomato/utils/BitmaskOperators.h
-        include/tomato/ecs/components/Collision.h
         include/tomato/collision/CollisionConstants.h
         include/tomato/collision/CollisionEvent.h
-        include/tomato/ecs/systems/CollisionSystem.h
         include/tomato/collision/CollisionLayerMatrix.h
+        include/tomato/utils/BitmaskOperators.h
 )
 
 set(ENGINE_SOURCES
@@ -76,12 +84,17 @@ set(ENGINE_SOURCES
         src/ecs/systems/CameraSystem.cpp
         src/ecs/systems/KinematicMovementSystem.cpp
         src/ecs/systems/RenderSystem.cpp  
+        src/ecs/systems/CollisionSystem.cpp
         src/ecs/systems/TransformSystem.cpp
         src/ecs/SystemManager.cpp
         src/ecs/SystemRegistry.cpp
+        src/resource/AtlasManager.cpp
+        src/resource/TextRenderer.cpp
+        src/resource/render/Font.cpp
         src/resource/render/Mesh.cpp
         src/resource/render/Shader.cpp
         src/resource/render/Texture.cpp
+        src/resource/render/TextureAtlas.cpp
         src/services/InputService.cpp
         src/services/WindowService.cpp
         src/services/network/NetDriver.cpp
@@ -97,9 +110,8 @@ set(ENGINE_SOURCES
         src/net/NetBitReader.cpp
         src/net/NetBitWriter.cpp
         src/net/InputNetMessage.cpp
-        src/input/InputRecorder.cpp
         src/net/NetMessageRegistry.cpp
-        src/ecs/systems/CollisionSystem.cpp
+        src/input/InputRecorder.cpp
 )
 
 set(EXTERNAL_SOURCES
@@ -119,6 +131,7 @@ target_include_directories(engine
 #        PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/external
         ${CMAKE_CURRENT_LIST_DIR}/external/glad/include
+        ${freetype_SOURCE_DIR}/include
 )
 
 if (NOT TARGET glfw)
@@ -144,4 +157,5 @@ target_link_libraries(engine
         PRIVATE
         opengl32    # OpenGL
         ws2_32      # Winsock API
+        freetype
 )

@@ -1,4 +1,4 @@
-#include "TestState.h"
+﻿#include "TestState.h"
 #include "tomato/tomato.h"
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/components/Transform.h"
@@ -7,7 +7,11 @@
 #include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Camera.h"
 #include "tomato/ecs/components/Tags.h"
+<<<<<<< HEAD
 #include "tomato/ecs/components/Collision.h"
+=======
+#include "tomato/ecs/components/Text.h"
+>>>>>>> yj
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Mesh.h"
 #include "tomato/resource/render/Texture.h"
@@ -125,6 +129,24 @@ void TestState::Init(tomato::World& world)
     //     tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
     //     tmt::GetAssetID(tmt::Shader::PrimitiveName),
     //     tmt::GetAssetID(tmt::Texture::PrimitiveName));
+
+    const auto floor = world.CreateEntity();
+
+    registry.emplace<tomato::PositionComponent>(floor, tmt::Vector3{ 0, -0.6, 0 });
+    registry.emplace<tomato::RotationComponent>(floor);
+    registry.emplace<tomato::ScaleComponent>(floor, (glm::vec3{ 30.f, 0.2f, 30.f }));
+    registry.emplace<tomato::WorldMatrixComponent>(floor);
+
+    registry.emplace<tomato::RenderComponent>(floor,
+        tmt::Vector4(0.5f, 0.5f, 0.5f, 1.f),
+        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::CUBE)),
+        tmt::GetAssetID(tmt::Shader::PrimitiveName),
+        tmt::GetAssetID(tmt::Texture::PrimitiveName));
+
+    const auto text = world.CreateEntity();
+    registry.emplace<tomato::TextComponent>(text, U"테스트test입니다.123", glm::vec4{ 0.3, 0.7f, 0.9f, 1.0f });
+    registry.emplace<tomato::PositionComponent>(text, tmt::Vector3{ 250.0f, 300.0f, 0.5f });
+    registry.emplace<tomato::ScaleComponent>(text, (glm::vec3{ 0.5f, 0.5f, 1.f }));
 }
 
 void TestState::Exit() {}
