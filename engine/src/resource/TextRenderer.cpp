@@ -5,6 +5,7 @@
 #include "tomato/Logger.h"
 
 #include <codecvt>
+#include <locale>
 
 namespace tomato
 {
