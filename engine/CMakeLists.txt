@@ -86,6 +86,7 @@ set(ENGINE_SOURCES
         src/ecs/systems/RenderSystem.cpp  
         src/ecs/systems/CollisionSystem.cpp
         src/ecs/systems/TransformSystem.cpp
+        src/ecs/systems/UISystem.cpp
         src/ecs/SystemManager.cpp
         src/ecs/SystemRegistry.cpp
         src/resource/AtlasManager.cpp

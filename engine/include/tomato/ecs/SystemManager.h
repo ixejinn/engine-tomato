@@ -41,6 +41,7 @@ namespace tomato
 
         static constexpr SystemPhase renderOrder_[] =
                 {
+                SystemPhase::UI,
                 SystemPhase::CAMERA,
                 SystemPhase::RENDER
                 };

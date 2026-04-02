@@ -14,6 +14,7 @@ namespace tomato
         COLLISION,
         RENDER,
         CAMERA,
+        UI,
         COUNT
     };
 

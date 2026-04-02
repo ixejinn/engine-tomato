@@ -119,10 +119,38 @@ namespace tomato
             mesh->Draw();
         }
 
+        auto groupUI = engine.GetWorld().GetRegistry().view<TransformComponent, RenderComponent, WorldMatrixComponent>();
+        for (auto [e, trans, render, mtx] : groupUI.each())
+        {
+            if (curShader_ != render.shader)
+            {
+                curShader_ = render.shader;
+                shader = AssetRegistry<Shader>::GetInstance().Get(curShader_);
+                shader->Use();
+            }
 
-        //    textRenderer_.DrawString(U"테스트test입니다.123", 250.0f, 300.0f, 0.5f, glm::vec4(0.3, 0.7f, 0.9f, 1.0f), font);
-        //    textRenderer_.Flush();
-        //}
+            if (curTexture_ != render.texture)
+            {
+                curTexture_ = render.texture;
+                AssetRegistry<Texture>::GetInstance().Get(curTexture_)->Bind();
+            }
+
+            if (curMesh_ != render.mesh)
+            {
+                curMesh_ = render.mesh;
+                mesh = AssetRegistry<Mesh>::GetInstance().Get(curMesh_);
+                mesh->Bind();
+            }
+
+            glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
+            shader->SetUniformInt("tex", 0);
+            shader->SetUniformMat4("uModel", mtx.matrix);
+            shader->SetUniformMat4("projection", projection);
+            shader->SetUniformVec4("uColor", render.color);
+
+            mesh->Draw();
+        }
+        
 
         //TextComponent Render
         glDisable(GL_DEPTH_TEST);
