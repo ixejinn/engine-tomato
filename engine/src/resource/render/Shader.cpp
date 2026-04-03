@@ -13,6 +13,9 @@ namespace tomato
 
         std::unique_ptr<Shader> fontShader{ new Shader{"assets/text.vs", "assets/text.fs"} };
         AssetRegistry<Shader>::GetInstance().Register("Font", std::move(fontShader));
+
+        std::unique_ptr<Shader> uiShader{ new Shader{"assets/ui.vs", "assets/ui.fs"} };
+        AssetRegistry<Shader>::GetInstance().Register("UI", std::move(uiShader));
     }
 
     void Shader::Create(const char* vsName, const char* fsName)

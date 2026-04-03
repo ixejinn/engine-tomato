@@ -15,21 +15,31 @@ namespace tomato
 	}
 	void UISystem::Update(Engine& engine, const SimContext& ctx)
 	{
-		auto view = engine.GetWorld().GetRegistry().view<TransformComponent, RectComponent, UIComponent>();
+		auto view = engine.GetWorld().GetRegistry().view<RectTransformComponent, UIComponent>();
 		
-		for (auto [e, transform, rect, ui] : view.each())
+		for (auto [e, rect, ui] : view.each())
 		{
 			if (ui.canvas == entt::null)
+			{
+				std::cout << "[UISystem] Can not found canvas.\n";
 				continue;
+			}
 
 			auto& canvas = engine.GetWorld().GetRegistry().get<CanvasComponent>(ui.canvas);
 
-			glm::vec2 anchorPos = canvas.scale * rect.anchorMin;
-			glm::vec2 pos = anchorPos + rect.anchoredPosition;
-			pos -= glm::vec2(rect.width, rect.height) * rect.pivot;
+			glm::vec2 scaleFactor = canvas.actualSize / canvas.referenceSize;
 
-			transform.position = glm::vec3(pos, 0.f);
-			transform.scale = glm::vec3(rect.width, rect.height, 1.f);
+			glm::vec2 anchorCenter = (rect.anchorMin + rect.anchorMax) * 0.5f;
+			glm::vec2 anchorPos = canvas.referenceSize * anchorCenter;
+
+			glm::vec2 pos = anchorPos + rect.anchoredPosition;
+			pos *= scaleFactor;
+
+			glm::vec2 size = glm::vec2(rect.width, rect.height) * scaleFactor;
+			pos -= size * rect.pivot;
+
+			rect.position = glm::vec3(pos, 0.f);
+			rect.scale = glm::vec3(size, 1.f);
 		}
 	}
 

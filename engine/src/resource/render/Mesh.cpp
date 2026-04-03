@@ -28,6 +28,10 @@ namespace tomato
                 Plain(vertices, indices);
                 break;
 
+            case PrimitiveType::LBPLAIN:
+                LBPlain(vertices, indices);
+                break;
+
             case PrimitiveType::CUBE:
                 Cube(vertices, indices);
                 break;
@@ -77,6 +81,19 @@ namespace tomato
         glm::vec3 v1{-0.5f, -0.5f, 0.0f};
         glm::vec3 v2{ 0.5f, -0.5f, 0.0f};
         glm::vec3 v3{ 0.5f,  0.5f, 0.0f};
+
+        FillMeshData(v0, v1, v2, v3, vertices, indices);
+    }
+
+    void Mesh::LBPlain(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
+    {
+        vertices.reserve(4);    // 4 vertices per plain
+        indices.reserve(6);     // 2 triangles per plain, 3 vertices per triangle
+
+        glm::vec3 v0{ 0.f,  1.f, 0.0f };
+        glm::vec3 v1{ 0.f,  0.f, 0.0f };
+        glm::vec3 v2{ 1.f,  0.f, 0.0f };
+        glm::vec3 v3{ 1.f,  1.f, 0.0f };
 
         FillMeshData(v0, v1, v2, v3, vertices, indices);
     }

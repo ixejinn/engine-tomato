@@ -20,7 +20,8 @@ namespace tomato
 
 		shader_->Use();
 
-		glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
+		//glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
+		glm::mat4 projection = glm::ortho(-800.0f, static_cast<float>(800), -450.0f, static_cast<float>(450), -1.0f, 1.0f);
 		shader->SetUniformMat4("projection", projection);
 
 		glUseProgram(0);

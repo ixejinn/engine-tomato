@@ -24,6 +24,7 @@ namespace tomato
         enum class PrimitiveType
         {
             PLAIN,
+            LBPLAIN,
             CUBE,
             SPHERE,
             CYLINDER,
@@ -36,6 +37,8 @@ namespace tomato
             {
                 case PrimitiveType::PLAIN:
                     return "Mesh_PLAIN";
+                case PrimitiveType::LBPLAIN:
+                    return "Mesh_LBPLAIN";
                 case PrimitiveType::CUBE:
                 default:
                     return "Mesh_CUBE";
@@ -64,6 +67,7 @@ namespace tomato
 
     private:
         static void Plain(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+        static void LBPlain(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
         static void Cube(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
         static void Sphere(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
         static void Cylinder(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);

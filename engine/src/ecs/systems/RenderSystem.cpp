@@ -13,6 +13,7 @@
 #include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/Text.h"
+#include "tomato/ecs/components/UI.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -119,8 +120,9 @@ namespace tomato
             mesh->Draw();
         }
 
-        auto groupUI = engine.GetWorld().GetRegistry().view<TransformComponent, RenderComponent, WorldMatrixComponent>();
-        for (auto [e, trans, render, mtx] : groupUI.each())
+        glDisable(GL_DEPTH_TEST);
+        auto groupUI = engine.GetWorld().GetRegistry().view<RectTransformComponent, RenderComponent>();
+        for (auto [e, rect, render] : groupUI.each())
         {
             if (curShader_ != render.shader)
             {
@@ -143,17 +145,17 @@ namespace tomato
             }
 
             glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
+
             shader->SetUniformInt("tex", 0);
-            shader->SetUniformMat4("uModel", mtx.matrix);
+            shader->SetUniformMat4("uModel", rect.world_matrix);
             shader->SetUniformMat4("projection", projection);
             shader->SetUniformVec4("uColor", render.color);
 
             mesh->Draw();
-        }
-        
+        }     
 
         //TextComponent Render
-        glDisable(GL_DEPTH_TEST);
+        
         glDisable(GL_CULL_FACE);
 
         shader = AssetRegistry<Shader>::GetInstance().Get(GetAssetID("Font"));
@@ -178,5 +180,6 @@ namespace tomato
         textRenderer_.Flush();
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
     }
 }

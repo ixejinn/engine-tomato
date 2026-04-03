@@ -14,18 +14,6 @@ namespace tomato
 
     struct ScaleComponent { Vector3 scale{1.f, 1.f, 1.f}; };
 
-    struct TransformComponent
-    {
-        Vector3 position{ 0.f, 0.f, 0.f };
-        Vector3 scale{ 1.f, 1.f, 1.f };
-        Vector3 eulerDegree;
-
-        Entity parent{ entt::null };
-        std::vector<Entity> children;
-
-        bool dirty{ true };
-    };
-
     // Local to World
     struct WorldMatrixComponent { Matrix4 matrix; };
 }

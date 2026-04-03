@@ -6,19 +6,19 @@
 
 namespace tomato
 {
-	enum class UISpace
+	enum class RenderMode
 	{
-		Screen,
+		ScreenOverlay,
+		ScreenCamera,
 		World
 	};
 
 	struct CanvasComponent // root
 	{
-		UISpace space{ UISpace::Screen };
+		RenderMode mode{ RenderMode::ScreenOverlay };
 
 		glm::vec2 referenceSize{ 1600.f, 900.f };
 		glm::vec2 actualSize{ 1600.f, 900.f };
-		glm::vec2 scale; // actual / reference
 
 		Entity camera; // optinal
 	};
@@ -28,10 +28,14 @@ namespace tomato
 		Entity canvas{ entt::null };
 	}; // Tag
 
-	struct RectComponent
+	struct RectTransformComponent
 	{
-		float width;
-		float height;
+		Vector3 position{ 0.f, 0.f, 0.f };
+		Vector3 scale{ 1.f, 1.f, 1.f };
+		Vector3 rotation{ 0.f, 0.f, 0.f };
+
+		float width{ 800.f };
+		float height{ 450.f };
 
 		glm::vec2 pivot{ 0.5f, 0.5f };
 
@@ -39,6 +43,12 @@ namespace tomato
 		glm::vec2 anchorMax{ 0.5f, 0.5f };
 
 		glm::vec2 anchoredPosition{ 0.f, 0.f };
+
+		glm::mat4 local_matrix;
+		glm::mat4 world_matrix;
+
+		Entity parent{ entt::null };
+		std::vector<Entity> children;
 
 		bool dirty{ true };
 	};
