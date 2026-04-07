@@ -13,17 +13,10 @@ namespace tomato
 
     enum class ColliderType : uint8_t
     {
-        AABB = 1 << 0,
-        OBB = 1 << 1,
-        Sphere = 1 << 2,
-        Cylinder = 1 << 3,
-    };
-
-    enum class Collider2DType : uint8_t
-    {
-        AABB,
-        OBB,
-        Circle
+        Cube,
+        Sphere,
+        Capsule,
+        COUNT
     };
 }
 

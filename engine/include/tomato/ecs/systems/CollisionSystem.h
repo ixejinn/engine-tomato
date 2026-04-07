@@ -7,7 +7,7 @@
 
 namespace tomato
 {
-    struct AABBComponent;
+    struct ColliderComponent;
 
     class CollisionSystem : public System
     {
@@ -15,7 +15,8 @@ namespace tomato
         void Update(Engine& engine, const SimContext& ctx) override;
 
     private:
-        static void SetAABB(Registry& reg, Entity e, AABBComponent& aabb);
+        static void SetAABB(Registry& reg, Entity e, ColliderComponent& col);
+        static bool GJK(Registry& reg, Entity e1, Entity e2);
 
         CollisionLayerMatrix layerMatrix_;
     };

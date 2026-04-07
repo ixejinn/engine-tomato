@@ -7,6 +7,7 @@
 #include "tomato/utils/BitmaskOperators.h"
 #include <list>
 #include <limits>
+#include <vector>
 
 #include "tomato/RegistryEntry.h"
 REGISTER_SYSTEM(tomato::SystemPhase::COLLISION, CollisionSystem);
@@ -16,37 +17,35 @@ namespace tomato
     void CollisionSystem::Update(Engine& engine, const SimContext& ctx)
     {
         auto& reg = engine.GetWorld().GetRegistry();
-        auto group = reg.group<AABBComponent, ColliderComponent>();
-        for (auto [e, aabb, col] : group.each())
+        auto group = reg.group<ColliderComponent>();
+        for (auto [e, col] : group.each())
         {
-            if (aabb.isDirty)
-                SetAABB(reg, e, aabb);
+            if (col.aabbDirty)
+                SetAABB(reg, e, col);
         }
 
-        group.sort<AABBComponent>([](const auto& l, const auto& r)
+        group.sort<ColliderComponent>([](const auto& l, const auto& r)
                                   { return l.min.x < r.min.x; });
 
         std::list<entt::entity> active;
         float activeMaxX = std::numeric_limits<float>::lowest();
 
-        for (auto [e, aabb, col] : group.each())
+        for (auto [e, col] : group.each())
         {
-            if (activeMaxX < aabb.min.x)
+            if (activeMaxX < col.min.x)
             {
                 active.clear();
 
                 active.push_back(e);
-                activeMaxX = aabb.max.x;
+                activeMaxX = col.max.x;
             }
             else
             {
-                activeMaxX = std::max(activeMaxX, aabb.max.x);
                 for (auto it = active.begin(); it != active.end();)
                 {
-                    auto& aabbAct = reg.get<AABBComponent>(*it);
                     auto& colAct = reg.get<ColliderComponent>(*it);
 
-                    if (aabbAct.max.x < aabb.min.x)
+                    if (colAct.max.x < col.min.x)
                     {
                         active.erase(it++);
                         continue;
@@ -58,12 +57,12 @@ namespace tomato
                         continue;
                     }
 
-                    if (aabbAct.max.y < aabb.min.y || aabb.max.y < aabbAct.min.y)
+                    if (colAct.max.y < col.min.y || col.max.y < colAct.min.y)
                     {
                         ++it;
                         continue;
                     }
-                    if (aabbAct.max.z < aabb.min.z || aabb.max.z < aabbAct.min.z)
+                    if (colAct.max.z < col.min.z || col.max.z < colAct.min.z)
                     {
                         ++it;
                         continue;
@@ -72,82 +71,53 @@ namespace tomato
                     TMT_INFO << "AABB Collision";
 
                     // narrow-phase
-                    const ColliderType type = col.type | colAct.type;
-                    if (type == (ColliderType::AABB | ColliderType::OBB))
-                        ;
-                    else if (type == (ColliderType::AABB | ColliderType::Sphere))
-                        ;
-                    else if (type == (ColliderType::AABB | ColliderType::Cylinder))
-                        ;
-                    else if (type == ColliderType::OBB)
-                        ;
-                    else if (type == (ColliderType::OBB | ColliderType::Sphere))
-                        ;
-                    else if (type == (ColliderType::OBB | ColliderType::Cylinder))
-                        ;
-                    else if (type == ColliderType::Sphere)
-                        ;
-                    else if (type == (ColliderType::Sphere | ColliderType::Cylinder))
-                        ;
-                    else          // ColliderType::Cylinder
-                        ;
 
 
                     ++it;
                 }
 
                 active.push_back(e);
-                activeMaxX = std::max(activeMaxX, aabb.max.x);
+                activeMaxX = std::max(activeMaxX, col.max.x);
             }
         }
     }
 
-    void CollisionSystem::SetAABB(Registry& reg, Entity e, AABBComponent& aabb)
+    void CollisionSystem::SetAABB(Registry& reg, const Entity e, ColliderComponent& col)
     {
-        auto& col = reg.get<ColliderComponent>(e);
         auto& pos = reg.get<PositionComponent>(e);
 
         switch (col.type)
         {
-            // case ColliderType::Plain:
-            case ColliderType::OBB:
+            case ColliderType::Sphere:
+            {
+                glm::vec3 radius{col.halfExtents.x};
+
+                col.max = pos.position + radius;
+                col.min = pos.position - radius;
+            }
+                break;
+            default:
             {
                 auto& rot = reg.get<RotationComponent>(e);
                 auto R = glm::toMat4(glm::quat(glm::radians(rot.eulerDegree)));
 
-                glm::vec3 rotatedHalfScale = glm::vec3
+                glm::vec3 aabbHalfExtents = glm::vec3
                 {
-                    glm::abs(R[0][0]) * col.halfScale.x + glm::abs(R[1][0]) * col.halfScale.y + glm::abs(R[2][0]) * col.halfScale.z,
-                    glm::abs(R[0][1]) * col.halfScale.x + glm::abs(R[1][1]) * col.halfScale.y + glm::abs(R[2][1]) * col.halfScale.z,
-                    glm::abs(R[0][2]) * col.halfScale.x + glm::abs(R[1][2]) * col.halfScale.y + glm::abs(R[2][2]) * col.halfScale.z
+                    glm::abs(R[0][0]) * col.halfExtents.x + glm::abs(R[1][0]) * col.halfExtents.y + glm::abs(R[2][0]) * col.halfExtents.z,
+                    glm::abs(R[0][1]) * col.halfExtents.x + glm::abs(R[1][1]) * col.halfExtents.y + glm::abs(R[2][1]) * col.halfExtents.z,
+                    glm::abs(R[0][2]) * col.halfExtents.x + glm::abs(R[1][2]) * col.halfExtents.y + glm::abs(R[2][2]) * col.halfExtents.z
                 };
 
-                aabb.max = pos.position + rotatedHalfScale;
-                aabb.min = pos.position - rotatedHalfScale;
+                col.max = pos.position + col.position + aabbHalfExtents;
+                col.min = pos.position + col.position - aabbHalfExtents;
             }
-                break;
-            // case ColliderType::Circle:
-            case ColliderType::Sphere:
-            {
-                glm::vec3 radius{col.halfScale.x};
-
-                aabb.max = pos.position + radius;
-                aabb.min = pos.position - radius;
-            }
-                break;
-            case ColliderType::Cylinder:
-            {
-                glm::vec3 offset{col.halfScale.x, col.halfScale.y, col.halfScale.x};
-
-                aabb.max = pos.position + offset;
-                aabb.min = pos.position - offset;
-            }
-                break;
-            case ColliderType::AABB:
-            default:
-                aabb.max = pos.position + col.halfScale;
-                aabb.min = pos.position - col.halfScale;
                 break;
         }
+    }
+
+    bool CollisionSystem::GJK(Engine& engine, const SimContext& ctx)
+    {
+        std::vector<glm::vec3> simplex;
+        simplex.reserve(4);
     }
 }

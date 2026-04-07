@@ -9,40 +9,17 @@ namespace tomato
     struct CollisionEvent;
     struct TriggerEvent;
 
-    // 3D
     struct ColliderComponent
     {
+        Vector3 position;
+        Vector3 halfExtents{0.5f};
+        Vector3 min, max;   // AABB for broad-phase collision detection
+
+        CollisionLayer layer = CollisionLayer::Default;
         ColliderType type;
-        Vector3 halfScale{0.5f};
-
-        CollisionLayer layer = CollisionLayer::Default;
 
         bool isTrigger = false;
-    };
-
-    struct AABBComponent
-    {
-        Vector3 min;
-        Vector3 max;
-        bool isDirty = true;
-    };
-
-    // 2D
-    struct Collider2DComponent
-    {
-        Collider2DType type;
-        Vector2 halfScale{0.5f};
-
-        CollisionLayer layer = CollisionLayer::Default;
-
-        bool isTrigger = false;
-    };
-
-    struct AABB2DComponent
-    {
-        Vector2 min;
-        Vector2 max;
-        bool isDirty = true;
+        bool aabbDirty = true;
     };
 
     // Callback function

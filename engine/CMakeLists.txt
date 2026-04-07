@@ -76,6 +76,7 @@ set(ENGINE_HEADERS
         include/tomato/collision/CollisionEvent.h
         include/tomato/collision/CollisionLayerMatrix.h
         include/tomato/utils/BitmaskOperators.h
+        include/tomato/collision/ColliderSupport.h
 )
 
 set(ENGINE_SOURCES
