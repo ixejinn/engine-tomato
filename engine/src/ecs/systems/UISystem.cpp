@@ -26,20 +26,47 @@ namespace tomato
 			}
 
 			auto& canvas = engine.GetWorld().GetRegistry().get<CanvasComponent>(ui.canvas);
+			if (ui.canvas == e)
+			{
+				rect.computedSize = canvas.actualSize;
+				rect.position = glm::vec3(rect.computedSize * rect.pivot, 0.f);
+				rect.scale = glm::vec3(1.f, 1.f, 1.f);
+				
+				continue;
+			}
+
+			auto& parentRect = engine.GetWorld().GetRegistry().get<RectTransformComponent>(rect.parent);
 
 			glm::vec2 scaleFactor = canvas.actualSize / canvas.referenceSize;
+			glm::vec2 parentSize = (rect.parent == entt::null) ? canvas.referenceSize : parentRect.computedSize;
+			glm::vec2 parentPivotPos = parentSize * parentRect.pivot;
+			
+			if (rect.anchorMin == rect.anchorMax) // anchor point
+			{
+				//std::cout << "point : min(" << rect.anchorMin.x << ", " << rect.anchorMin.y <<") max(" << rect.anchorMax.x << ", " << rect.anchorMax.y << ")\n";
+				//std::cout << "pivot : (" << rect.pivot.x << ", " << rect.pivot.y << ") sizeDelta : (" << rect.sizeDelta.x << ", " << rect.sizeDelta.y << ")\n";
+				glm::vec2 anchorPos = parentSize * rect.anchorMin;
+				glm::vec2 localPos = (anchorPos - parentPivotPos) + rect.anchoredPosition;
 
-			glm::vec2 anchorCenter = (rect.anchorMin + rect.anchorMax) * 0.5f;
-			glm::vec2 anchorPos = canvas.referenceSize * anchorCenter;
+				rect.computedSize = rect.sizeDelta;
+				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 
-			glm::vec2 pos = anchorPos + rect.anchoredPosition;
-			pos *= scaleFactor;
+				//std::cout << "position(" << localPos.x << ", " << localPos.y << ") size(" << rect.sizeDelta.x << ", " << rect.sizeDelta.y << ")\n";
+			}
+			else // anchor stretch
+			{
+				//std::cout << "stretch\n";
+				glm::vec2 anchorPosMin = parentSize * rect.anchorMin;
+				glm::vec2 anchorPosMax = parentSize * rect.anchorMax;
 
-			glm::vec2 size = glm::vec2(rect.width, rect.height) * scaleFactor;
-			pos -= size * rect.pivot;
+				glm::vec2 finalLocalMin = (anchorPosMin - parentPivotPos) + rect.offsetMin;
+				glm::vec2 finalLocalMax = (anchorPosMax - parentPivotPos) + rect.offsetMax;
 
-			rect.position = glm::vec3(pos, 0.f);
-			rect.scale = glm::vec3(size, 1.f);
+				rect.computedSize = finalLocalMax - finalLocalMin;
+
+				glm::vec2 localPos = finalLocalMin + (rect.computedSize * rect.pivot);
+				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
+			}
 		}
 	}
 

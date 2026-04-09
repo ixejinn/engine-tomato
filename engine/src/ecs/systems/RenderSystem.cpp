@@ -147,7 +147,7 @@ namespace tomato
             glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
 
             shader->SetUniformInt("tex", 0);
-            shader->SetUniformMat4("uModel", rect.world_matrix);
+            shader->SetUniformMat4("uModel", rect.model_matrix);
             shader->SetUniformMat4("projection", projection);
             shader->SetUniformVec4("uColor", render.color);
 
@@ -156,7 +156,7 @@ namespace tomato
 
         //TextComponent Render
         
-        glDisable(GL_CULL_FACE);
+        //glDisable(GL_CULL_FACE);
 
         shader = AssetRegistry<Shader>::GetInstance().Get(GetAssetID("Font"));
         shader->Use();
