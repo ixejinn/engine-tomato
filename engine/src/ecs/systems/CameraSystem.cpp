@@ -13,21 +13,22 @@ namespace tomato
 {
     void CameraSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        auto _view = engine.GetWorld().GetRegistry().view<PositionComponent, RotationComponent, CameraComponent>();
+        auto _view = engine.GetWorld().GetRegistry().view<TransformComponent, CameraComponent>();
 
-        for (auto [e, pos, rot, cam] : _view.each())
+        for (auto [e, trf, cam] : _view.each())
         {
-            auto quaternion = glm::quat(glm::radians(rot.eulerDegree));
+            auto quaternion = trf.GetQuaternion();
             glm::vec3 b = quaternion * glm::vec3(0, 0, 1);
             glm::vec3 r = quaternion * glm::vec3(1, 0, 0);
             glm::vec3 u = quaternion * glm::vec3(0, 1, 0);
 
+            auto pos = trf.GetPosition();
             glm::mat4 view
             {
                 r.x, u.x, b.x, 0,   // column 0
                 r.y, u.y, b.y, 0,   // column 1
                 r.z, u.z, b.z, 0,   // column 2
-                -glm::dot(r, pos.position), -glm::dot(u, pos.position), -glm::dot(b, pos.position), 1
+                -glm::dot(r, pos), -glm::dot(u, pos), -glm::dot(b, pos), 1
             };
 
             glm::mat4 projection{1.f};

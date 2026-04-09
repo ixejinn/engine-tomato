@@ -83,8 +83,8 @@ namespace tomato
 
         AssetRegistry<Texture>::GetInstance().Get(curTexture_)->Bind();
 
-        auto group = engine.GetWorld().GetRegistry().group<PositionComponent, RenderComponent, WorldMatrixComponent>();
-        for (auto [e, pos, render, mtx] : group.each())
+        auto group = engine.GetWorld().GetRegistry().group<TransformComponent, RenderComponent>();
+        for (auto [e, trf, render] : group.each())
         {
             // TODO: frustum culling
 
@@ -108,9 +108,10 @@ namespace tomato
                 mesh->Bind();
             }
 
-            shader->SetUniformMat4("uModel", mtx.matrix);
+            const auto& mtx = trf.GetTransformMatrix();
+            shader->SetUniformMat4("uModel", mtx);
             shader->SetUniformMat4("uViewProj", viewProjection);
-            shader->SetUniformMat3("uNormal", glm::transpose(glm::inverse(glm::mat3(mtx.matrix))));
+            shader->SetUniformMat3("uNormal", glm::transpose(glm::inverse(glm::mat3(mtx))));
 
             shader->SetUniformInt("uTexture", 0);
             shader->SetUniformVec3("uLightPos", glm::vec3(0, 10, 0));
@@ -125,30 +126,30 @@ namespace tomato
         //}
 
         //TextComponent Render
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
-
-        shader = AssetRegistry<Shader>::GetInstance().Get(GetAssetID("Font"));
-        shader->Use();
-        shader->SetUniformInt("text", 0);
-
-        auto view = engine.GetWorld().GetRegistry().view<TextComponent, PositionComponent, ScaleComponent>();
-        for (auto [e, text, pos, scale] : view.each())
-        {
-            Font* font = AssetRegistry<Font>::GetInstance().Get(text.font);
-            if (font)
-            {
-                textRenderer_.DrawString(
-                    text.text,
-                    pos.position.x, pos.position.y,
-                    scale.scale.x,
-                    text.color,
-                    font
-                );
-            }
-        }
-        textRenderer_.Flush();
-
-        glEnable(GL_DEPTH_TEST);
+//        glDisable(GL_DEPTH_TEST);
+//        glDisable(GL_CULL_FACE);
+//
+//        shader = AssetRegistry<Shader>::GetInstance().Get(GetAssetID("Font"));
+//        shader->Use();
+//        shader->SetUniformInt("text", 0);
+//
+//        auto view = engine.GetWorld().GetRegistry().view<TextComponent, PositionComponent, ScaleComponent>();
+//        for (auto [e, text, pos, scale] : view.each())
+//        {
+//            Font* font = AssetRegistry<Font>::GetInstance().Get(text.font);
+//            if (font)
+//            {
+//                textRenderer_.DrawString(
+//                    text.text,
+//                    pos.position.x, pos.position.y,
+//                    scale.scale.x,
+//                    text.color,
+//                    font
+//                );
+//            }
+//        }
+//        textRenderer_.Flush();
+//
+//        glEnable(GL_DEPTH_TEST);
     }
 }

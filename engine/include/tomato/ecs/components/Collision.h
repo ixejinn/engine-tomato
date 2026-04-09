@@ -11,6 +11,8 @@ namespace tomato
 
     struct ColliderComponent
     {
+        ColliderComponent(ColliderType t, CollisionLayer l = CollisionLayer::Default, Vector3 pos = Vector3{0.f})
+        : type(t), layer(l), position(pos) {}
         Vector3 position;
         Vector3 halfExtents{0.5f};
         Vector3 min, max;   // AABB for broad-phase collision detection

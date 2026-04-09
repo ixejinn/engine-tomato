@@ -113,6 +113,7 @@ set(ENGINE_SOURCES
         src/net/InputNetMessage.cpp
         src/net/NetMessageRegistry.cpp
         src/input/InputRecorder.cpp
+        src/collision/ColliderSupport.cpp
 )
 
 set(EXTERNAL_SOURCES

@@ -2,7 +2,6 @@
 #include "tomato/Engine.h"
 #include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Transform.h"
-#include "tomato/Logger.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -14,16 +13,21 @@ namespace tomato
 {
     void TransformSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        auto view = engine.GetWorld().GetRegistry().view<PositionComponent, RotationComponent, ScaleComponent, WorldMatrixComponent>();
+        auto view = engine.GetWorld().GetRegistry().view<TransformComponent>();
 
-        for (auto [e, pos, rot, scl, mat] : view.each())
+        for (auto [e, trf] : view.each())
         {
             // Scale → Rotate → Translate
-            auto T = glm::translate(glm::mat4(1.f), pos.position);
-            auto R = glm::toMat4(glm::quat(glm::radians(rot.eulerDegree)));
-            auto S = glm::scale(glm::mat4(1.f), scl.scale);
+            auto T = glm::translate(glm::mat4(1.f), trf.position);
+            if (trf.rotDirty)
+            {
+                trf.rotation = glm::quat(glm::radians(trf.eulerDegree));
+                trf.rotDirty = false;
+            }
+            auto R = glm::toMat4(trf.rotation);
+            auto S = glm::scale(glm::mat4(1.f), trf.scale);
 
-            mat.matrix = T * R * S;
+            trf.transformMatrix = T * R * S;
         }
     }
 }

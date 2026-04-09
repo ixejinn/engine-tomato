@@ -13,11 +13,12 @@ namespace tomato
 {
     void KinematicMovementSystem::Update(Engine& engine, const SimContext& ctx)
     {
-        auto view = engine.GetWorld().GetRegistry().view<PositionComponent, SpeedComponent, InputChannelComponent, JumpComponent>();
+        auto view = engine.GetWorld().GetRegistry().view<TransformComponent, SpeedComponent, InputChannelComponent, JumpComponent>();
         auto inputTimeline = engine.GetInputTimeline();
 
-        for (auto [e, pos, speed, ch, move] : view.each())
+        for (auto [e, trf, speed, ch, move] : view.each())
         {
+            auto pos = trf.GetPosition();
             const auto& inputRec = inputTimeline[ch.channel][ctx.tick];
             if (inputRec.tick != ctx.tick)
                 continue;
@@ -39,12 +40,12 @@ namespace tomato
             if (glm::length(dir) > 1)
                 dir = glm::normalize(dir);
 
-            pos.position.x += dir.x * speed.speed * Engine::FIXED_DELTA_TIME;
+            pos.x += dir.x * speed.speed * Engine::FIXED_DELTA_TIME;
             // !!! for 2D MOVEMENT !!!
             //pos.position.y += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
 
             // !!! for 3D MOVEMENT !!!
-            pos.position.z += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
+            pos.z += dir.y * speed.speed * Engine::FIXED_DELTA_TIME;
 
             // Jump
             if (HasFlag(keydown, InputIntent::JUMP) && move.cnt < JUMP_COUNT_MAX)
@@ -58,16 +59,18 @@ namespace tomato
             {
                 // Jumping
                 move.vy += GRAVITY * Engine::FIXED_DELTA_TIME;
-                pos.position.y += move.vy * Engine::FIXED_DELTA_TIME;
+                pos.y += move.vy * Engine::FIXED_DELTA_TIME;
 
-                if (pos.position.y <= 0)
+                if (pos.y <= 0)
                 {
                     // End jump
                     move.cnt = 0;
-                    pos.position.y = 0;
+                    pos.y = 0;
                     move.vy = 0.f;
                 }
             }
+
+            trf.SetPosition(pos);
         }
     }
 }
