@@ -2,15 +2,15 @@
 #define TOMATO_COLLISIONSYSTEM_H
 
 #include "tomato/ecs/systems/System.h"
-#include "tomato/ecs/tomato_ecs.h"
+#include "tomato/ecs/components/Collision.h"
 #include "tomato/collision/CollisionLayerMatrix.h"
 #include "tomato/collision/CollisionConstants.h"
 #include "tomato/containers/EnumArray.h"
 #include "tomato/tomato_math.h"
+#include "tomato/ecs/tomato_ecs.h"
 
 namespace tomato
 {
-    struct ColliderComponent;
     struct TransformComponent;
 
     class CollisionSystem : public System
@@ -21,7 +21,11 @@ namespace tomato
         void Update(Engine& engine, const SimContext& ctx) override;
 
     private:
+        void BroadPhase(Registry& reg) { SAP(reg); }
+        void NarrowPhase(Registry& reg);
+
         static void SetAABB(ColliderComponent& col, const TransformComponent& trf);
+        void SAP(Registry& reg);
 
         bool GJK(const ColliderComponent& col1, const TransformComponent& trf1,
                         const ColliderComponent& col2, const TransformComponent& trf2);
@@ -33,7 +37,11 @@ namespace tomato
         static bool VoronoiRegion(std::vector<glm::vec3>& simplex);
         static Vector3 GetOrientedNormal(const Vector3& refP, const Vector3& p0, const Vector3& p1, const Vector3& p2);
 
+        static void OnCollisionEvent(const CollisionEvent& e);
+
         CollisionLayerMatrix layerMatrix_;
+
+        std::vector<std::pair<Entity, Entity>> broadPairs_;
 
         using SupportFunc = std::function<Vector3(const Vector3& dir, const ColliderComponent& col)>;
         EnumArray<ColliderType, SupportFunc> supportFunctions_;

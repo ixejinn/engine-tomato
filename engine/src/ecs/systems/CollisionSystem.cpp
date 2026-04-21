@@ -6,10 +6,14 @@
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/utils/BitmaskOperators.h"
 #include "tomato/collision/ColliderSupport.h"
+#include "tomato/event/EventDispatcher.h"
+#include "tomato/collision/CollisionEvent.h"
+
 #include <list>
 #include <limits>
 #include <vector>
 #include <glm/glm.hpp>
+#include <entt/entt.hpp>
 
 #include "tomato/RegistryEntry.h"
 REGISTER_SYSTEM(tomato::SystemPhase::COLLISION, CollisionSystem);
@@ -18,29 +22,95 @@ namespace tomato
 {
     CollisionSystem::CollisionSystem()
     {
+        // Registry support function per collider
         supportFunctions_[ColliderType::Cube] = support::Cube;
         supportFunctions_[ColliderType::Sphere] = support::Sphere;
         supportFunctions_[ColliderType::Capsule] = support::Capsule;
+
+        EventDispatcher::GetInstance().Connect<CollisionEvent, &CollisionSystem::OnCollisionEvent>();
     }
 
     void CollisionSystem::Update(Engine& engine, const SimContext& ctx)
     {
+        broadPairs_.clear();
+
         auto& reg = engine.GetWorld().GetRegistry();
+        BroadPhase(reg);
+        NarrowPhase(reg);
+    }
+
+    void CollisionSystem::NarrowPhase(entt::registry& reg)
+    {
+        for (const auto& p : broadPairs_)
+        {
+            auto& col1 = reg.get<ColliderComponent>(p.first);
+            auto& col2 = reg.get<ColliderComponent>(p.second);
+
+            auto& trf1 = reg.get<TransformComponent>(p.first);
+            auto& trf2 = reg.get<TransformComponent>(p.second);
+
+            if (GJK(col1, trf1, col2, trf2))
+            {
+                // Collision
+                EventDispatcher::GetInstance().Enqueue(CollisionEvent{p.first, p.second});
+            }
+        }
+    }
+
+    void CollisionSystem::SetAABB(ColliderComponent& col, const TransformComponent& trf)
+    {
+        const auto& wPos = trf.GetPosition();
+
+        switch (col.type)
+        {
+            case ColliderType::Sphere:
+            {
+                glm::vec3 radius{col.halfExtents.x};
+
+                col.max = wPos + radius;
+                col.min = wPos - radius;
+            }
+                break;
+            default:
+            {
+                auto R = glm::toMat4(trf.GetQuaternion());
+
+                glm::vec3 aabbHalfExtents
+                {
+                    glm::abs(R[0][0]) * col.halfExtents.x + glm::abs(R[1][0]) * col.halfExtents.y + glm::abs(R[2][0]) * col.halfExtents.z,
+                    glm::abs(R[0][1]) * col.halfExtents.x + glm::abs(R[1][1]) * col.halfExtents.y + glm::abs(R[2][1]) * col.halfExtents.z,
+                    glm::abs(R[0][2]) * col.halfExtents.x + glm::abs(R[1][2]) * col.halfExtents.y + glm::abs(R[2][2]) * col.halfExtents.z
+                };
+
+                auto wOffset = glm::vec3(R * glm::vec4(col.position, 1.f));
+                col.max = wPos + wOffset + aabbHalfExtents;
+                col.min = wPos + wOffset - aabbHalfExtents;
+            }
+                break;
+        }
+    }
+
+    void CollisionSystem::SAP(Registry& reg)
+    {
         auto group = reg.group<ColliderComponent>();
         for (auto [e, col] : group.each())
         {
             if (col.aabbDirty)
+                // Update AABB min, max
                 SetAABB(col, reg.get<TransformComponent>(e));
         }
 
+        // Sort by AABB.min.x for x-axis SAP
         group.sort<ColliderComponent>([](const auto& l, const auto& r)
-                                  { return l.min.x < r.min.x; });
+                                      { return l.min.x < r.min.x; });
 
+        // Active list contains AABBs that are currently open on the sweep axis.
         std::list<entt::entity> active;
         float activeMaxX = std::numeric_limits<float>::lowest();
 
         for (auto [e, col] : group.each())
         {
+            // Initialize active list
             if (activeMaxX < col.min.x)
             {
                 active.clear();
@@ -54,18 +124,22 @@ namespace tomato
                 {
                     auto& colAct = reg.get<ColliderComponent>(*it);
 
+                    // If active AABB.max < current AABB.min
+                    // active AABB does not overlap on the sweep axis and cannot collide.
                     if (colAct.max.x < col.min.x)
                     {
                         active.erase(it++);
                         continue;
                     }
 
+                    // Check collision layer
                     if (!layerMatrix_.CanCollide(col.layer, colAct.layer))
                     {
                         ++it;
                         continue;
                     }
 
+                    // Check AABB
                     if (colAct.max.y < col.min.y || col.max.y < colAct.min.y)
                     {
                         ++it;
@@ -77,10 +151,7 @@ namespace tomato
                         continue;
                     }
 
-                    // narrow-phase
-                    if (GJK(col, reg.get<TransformComponent>(e), colAct, reg.get<TransformComponent>(*it)))
-                        TMT_INFO << "Collision";
-
+                    broadPairs_.emplace_back(e, *it);
                     ++it;
                 }
 
@@ -90,51 +161,11 @@ namespace tomato
         }
     }
 
-    void CollisionSystem::SetAABB(ColliderComponent& col, const TransformComponent& trf)
-    {
-        const auto& pos = trf.GetPosition();
-
-        switch (col.type)
-        {
-            case ColliderType::Sphere:
-            {
-                glm::vec3 radius{col.halfExtents.x};
-
-                col.max = pos + radius;
-                col.min = pos - radius;
-            }
-                break;
-            default:
-            {
-                auto R = glm::toMat4(trf.GetQuaternion());
-
-                glm::vec3 aabbHalfExtents = glm::vec3
-                {
-                    glm::abs(R[0][0]) * col.halfExtents.x + glm::abs(R[1][0]) * col.halfExtents.y + glm::abs(R[2][0]) * col.halfExtents.z,
-                    glm::abs(R[0][1]) * col.halfExtents.x + glm::abs(R[1][1]) * col.halfExtents.y + glm::abs(R[2][1]) * col.halfExtents.z,
-                    glm::abs(R[0][2]) * col.halfExtents.x + glm::abs(R[1][2]) * col.halfExtents.y + glm::abs(R[2][2]) * col.halfExtents.z
-                };
-
-                col.max = pos + col.position + aabbHalfExtents;
-                col.min = pos + col.position - aabbHalfExtents;
-            }
-                break;
-        }
-    }
-
     bool CollisionSystem::GJK(const ColliderComponent& col1, const TransformComponent& trf1,
                               const ColliderComponent& col2, const TransformComponent& trf2)
     {
         std::vector<glm::vec3> simplex;
         simplex.reserve(4);
-
-        const auto R1 = glm::toMat4(trf1.GetQuaternion());
-        glm::vec3 wPosCol1 = trf1.GetTransformMatrix() * glm::vec4(col1.position, 1.f);
-
-        const auto R2 = glm::toMat4(trf2.GetQuaternion());
-        glm::vec3 wPosCol2 = trf2.GetTransformMatrix() * glm::vec4(col2.position, 1.f);
-
-        simplex.push_back(Support(wPosCol2 - wPosCol1, col1, trf1) - Support(wPosCol1 - wPosCol2, col2, trf2));
 
         while (true)
         {
@@ -153,7 +184,7 @@ namespace tomato
         const glm::vec4 localDir = glm::transpose(R) * glm::vec4(worldDir, 0.f);
 
         const auto localSupportP = supportFunctions_[col.type](localDir, col);
-        return trf.GetPosition() + glm::vec3(R * glm::vec4(col.position, 1.f)) + glm::vec3(R * glm::vec4(localSupportP, 1.f));
+        return glm::vec3{trf.GetTransformMatrix() * glm::vec4(col.position + localSupportP, 1.f)};
     }
 
     bool CollisionSystem::AddSimplexPoint(std::vector<glm::vec3> &simplex,
@@ -164,6 +195,14 @@ namespace tomato
         auto simplexSize = simplex.size();
         switch (simplexSize)
         {
+            case 0:
+            {
+                glm::vec3 wPosCol1 = trf1.GetTransformMatrix() * glm::vec4(col1.position, 1.f);
+                glm::vec3 wPosCol2 = trf2.GetTransformMatrix() * glm::vec4(col2.position, 1.f);
+
+                simplex.push_back(Support(wPosCol2 - wPosCol1, col1, trf1) - Support(wPosCol1 - wPosCol2, col2, trf2));
+            }
+            break;
             case 1:
                 dir = -simplex[0];
                 simplex.push_back(Support(dir, col1, trf1) - Support(-dir, col2, trf2));
@@ -201,6 +240,9 @@ namespace tomato
         auto simplexSize = simplex.size();
         switch (simplexSize)
         {
+            case 1:
+                // if (simplex[0] == Vector3{0.f}) return true;
+                return false;
             case 2:
             {
                 const auto ao = -simplex[0];
@@ -214,8 +256,6 @@ namespace tomato
 
                 return false;
             }
-            break;
-
             case 3:
             {
                 const auto ab = simplex[1] - simplex[0];
@@ -247,15 +287,11 @@ namespace tomato
                 // 2차원이면 return true;
                 return false;
             }
-                break;
-
             case 4:
             {
                 const auto lo = -simplex[3];
 
-                float x;
-                x = glm::dot(-GetOrientedNormal(simplex[1], simplex[3], simplex[0], simplex[2]), lo);
-                if (x > 0)
+                if (glm::dot(-GetOrientedNormal(simplex[1], simplex[3], simplex[0], simplex[2]), lo) > 0)
                 {
                     simplex.erase(++simplex.begin());
                     return false;
@@ -272,13 +308,10 @@ namespace tomato
                 }
                 return true;
             }
-                break;
-
             default:
                 TMT_WARN << "Incorrect simplex size.";
                 return false;
         }
-        return false;
     }
 
     Vector3 CollisionSystem::GetOrientedNormal(const Vector3& refP, const Vector3& p0, const Vector3& p1, const Vector3& p2)
@@ -288,5 +321,10 @@ namespace tomato
         auto normal = glm::cross(vec01, vec02);
         auto x = glm::dot(normal, (refP - p0));
         return (x > 0 ? normal : -normal);
+    }
+
+    void CollisionSystem::OnCollisionEvent(const CollisionEvent& e)
+    {
+        //TMT_INFO << "OnCollisionEvent " << static_cast<int>(e.e1) << ", " << static_cast<int>(e.e2);
     }
 }

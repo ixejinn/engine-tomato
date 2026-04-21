@@ -25,14 +25,14 @@ namespace tomato
     };
 
     // Callback function
-    using CollisionCallback = std::function<void(CollisionEvent&)>;
+    using CollisionCallback = std::function<void(const CollisionEvent&)>;
     struct OnCollisionComponent
     {
         CollisionCallback enter;
         // exit, stay
     };
 
-    using TriggerCallback = std::function<void(TriggerEvent&)>;
+    using TriggerCallback = std::function<void(const TriggerEvent&)>;
     struct OnTriggerComponent
     {
         TriggerCallback enter;

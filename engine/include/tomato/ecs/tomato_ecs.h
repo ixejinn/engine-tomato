@@ -1,7 +1,7 @@
 #ifndef TOMATO_TOMATO_ECS_H
 #define TOMATO_TOMATO_ECS_H
 
-#include <entt/entt.hpp>
+#include <entt/fwd.hpp>
 
 namespace tomato
 {
