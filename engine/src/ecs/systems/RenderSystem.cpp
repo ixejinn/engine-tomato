@@ -120,6 +120,7 @@ namespace tomato
             mesh->Draw();
         }
 
+        //Screen UI Render
         glDisable(GL_DEPTH_TEST);
         auto groupUI = engine.GetWorld().GetRegistry().view<RectTransformComponent, RenderComponent>();
         for (auto [e, rect, render] : groupUI.each())
@@ -155,23 +156,20 @@ namespace tomato
         }     
 
         //TextComponent Render
-        
-        //glDisable(GL_CULL_FACE);
-
         shader = AssetRegistry<Shader>::GetInstance().Get(GetAssetID("Font"));
         shader->Use();
         shader->SetUniformInt("text", 0);
 
-        auto view = engine.GetWorld().GetRegistry().view<TextComponent, PositionComponent, ScaleComponent>();
-        for (auto [e, text, pos, scale] : view.each())
+        auto view = engine.GetWorld().GetRegistry().view<TextComponent, RectTransformComponent>();
+        for (auto [e, text, rect] : view.each())
         {
             Font* font = AssetRegistry<Font>::GetInstance().Get(text.font);
             if (font)
             {
                 textRenderer_.DrawString(
                     text.text,
-                    pos.position.x, pos.position.y,
-                    scale.scale.x,
+                    rect.position.x, rect.position.y,
+                    text.fontSize,
                     text.color,
                     font
                 );

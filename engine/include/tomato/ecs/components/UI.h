@@ -21,6 +21,7 @@ namespace tomato
 		glm::vec2 actualSize{ 1600.f, 900.f };
 
 		Entity camera; // optinal
+		int sortOrder{ 0 };
 	};
 
 	struct UIComponent
@@ -52,13 +53,36 @@ namespace tomato
 		glm::mat4 world_matrix{ 1.f };
 		glm::mat4 model_matrix{ 1.f };
 
+		//bool dirty{ true };
+	};
+
+	struct HierarchyComponent
+	{
 		Entity parent{ entt::null };
 		std::vector<Entity> children;
 
-		bool dirty{ true };
+		void SetParent(World& world, Entity child, Entity parent)
+		{
+			entt::registry& r = world.GetRegistry();
 
-		void SetParent(Entity e) { parent = e; }
+			auto& childH = r.get<HierarchyComponent>(child);
+			if (childH.parent != entt::null)
+			{
+				auto& oldParentH = r.get<HierarchyComponent>(childH.parent);
+				auto& siblings = oldParentH.children;
+
+				siblings.erase(std::remove(siblings.begin(), siblings.end(), child), siblings.end());
+			}
+
+			childH.parent = parent;
+			if (parent != entt::null)
+			{
+				auto& newParentH = r.get<HierarchyComponent>(parent);
+				newParentH.children.push_back(child);
+			}
+		}
 	};
+
 }
 
 #endif // !TOMATO_UI_H

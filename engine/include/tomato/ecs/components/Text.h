@@ -17,8 +17,9 @@ namespace tomato
 		 * Modify the write interface to accept standard std::string (UTF-8)
 		 * and handle internal conversion to UTF-32 for better usability.
 		 */
-		std::u32string text{};
+		std::string text{};
 		glm::vec4 color{ 0.0f, 0.0f, 0.0f, 1.0f };
+		float fontSize{ 0.6f };
 		AssetId font{ GetAssetID(Font::PrimitiveName) };
 	};
 }

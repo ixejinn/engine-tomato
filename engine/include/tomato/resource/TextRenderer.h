@@ -26,7 +26,8 @@ namespace tomato
 		void Init(Shader* shader);
 
 		// Add text data to the buffer
-		void DrawString(const std::u32string& text, float x, float y, float size, const glm::vec4& color, Font* font);
+		//void DrawString(const std::u32string& text, float x, float y, float size, const glm::vec4& color, Font* font);
+		void DrawString(const std::string& text, float x, float y, float size, const glm::vec4& color, Font* font);
 
 		// Actually send data to GPU and Draw
 		void Flush();

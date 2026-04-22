@@ -55,14 +55,11 @@ namespace tomato
 		TMT_INFO << "TextRenderer initialized with reserved capacity: 1000 chars.";
 	}
 
-	void TextRenderer::DrawString(const std::u32string& text, float x, float y, float size, const glm::vec4& color, Font* font)
+	void TextRenderer::DrawString(const std::string& text, float x, float y, float size, const glm::vec4& color, Font* font)
 	{
-		//std::u32string str = ToUTF32(text);
-		//std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
-		//std::u32string str = convert.from_bytes(text);
-
+		std::u32string str = ToUTF32(text);
 		std::u32string::const_iterator c;
-		for (c = text.begin(); c != text.end(); c++)
+		for (c = str.begin(); c != str.end(); c++)
 		{
 			const Glyph& glyph = font->GetGlyph(*c);
 

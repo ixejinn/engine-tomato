@@ -11,6 +11,9 @@ namespace tomato
     {
     public:
         void Update(Engine& engine, const SimContext& ctx) override;
+
+    private:
+        void UpdateScreenUI(Engine& engine);
     };
 }
 

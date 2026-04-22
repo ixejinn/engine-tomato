@@ -27,9 +27,10 @@ namespace tomato
             mat.matrix = T * R * S;
         }
 
-        auto viewUI = engine.GetWorld().GetRegistry().view<RectTransformComponent, UIComponent>();
+        //For UI
+        auto viewUI = engine.GetWorld().GetRegistry().view<HierarchyComponent ,RectTransformComponent, UIComponent>();
 
-        for (auto [e, rect, ui] : viewUI.each())
+        for (auto [e, hierarchy, rect, ui] : viewUI.each())
         {
             // Scale → Rotate → Translate
             auto T = glm::translate(glm::mat4(1.f), rect.position);
@@ -38,19 +39,54 @@ namespace tomato
             
             rect.local_matrix = T * R * S;
             
-            //@TODO : calculate world matrix with parent world matrix
             if (ui.canvas == e)
                 rect.world_matrix = rect.local_matrix;
 
-            else if(rect.parent != entt::null)
+            else if(hierarchy.parent != entt::null)
             {
-                //std::cout << "Calculate child ui\n";
                 auto& parentRect = engine.GetWorld().GetRegistry()
-                    .get<tomato::RectTransformComponent>(rect.parent);
+                    .get<tomato::RectTransformComponent>(hierarchy.parent);
                 //if (parentRect.world_matrix != glm::mat4(1.f)) // @TODO : parent world matrix first (sort)
                 //{
                     //std::cout << "child rect pos(" << rect.position.x << ", " << rect.position.y << ")\n";
                     rect.world_matrix = parentRect.world_matrix * rect.local_matrix;
+                //}
+            }
+            else
+                rect.world_matrix = rect.local_matrix;
+
+            glm::mat4 renderM = rect.world_matrix;
+            renderM = glm::scale(renderM, glm::vec3(rect.computedSize, 1.0f));
+            renderM = glm::translate(renderM, glm::vec3(-rect.pivot, 0.f));
+
+            rect.model_matrix = renderM;
+        }
+    }
+
+    void TransformSystem::UpdateScreenUI(Engine& engine)
+    {
+        auto viewUI = engine.GetWorld().GetRegistry().view<HierarchyComponent, RectTransformComponent, UIComponent>();
+
+        for (auto [e, hierarchy, rect, ui] : viewUI.each())
+        {
+            // Scale → Rotate → Translate
+            auto T = glm::translate(glm::mat4(1.f), rect.position);
+            auto R = glm::toMat4(glm::quat(glm::radians(rect.rotation)));
+            auto S = glm::scale(glm::mat4(1.f), rect.scale);
+
+            rect.local_matrix = T * R * S;
+
+            if (ui.canvas == e)
+                rect.world_matrix = rect.local_matrix;
+
+            else if (hierarchy.parent != entt::null)
+            {
+                auto& parentRect = engine.GetWorld().GetRegistry()
+                    .get<tomato::RectTransformComponent>(hierarchy.parent);
+                //if (parentRect.world_matrix != glm::mat4(1.f)) // @TODO : parent world matrix first (sort)
+                //{
+                    //std::cout << "child rect pos(" << rect.position.x << ", " << rect.position.y << ")\n";
+                rect.world_matrix = parentRect.world_matrix * rect.local_matrix;
                 //}
             }
             else
