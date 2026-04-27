@@ -3,6 +3,7 @@
 
 #include "System.h"
 #include "tomato/ecs/tomato_ecs.h"
+//#include "tomato/tomato_sim.h"
 
 namespace tomato
 {
@@ -13,11 +14,11 @@ namespace tomato
 		void Update(Engine& engine, const SimContext& ctx) override;
 
 	private:
-		void Traverse(Engine& engine, Entity e);
+		void Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList);
 		void BuildDrawList(Engine& engine);
 		void UpdateRectTransform(Engine& engine);
 
-		std::vector<Entity> drawList;
+		//std::vector<Entity> drawList;
 	};
 
 }

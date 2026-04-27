@@ -27,6 +27,7 @@ namespace tomato
 	struct UIComponent
 	{
 		Entity canvas{ entt::null };
+		int type{ 0 };
 	}; // Tag
 
 	struct RectTransformComponent
@@ -60,28 +61,28 @@ namespace tomato
 	{
 		Entity parent{ entt::null };
 		std::vector<Entity> children;
-
-		void SetParent(World& world, Entity child, Entity parent)
-		{
-			entt::registry& r = world.GetRegistry();
-
-			auto& childH = r.get<HierarchyComponent>(child);
-			if (childH.parent != entt::null)
-			{
-				auto& oldParentH = r.get<HierarchyComponent>(childH.parent);
-				auto& siblings = oldParentH.children;
-
-				siblings.erase(std::remove(siblings.begin(), siblings.end(), child), siblings.end());
-			}
-
-			childH.parent = parent;
-			if (parent != entt::null)
-			{
-				auto& newParentH = r.get<HierarchyComponent>(parent);
-				newParentH.children.push_back(child);
-			}
-		}
 	};
+
+	inline void SetParent(World& world, Entity child, Entity parent)
+	{
+		entt::registry& r = world.GetRegistry();
+
+		auto& childH = r.get<HierarchyComponent>(child);
+		if (childH.parent != entt::null)
+		{
+			auto& oldParentH = r.get<HierarchyComponent>(childH.parent);
+			auto& siblings = oldParentH.children;
+
+			siblings.erase(std::remove(siblings.begin(), siblings.end(), child), siblings.end());
+		}
+
+		childH.parent = parent;
+		if (parent != entt::null)
+		{
+			auto& newParentH = r.get<HierarchyComponent>(parent);
+			newParentH.children.push_back(child);
+		}
+	}
 
 }
 

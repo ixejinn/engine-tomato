@@ -122,6 +122,50 @@ namespace tomato
 
         //Screen UI Render
         glDisable(GL_DEPTH_TEST);
+#if 0
+        auto* uiCtx = engine.GetWorld().GetRegistry().ctx().find<UIContext>();
+        if (uiCtx == nullptr)
+            return;
+
+        for (auto e : uiCtx->drawList)
+        {
+            auto& ui = engine.GetWorld().GetRegistry().get<UIComponent>(e);
+            if (ui.type == 2) continue; //text
+
+            auto& rect = engine.GetWorld().GetRegistry().get<RectTransformComponent>(e);
+            auto& render = engine.GetWorld().GetRegistry().get<RenderComponent>(e);
+
+            if (curShader_ != render.shader)
+            {
+                curShader_ = render.shader;
+                shader = AssetRegistry<Shader>::GetInstance().Get(curShader_);
+                shader->Use();
+            }
+
+            if (curTexture_ != render.texture)
+            {
+                curTexture_ = render.texture;
+                AssetRegistry<Texture>::GetInstance().Get(curTexture_)->Bind();
+            }
+
+            if (curMesh_ != render.mesh)
+            {
+                curMesh_ = render.mesh;
+                mesh = AssetRegistry<Mesh>::GetInstance().Get(curMesh_);
+                mesh->Bind();
+            }
+
+            glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
+
+            shader->SetUniformInt("tex", 0);
+            shader->SetUniformMat4("uModel", rect.model_matrix);
+            shader->SetUniformMat4("projection", projection);
+            shader->SetUniformVec4("uColor", render.color);
+
+            mesh->Draw();
+        }
+#else 1
+        
         auto groupUI = engine.GetWorld().GetRegistry().view<RectTransformComponent, RenderComponent>();
         for (auto [e, rect, render] : groupUI.each())
         {
@@ -154,7 +198,7 @@ namespace tomato
 
             mesh->Draw();
         }     
-
+#endif
         //TextComponent Render
         shader = AssetRegistry<Shader>::GetInstance().Get(GetAssetID("Font"));
         shader->Use();

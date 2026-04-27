@@ -74,20 +74,29 @@ namespace tomato
 #endif
 	}
 
-	void UISystem::Traverse(Engine& engine, Entity e)
+	void UISystem::Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList)
 	{
+
+		auto& ui = engine.GetWorld().GetRegistry().get<UIComponent>(e);
+		//std::cout << ui.type << " ";
 		drawList.push_back(e);
 		
 		auto& hierarchy = engine.GetWorld().GetRegistry().get<HierarchyComponent>(e);
 		for (auto child : hierarchy.children)
-			Traverse(engine, child);
+			Traverse(engine, child, drawList);
 	}
 
 	void UISystem::BuildDrawList(Engine& engine)
 	{
-		drawList.clear();
+		auto* uiCtx = engine.GetWorld().GetRegistry().ctx().find<UIContext>();
+		if (uiCtx == nullptr)
+		{
+			std::cout << "NULL DRAWLIST\n";
+			engine.GetWorld().GetRegistry().ctx().emplace<UIContext>();
+			uiCtx = engine.GetWorld().GetRegistry().ctx().find<UIContext>();
+		}
 
-		std::vector<Entity> canvases;
+		std::vector<Entity> canvases, drawList;
 
 		auto canvasView = engine.GetWorld().GetRegistry().view<CanvasComponent>();
 		for (auto canvas : canvasView)
@@ -101,17 +110,22 @@ namespace tomato
 			});
 
 		for (auto canvas : canvases)
-			Traverse(engine, canvas);
+			Traverse(engine, canvas, drawList);
+		//std::cout << '\n';
+
+		uiCtx->drawList.clear();
+		uiCtx->drawList = std::move(drawList);
 	}
 
 	void UISystem::UpdateRectTransform(Engine& engine)
 	{
-		if (drawList.empty())
+		auto& uiCtx = engine.GetWorld().GetRegistry().ctx().get<UIContext>();
+		if (uiCtx.drawList.empty())
 			return;
 
 		auto& r = engine.GetWorld().GetRegistry();
 		CanvasComponent* currentCanvas = nullptr;
-		for (auto entity : drawList)
+		for (auto entity : uiCtx.drawList)
 		{
 			auto& hierarchy = r.get<HierarchyComponent>(entity);
 			auto& rect = r.get<RectTransformComponent>(entity);

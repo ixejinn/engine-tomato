@@ -146,28 +146,24 @@ void TestState::Init(tomato::World& world)
 
 
     const auto button = world.CreateEntity();
-    registry.emplace<tomato::UIComponent>(button, canvas);
+    registry.emplace<tomato::UIComponent>(button, canvas, 1);
     //registry.emplace<tomato::RectTransformComponent>(button, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.f), glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec2(0.5f, 0.5f));
     registry.emplace<tomato::RectTransformComponent>(button, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
     registry.emplace<tomato::HierarchyComponent>(button);
-    auto& h = world.GetRegistry().get<tomato::HierarchyComponent>(button);
-    h.SetParent(world, button, canvas);
+    SetParent(world, button, canvas);
     registry.emplace<tomato::RenderComponent>(button,
              glm::vec4{ 1.f, 0.f, 0.f, 1.f },
              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::LBPLAIN)),
              tmt::GetAssetID("UI"),
              tmt::GetAssetID(tmt::Texture::PrimitiveName));
-    //auto& rect = world.GetRegistry().get<tomato::RectTransformComponent>(button);
-    //rect.SetParent(canvas);
+
 
     const auto buttonText = world.CreateEntity();
-    registry.emplace<tomato::UIComponent>(buttonText, canvas);
+    registry.emplace<tomato::UIComponent>(buttonText, canvas, 2);
     registry.emplace<tomato::TextComponent>(buttonText, "테스트test입니다.123", glm::vec4{ 0.3, 0.7f, 0.9f, 1.0f });
     registry.emplace<tomato::RectTransformComponent>(buttonText, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(10.f, 10.f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
-    auto& rrect = world.GetRegistry().get<tomato::RectTransformComponent>(buttonText);
     registry.emplace<tomato::HierarchyComponent>(buttonText);
-    auto& hh = world.GetRegistry().get<tomato::HierarchyComponent>(buttonText);
-    hh.SetParent(world, buttonText, button);
+    SetParent(world, buttonText, button);
     
 }
 

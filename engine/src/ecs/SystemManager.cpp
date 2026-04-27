@@ -11,7 +11,7 @@ namespace tomato
     SystemManager::SystemManager()
     {
         auto& registry = SystemRegistry::GetInstance();
-
+        
         for (SystemPhase phase : simulationOrder_)
         {
             for (const auto& factory : registry.GetFactory(phase))

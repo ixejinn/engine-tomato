@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 #include "tomato/Logger.h"
+#include "tomato/ecs/tomato_ecs.h"
 
 namespace tomato
 {
@@ -39,6 +40,11 @@ namespace tomato
     struct SimContext
     {
         uint32_t tick{0};
+    };
+
+    struct UIContext
+    {
+        std::vector<Entity> drawList;
     };
 }
 
