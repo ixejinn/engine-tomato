@@ -5,6 +5,7 @@
 #include "tomato/Logger.h"
 
 #include <string>
+#include <codecvt>
 
 namespace tomato
 {
@@ -47,6 +48,25 @@ namespace tomato
 		
 		//If not found, load, cache, and return the reference
 		return LoadGlyph(codepoint);
+	}
+
+	glm::vec2 Font::MeasureText(const std::string& text, float size)
+	{
+		float width{ 0 }, height{ 0 };
+
+		std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
+		std::u32string str =  convert.from_bytes(text);
+
+		std::u32string::const_iterator c;
+		for (c = str.begin(); c != str.end(); c++)
+		{
+			const Glyph& glyph = GetGlyph(*c);
+
+			width += glyph.advance * size;
+			height = std::max(height, glyph.size.y * size);
+		}
+
+		return glm::vec2{ width, height };
 	}
 
 	const Glyph& Font::LoadGlyph(char32_t codepoint)

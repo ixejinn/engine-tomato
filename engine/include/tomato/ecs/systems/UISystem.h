@@ -3,6 +3,7 @@
 
 #include "System.h"
 #include "tomato/ecs/tomato_ecs.h"
+#include "tomato/tomato_math.h"
 //#include "tomato/tomato_sim.h"
 
 namespace tomato
@@ -17,8 +18,7 @@ namespace tomato
 		void Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList);
 		void BuildDrawList(Engine& engine);
 		void UpdateRectTransform(Engine& engine);
-
-		//std::vector<Entity> drawList;
+		glm::vec2 SetTextData(Engine& engine, Entity e);
 	};
 
 }

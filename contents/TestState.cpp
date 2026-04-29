@@ -128,11 +128,6 @@ void TestState::Init(tomato::World& world)
          tmt::GetAssetID(tmt::Shader::PrimitiveName),
          tmt::GetAssetID(tmt::Texture::PrimitiveName));
 
-    //const auto text = world.CreateEntity();
-    //registry.emplace<tomato::TextComponent>(text, "테스트test입니다.123", glm::vec4{ 0.3, 0.7f, 0.9f, 1.0f });
-    //registry.emplace<tomato::PositionComponent>(text, tmt::Vector3{ 0.0f, -300.0f, 0.0f });
-    //registry.emplace<tomato::ScaleComponent>(text, (glm::vec3{ 0.5f, 0.5f, 1.f }));
-
     const auto canvas = world.CreateEntity();
     registry.emplace<tomato::CanvasComponent>(canvas);
     registry.emplace<tomato::UIComponent>(canvas, canvas);
@@ -152,7 +147,7 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::HierarchyComponent>(button);
     SetParent(world, button, canvas);
     registry.emplace<tomato::RenderComponent>(button,
-             glm::vec4{ 1.f, 0.f, 0.f, 1.f },
+             glm::vec4{ 1.f, 0.f, 1.f, 1.f },
              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::LBPLAIN)),
              tmt::GetAssetID("UI"),
              tmt::GetAssetID(tmt::Texture::PrimitiveName));
@@ -161,7 +156,7 @@ void TestState::Init(tomato::World& world)
     const auto buttonText = world.CreateEntity();
     registry.emplace<tomato::UIComponent>(buttonText, canvas, 2);
     registry.emplace<tomato::TextComponent>(buttonText, "테스트test입니다.123", glm::vec4{ 0.3, 0.7f, 0.9f, 1.0f });
-    registry.emplace<tomato::RectTransformComponent>(buttonText, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(10.f, 10.f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
+    registry.emplace<tomato::RectTransformComponent>(buttonText, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
     registry.emplace<tomato::HierarchyComponent>(buttonText);
     SetParent(world, buttonText, button);
     

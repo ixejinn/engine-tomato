@@ -3,6 +3,9 @@
 #include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/UI.h"
+#include "tomato/ecs/components/Text.h"
+#include "tomato/resource/AssetRegistry.h"
+#include "tomato/resource/render/Font.h"
 #include "tomato/Logger.h"
 
 #include "tomato/RegistryEntry.h"
@@ -16,7 +19,7 @@ namespace tomato
 	void UISystem::Update(Engine& engine, const SimContext& ctx)
 	{
 		BuildDrawList(engine);
-#if 1
+#if 0
 		auto view = engine.GetWorld().GetRegistry().view<HierarchyComponent, RectTransformComponent, UIComponent>();
 		
 		for (auto [e, hierarchy, rect, ui] : view.each())
@@ -69,7 +72,7 @@ namespace tomato
 				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 			}
 		}
-#else 0
+#else 1
 		UpdateRectTransform(engine);
 #endif
 	}
@@ -119,32 +122,43 @@ namespace tomato
 
 	void UISystem::UpdateRectTransform(Engine& engine)
 	{
-		auto& uiCtx = engine.GetWorld().GetRegistry().ctx().get<UIContext>();
+		auto& r = engine.GetWorld().GetRegistry();
+		auto& uiCtx = r.ctx().get<UIContext>();
+
 		if (uiCtx.drawList.empty())
 			return;
 
-		auto& r = engine.GetWorld().GetRegistry();
 		CanvasComponent* currentCanvas = nullptr;
 		for (auto entity : uiCtx.drawList)
 		{
 			auto& hierarchy = r.get<HierarchyComponent>(entity);
-			auto& rect = r.get<RectTransformComponent>(entity);
 
 			// entity is canvas(root).
 			if (hierarchy.parent == entt::null)
 			{
-				auto& canvas = r.get<CanvasComponent>(entity);
-				currentCanvas = &canvas;
+				currentCanvas = &r.get<CanvasComponent>(entity);
 
-				rect.computedSize = canvas.actualSize;
+				auto& rect = r.get<RectTransformComponent>(entity);
+				rect.computedSize = currentCanvas->actualSize;
 				rect.position = glm::vec3(rect.computedSize * rect.pivot, 0.f);
-				rect.scale = glm::vec3(1.f, 1.f, 1.f);
+				rect.scale = glm::vec3(1.f);
 
-				continue;
+				break;
 			}
+		}
+
+		if (!currentCanvas) return;
+		for (auto entity : uiCtx.drawList)
+		{
+			auto& hierarchy = r.get<HierarchyComponent>(entity);
+			if (hierarchy.parent == entt::null)
+				continue;
 
 			// children
+			auto& rect = r.get<RectTransformComponent>(entity);
 			auto& parentRect = r.get<RectTransformComponent>(hierarchy.parent);
+			auto& ui = r.get<UIComponent>(entity);
+
 
 			glm::vec2 scaleFactor = currentCanvas->actualSize / currentCanvas->referenceSize;
 			glm::vec2 parentSize = parentRect.computedSize;
@@ -155,7 +169,7 @@ namespace tomato
 				glm::vec2 anchorPos = parentSize * rect.anchorMin;
 				glm::vec2 localPos = (anchorPos - parentPivotPos) + rect.anchoredPosition;
 
-				rect.computedSize = rect.sizeDelta;
+				rect.computedSize = (ui.type == 2) ? SetTextData(engine, entity) : rect.sizeDelta;
 				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 			}
 			else // anchor stretch
@@ -172,5 +186,11 @@ namespace tomato
 				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 			}
 		}
+	}
+	glm::vec2 UISystem::SetTextData(Engine& engine, Entity e)
+	{
+		auto& text = engine.GetWorld().GetRegistry().get<TextComponent>(e);
+		Font* font = AssetRegistry<Font>::GetInstance().Get(text.font);
+		return font->MeasureText(text.text, text.fontSize / 64.f);
 	}
 }

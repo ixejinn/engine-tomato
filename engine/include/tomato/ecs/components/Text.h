@@ -19,7 +19,7 @@ namespace tomato
 		 */
 		std::string text{};
 		glm::vec4 color{ 0.0f, 0.0f, 0.0f, 1.0f };
-		float fontSize{ 0.6f };
+		float fontSize{ 48.f };
 		AssetId font{ GetAssetID(Font::PrimitiveName) };
 	};
 }

@@ -20,8 +20,7 @@ namespace tomato
 
 		shader_->Use();
 
-		//glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
-		glm::mat4 projection = glm::ortho(-800.0f, static_cast<float>(800), -450.0f, static_cast<float>(450), -1.0f, 1.0f);
+		glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1600), 0.0f, static_cast<float>(900), -1.0f, 1.0f);
 		shader->SetUniformMat4("projection", projection);
 
 		glUseProgram(0);
@@ -55,10 +54,15 @@ namespace tomato
 		TMT_INFO << "TextRenderer initialized with reserved capacity: 1000 chars.";
 	}
 
-	void TextRenderer::DrawString(const std::string& text, float x, float y, float size, const glm::vec4& color, Font* font)
+	void TextRenderer::DrawString(const std::string& text, float x, float y, float size, const glm::vec4& color, Font* font, const glm::mat4 model)
 	{
+		// @NOTE :
+		// Pixel perfect handling is not implemented yet.
+		// May cause minor visual issues (e.g. blurriness or jitter).
+		
 		std::u32string str = ToUTF32(text);
 		std::u32string::const_iterator c;
+
 		for (c = str.begin(); c != str.end(); c++)
 		{
 			const Glyph& glyph = font->GetGlyph(*c);
@@ -80,14 +84,7 @@ namespace tomato
 			float v2 = glyph.uvMax.y;
 
 			// Generate 6 vertices for two triangles (TL, BL, BR, TL, BR, TR) to form a quad.
-			vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{u1, v1}, color });
-			vertices_.emplace_back(TextVertex{ {xpos, ypos},			{u1, v2}, color });
-			vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{u2, v2}, color });
-
-			vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{u1, v1}, color });
-			vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{u2, v2}, color });
-			vertices_.emplace_back(TextVertex{ {xpos + w, ypos + h},	{u2, v1}, color });
-			//AddQuad(x, y, size, glyph, color);
+			AddQuad(x, y, size, glyph, color, model);
 
 			// Advance the cursor position for the next character.
 			x += glyph.advance * size;
@@ -109,7 +106,7 @@ namespace tomato
 		vertices_.clear();
 	}
 
-	void TextRenderer::AddQuad(float x, float y, float size, const Glyph& glyph, const glm::vec4& color)
+	void TextRenderer::AddQuad(float x, float y, float size, const Glyph& glyph, const glm::vec4& color, const glm::mat4 model)
 	{
 		float xpos = x + glyph.bearing.x * size;
 		float ypos = y - (glyph.size.y - glyph.bearing.y) * size;
@@ -121,13 +118,13 @@ namespace tomato
 		float u2 = glyph.uvMax.x;
 		float v2 = glyph.uvMax.y;
 
-		vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{u1, v1}, color });
-		vertices_.emplace_back(TextVertex{ {xpos, ypos},			{u1, v2}, color });
-		vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{u2, v2}, color });
+		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos, ypos + h, 0.0, 1.0),		{u1, v1}, color });
+		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos, ypos, 0.0, 1.0),			{u1, v2}, color });
+		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos + w, ypos, 0.0, 1.0),		{u2, v2}, color });
 
-		vertices_.emplace_back(TextVertex{ {xpos, ypos + h},		{u1, v1}, color });
-		vertices_.emplace_back(TextVertex{ {xpos + w, ypos},		{u2, v2}, color });
-		vertices_.emplace_back(TextVertex{ {xpos + w, ypos + h},	{u2, v1}, color });
+		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos, ypos + h, 0.0, 1.0),		{u1, v1}, color });
+		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos + w, ypos, 0.0, 1.0),		{u2, v2}, color });
+		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos + w, ypos + h, 0.0, 1.0),	{u2, v1}, color });
 	}
 
 	std::u32string TextRenderer::ToUTF32(const std::string& uft8Str)

@@ -46,7 +46,7 @@ namespace tomato
 		//void SetFontSize(int size);
 		
 		const Glyph& GetGlyph(char32_t codepoint);
-
+		glm::vec2 MeasureText(const std::string& text, float size);
 	private:
 		const Glyph& LoadGlyph(char32_t codepoint);
 
@@ -54,7 +54,7 @@ namespace tomato
 		Font(const char* path = defaultPath);
 
 		FT_Face face;
-		uint32_t baseSize{ 48 };
+		uint32_t baseSize{ 64 };
 		
 		std::unordered_map<char32_t, Glyph> glyphs;
 	};
