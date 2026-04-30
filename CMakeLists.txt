@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.26)
 project(tomato
         VERSION 1.0.0
 )
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 # requires expression (NetBitReader::ReadInt), std::source_location (Logger)
@@ -52,10 +55,6 @@ target_compile_definitions(project_options
         WIN32_LEAN_AND_MEAN
         NOMINMAX
 )
-
-if (MSVC)
-    target_compile_options(project_options INTERFACE /utf-8)
-endif()
 
 add_subdirectory(engine)
 add_subdirectory(contents)

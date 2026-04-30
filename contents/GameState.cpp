@@ -1,4 +1,4 @@
-#include "GameState.h"
+﻿#include "GameState.h"
 #include "tomato/tomato.h"
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/components/Transform.h"
@@ -7,6 +7,8 @@
 #include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Camera.h"
 #include "tomato/ecs/components/Tags.h"
+#include "tomato/ecs/components/UI.h"
+#include "tomato/ecs/components/Text.h"
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Mesh.h"
 #include "tomato/resource/render/Texture.h"
@@ -26,4 +28,4 @@ void GameState::Init(tomato::World& world)
     registry.emplace<tomato::MainCameraTag>(cam);
 }
 
-void GameState::Exit() {}
+void GameState::Exit() {}  

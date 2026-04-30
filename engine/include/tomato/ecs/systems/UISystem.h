@@ -1,4 +1,4 @@
-#ifndef TOMATO_UISYSTEM_H
+﻿#ifndef TOMATO_UISYSTEM_H
 #define TOMATO_UISYSTEM_H
 
 #include "System.h"
@@ -18,7 +18,6 @@ namespace tomato
 		void Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList);
 		void BuildDrawList(Engine& engine);
 		void UpdateRectTransform(Engine& engine);
-		glm::vec2 SetTextData(Engine& engine, Entity e);
 	};
 
 }

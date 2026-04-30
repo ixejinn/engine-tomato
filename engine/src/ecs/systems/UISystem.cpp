@@ -1,4 +1,4 @@
-#include "tomato/ecs/systems/UISystem.h"
+﻿#include "tomato/ecs/systems/UISystem.h"
 #include "tomato/Engine.h"
 #include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Transform.h"
@@ -6,6 +6,7 @@
 #include "tomato/ecs/components/Text.h"
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Font.h"
+#include "tomato/utils/Utf.h"
 #include "tomato/Logger.h"
 
 #include "tomato/RegistryEntry.h"
@@ -169,7 +170,20 @@ namespace tomato
 				glm::vec2 anchorPos = parentSize * rect.anchorMin;
 				glm::vec2 localPos = (anchorPos - parentPivotPos) + rect.anchoredPosition;
 
-				rect.computedSize = (ui.type == 2) ? SetTextData(engine, entity) : rect.sizeDelta;
+				if (ui.type == 2)
+				{
+					auto& text = engine.GetWorld().GetRegistry().get<TextComponent>(entity);
+					if (text.dirty)
+					{
+						text.codepoints = UTF8ToUTF32(text.text);
+						Font* font = AssetRegistry<Font>::GetInstance().Get(text.font);
+
+						rect.sizeDelta = font->MeasureText(text.codepoints, text.fontSize / 64.f);
+						text.dirty = false;
+					}
+				}
+				
+				rect.computedSize = rect.sizeDelta;
 				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 			}
 			else // anchor stretch
@@ -186,11 +200,5 @@ namespace tomato
 				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 			}
 		}
-	}
-	glm::vec2 UISystem::SetTextData(Engine& engine, Entity e)
-	{
-		auto& text = engine.GetWorld().GetRegistry().get<TextComponent>(e);
-		Font* font = AssetRegistry<Font>::GetInstance().Get(text.font);
-		return font->MeasureText(text.text, text.fontSize / 64.f);
 	}
 }

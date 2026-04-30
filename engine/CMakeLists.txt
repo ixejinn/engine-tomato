@@ -1,4 +1,4 @@
-set(ENGINE_HEADERS
+﻿set(ENGINE_HEADERS
         include/tomato/DefaultState.h
         include/tomato/Engine.h
         include/tomato/EngineConfig.h
@@ -76,6 +76,7 @@ set(ENGINE_HEADERS
         include/tomato/collision/CollisionEvent.h
         include/tomato/collision/CollisionLayerMatrix.h
         include/tomato/utils/BitmaskOperators.h
+        include/tomato/utils/Utf.h
 )
 
 set(ENGINE_SOURCES
@@ -113,6 +114,7 @@ set(ENGINE_SOURCES
         src/net/InputNetMessage.cpp
         src/net/NetMessageRegistry.cpp
         src/input/InputRecorder.cpp
+        src/utils/Utf.cpp
 )
 
 set(EXTERNAL_SOURCES

@@ -1,9 +1,9 @@
-#include "tomato/resource/TextRenderer.h"
+﻿#include "tomato/resource/TextRenderer.h"
 #include "tomato/resource/AtlasManager.h"
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Shader.h"
 #include "tomato/Logger.h"
-
+#include "tomato/utils/Utf.h"
 #include <codecvt>
 
 namespace tomato
@@ -54,16 +54,15 @@ namespace tomato
 		TMT_INFO << "TextRenderer initialized with reserved capacity: 1000 chars.";
 	}
 
-	void TextRenderer::DrawString(const std::string& text, float x, float y, float size, const glm::vec4& color, Font* font, const glm::mat4 model)
+	void TextRenderer::DrawString(const std::u32string& text, float x, float y, float size, const glm::vec4& color, Font* font, const glm::mat4 model)
 	{
 		// @NOTE :
 		// Pixel perfect handling is not implemented yet.
 		// May cause minor visual issues (e.g. blurriness or jitter).
 		
-		std::u32string str = ToUTF32(text);
 		std::u32string::const_iterator c;
 
-		for (c = str.begin(); c != str.end(); c++)
+		for (c = text.begin(); c != text.end(); c++)
 		{
 			const Glyph& glyph = font->GetGlyph(*c);
 
@@ -125,11 +124,5 @@ namespace tomato
 		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos, ypos + h, 0.0, 1.0),		{u1, v1}, color });
 		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos + w, ypos, 0.0, 1.0),		{u2, v2}, color });
 		vertices_.emplace_back(TextVertex{ model * glm::vec4(xpos + w, ypos + h, 0.0, 1.0),	{u2, v1}, color });
-	}
-
-	std::u32string TextRenderer::ToUTF32(const std::string& uft8Str)
-	{
-		std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
-		return convert.from_bytes(uft8Str);
 	}
 }

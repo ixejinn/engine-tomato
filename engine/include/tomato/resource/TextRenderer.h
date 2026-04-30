@@ -1,4 +1,4 @@
-#ifndef TOMATO_TEXT_RENDERER_H
+﻿#ifndef TOMATO_TEXT_RENDERER_H
 #define TOMATO_TEXT_RENDERER_H
 
 #include <glm/glm.hpp>
@@ -26,8 +26,7 @@ namespace tomato
 		void Init(Shader* shader);
 
 		// Add text data to the buffer
-		//void DrawString(const std::u32string& text, float x, float y, float size, const glm::vec4& color, Font* font);
-		void DrawString(const std::string& text, float x, float y, float size, const glm::vec4& color, Font* font, const glm::mat4 model);
+		void DrawString(const std::u32string& text, float x, float y, float size, const glm::vec4& color, Font* font, const glm::mat4 model);
 		
 		// Actually send data to GPU and Draw
 		void Flush();
@@ -36,7 +35,6 @@ namespace tomato
 	private:
 		// Helper to add a qua (2 triangles, 6 vertices)
 		void AddQuad(float x, float y, float size, const Glyph& glyph, const glm::vec4& color, const glm::mat4 model);
-		std::u32string ToUTF32(const std::string& uft8Str);
 
 	private:
 		Shader* shader_{ nullptr };

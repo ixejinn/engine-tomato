@@ -1,4 +1,4 @@
-#ifndef TOMATO_TEXT_H
+﻿#ifndef TOMATO_TEXT_H
 #define TOMATO_TEXT_H
 
 #include "tomato/resource/tomato_resource.h"
@@ -21,6 +21,9 @@ namespace tomato
 		glm::vec4 color{ 0.0f, 0.0f, 0.0f, 1.0f };
 		float fontSize{ 48.f };
 		AssetId font{ GetAssetID(Font::PrimitiveName) };
+
+		std::u32string codepoints{};
+		bool dirty{ true };
 	};
 }
 

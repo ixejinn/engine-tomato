@@ -1,4 +1,4 @@
-#ifndef TOMATO_FONT_H
+﻿#ifndef TOMATO_FONT_H
 #define TOMATO_FONT_H
 
 #include <map>
@@ -46,7 +46,7 @@ namespace tomato
 		//void SetFontSize(int size);
 		
 		const Glyph& GetGlyph(char32_t codepoint);
-		glm::vec2 MeasureText(const std::string& text, float size);
+		glm::vec2 MeasureText(const std::u32string& text, float size);
 	private:
 		const Glyph& LoadGlyph(char32_t codepoint);
 

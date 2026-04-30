@@ -160,6 +160,12 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::HierarchyComponent>(buttonText);
     SetParent(world, buttonText, button);
     
+    const auto buttonText2 = world.CreateEntity();
+    registry.emplace<tomato::UIComponent>(buttonText2, canvas, 2);
+    registry.emplace<tomato::TextComponent>(buttonText2, "띄v 어 쓰 기 는 되 는 거 잔 아🤣", glm::vec4{ 0.3f, 1.f, 0.5f, 1.0f });
+    registry.emplace<tomato::RectTransformComponent>(buttonText2, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(1.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec2(0.5f, 0.5f));
+    registry.emplace<tomato::HierarchyComponent>(buttonText2);
+    SetParent(world, buttonText2, button);
 }
 
 void TestState::Exit() {}

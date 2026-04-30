@@ -1,11 +1,9 @@
-#include "tomato/resource/render/Font.h"
+﻿#include "tomato/resource/render/Font.h"
 #include "tomato/FontContext.h"
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/AtlasManager.h"
+#include "tomato/utils/Utf.h"
 #include "tomato/Logger.h"
-
-#include <string>
-#include <codecvt>
 
 namespace tomato
 {
@@ -50,15 +48,12 @@ namespace tomato
 		return LoadGlyph(codepoint);
 	}
 
-	glm::vec2 Font::MeasureText(const std::string& text, float size)
+	glm::vec2 Font::MeasureText(const std::u32string& text, float size)
 	{
 		float width{ 0 }, height{ 0 };
 
-		std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
-		std::u32string str =  convert.from_bytes(text);
-
 		std::u32string::const_iterator c;
-		for (c = str.begin(); c != str.end(); c++)
+		for (c = text.begin(); c != text.end(); c++)
 		{
 			const Glyph& glyph = GetGlyph(*c);
 

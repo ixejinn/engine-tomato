@@ -181,7 +181,7 @@ namespace tomato
             if (font)
             {
                 textRenderer_.DrawString(
-                    text.text,
+                    text.codepoints,
                     pivotOffset.x, pivotOffset.y,
                     text.fontSize / 64.f,
                     text.color,
