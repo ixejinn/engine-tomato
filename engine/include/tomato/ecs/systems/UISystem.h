@@ -17,7 +17,16 @@ namespace tomato
 	private:
 		void Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList);
 		void BuildDrawList(Engine& engine);
+
+		glm::vec3 WorldToScreen(
+			const glm::vec3& worldPos,
+			const glm::mat4& viewProjection,
+			float screenWidth,
+			float screenHeight);
+
 		void UpdateRectTransform(Engine& engine);
+		
+		void HitTest(Engine& engine);
 	};
 
 }

@@ -1,4 +1,4 @@
-#ifndef TOMATO_INPUTSERVICE_H
+﻿#ifndef TOMATO_INPUTSERVICE_H
 #define TOMATO_INPUTSERVICE_H
 
 #include <queue>
@@ -27,6 +27,7 @@ namespace tomato
         static Key ConvertKeyGLFW(int glfwKey);
         static KeyAction ConvertActionGLFW(int glfwAction);
 
+        static void GetMouseCursorPos(GLFWwindow* window, double* xpos, double* ypos);
     private:
         static void OnKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
         static void OnMouseButtonEvent(GLFWwindow* w, int button, int action, int mods);

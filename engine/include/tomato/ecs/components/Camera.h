@@ -1,4 +1,4 @@
-#ifndef TOMATO_CAMERA_H
+﻿#ifndef TOMATO_CAMERA_H
 #define TOMATO_CAMERA_H
 
 #include "tomato/tomato_math.h"
@@ -13,7 +13,7 @@ namespace tomato
 
 	struct CameraComponent
 	{
-        ProjectionMode mode{ORTHOGONAL};
+        ProjectionMode mode{ PERSPECTIVE };
 
         float degree{45.f};
         float zNear{0.1f};

@@ -1,4 +1,4 @@
-#include "tomato/services/InputService.h"
+﻿#include "tomato/services/InputService.h"
 #include "tomato/services/WindowService.h"
 #include "tomato/input/InputRecorder.h"
 #include "tomato/Engine.h"
@@ -144,6 +144,11 @@ namespace tomato
         default:
             return KeyAction::COUNT;
         }
+    }
+
+    void InputService::GetMouseCursorPos(GLFWwindow* window, double* xpos, double* ypos)
+    {
+        glfwGetCursorPos(window, xpos, ypos);
     }
 
     void InputService::OnKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods)

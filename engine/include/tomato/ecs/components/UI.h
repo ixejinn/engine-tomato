@@ -1,4 +1,4 @@
-#ifndef TOMATO_UI_H
+﻿#ifndef TOMATO_UI_H
 #define TOMATO_UI_H
 
 #include "tomato/ecs/tomato_ecs.h"
@@ -61,6 +61,12 @@ namespace tomato
 	{
 		Entity parent{ entt::null };
 		std::vector<Entity> children;
+	};
+
+	struct TargetComponent
+	{
+		Entity target{ entt::null };
+		glm::vec3 headOffset{ 0.f, 100.f, 0.f };
 	};
 
 	inline void SetParent(World& world, Entity child, Entity parent)

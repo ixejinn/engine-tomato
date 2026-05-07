@@ -1,9 +1,13 @@
 ﻿#include "tomato/ecs/systems/UISystem.h"
 #include "tomato/Engine.h"
+#include "tomato/services/WindowService.h"
+#include "tomato/services/InputService.h"
 #include "tomato/tomato_sim.h"
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/UI.h"
 #include "tomato/ecs/components/Text.h"
+#include "tomato/ecs/components/Camera.h"
+#include "tomato/ecs/components/Tags.h"
 #include "tomato/resource/AssetRegistry.h"
 #include "tomato/resource/render/Font.h"
 #include "tomato/utils/Utf.h"
@@ -20,62 +24,11 @@ namespace tomato
 	void UISystem::Update(Engine& engine, const SimContext& ctx)
 	{
 		BuildDrawList(engine);
-#if 0
-		auto view = engine.GetWorld().GetRegistry().view<HierarchyComponent, RectTransformComponent, UIComponent>();
-		
-		for (auto [e, hierarchy, rect, ui] : view.each())
-		{
-			if (ui.canvas == entt::null)
-			{
-				std::cout << "[UISystem] Can not found canvas.\n";
-				continue;
-			}
 
-			auto& canvas = engine.GetWorld().GetRegistry().get<CanvasComponent>(ui.canvas);
-			if (ui.canvas == e)
-			{
-				rect.computedSize = canvas.actualSize;
-				rect.position = glm::vec3(rect.computedSize * rect.pivot, 0.f);
-				rect.scale = glm::vec3(1.f, 1.f, 1.f);
-				
-				continue;
-			}
-
-			auto& parentRect = engine.GetWorld().GetRegistry().get<RectTransformComponent>(hierarchy.parent);
-
-			glm::vec2 scaleFactor = canvas.actualSize / canvas.referenceSize;
-			glm::vec2 parentSize = (hierarchy.parent == entt::null) ? canvas.referenceSize : parentRect.computedSize;
-			glm::vec2 parentPivotPos = parentSize * parentRect.pivot;
-			
-			if (rect.anchorMin == rect.anchorMax) // anchor point
-			{
-				//std::cout << "point : min(" << rect.anchorMin.x << ", " << rect.anchorMin.y <<") max(" << rect.anchorMax.x << ", " << rect.anchorMax.y << ")\n";
-				//std::cout << "pivot : (" << rect.pivot.x << ", " << rect.pivot.y << ") sizeDelta : (" << rect.sizeDelta.x << ", " << rect.sizeDelta.y << ")\n";
-				glm::vec2 anchorPos = parentSize * rect.anchorMin;
-				glm::vec2 localPos = (anchorPos - parentPivotPos) + rect.anchoredPosition;
-
-				rect.computedSize = rect.sizeDelta;
-				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
-
-				//std::cout << "position(" << localPos.x << ", " << localPos.y << ") size(" << rect.sizeDelta.x << ", " << rect.sizeDelta.y << ")\n";
-			}
-			else // anchor stretch
-			{
-				glm::vec2 anchorPosMin = parentSize * rect.anchorMin;
-				glm::vec2 anchorPosMax = parentSize * rect.anchorMax;
-
-				glm::vec2 finalLocalMin = (anchorPosMin - parentPivotPos) + rect.offsetMin;
-				glm::vec2 finalLocalMax = (anchorPosMax - parentPivotPos) + rect.offsetMax;
-
-				rect.computedSize = finalLocalMax - finalLocalMin;
-
-				glm::vec2 localPos = finalLocalMin + (rect.computedSize * rect.pivot);
-				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
-			}
-		}
-#else 1
 		UpdateRectTransform(engine);
-#endif
+
+		
+		HitTest(engine);
 	}
 
 	void UISystem::Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList)
@@ -172,7 +125,7 @@ namespace tomato
 
 				if (ui.type == 2)
 				{
-					auto& text = engine.GetWorld().GetRegistry().get<TextComponent>(entity);
+					auto& text = r.get<TextComponent>(entity);
 					if (text.dirty)
 					{
 						text.codepoints = UTF8ToUTF32(text.text);
@@ -183,6 +136,39 @@ namespace tomato
 					}
 				}
 				
+				// World Name Label
+				if (r.all_of<TargetComponent>(entity))
+				{
+					auto& target = r.get<TargetComponent>(entity);
+					auto& targetTransform = r.get<PositionComponent>(target.target);
+
+					auto viewProjection = glm::mat4(1.f);
+					CameraComponent* cam{ nullptr };
+
+					auto curCam = engine.GetCurrentCamera();
+					if (curCam == entt::null)
+					{
+						curCam = engine.GetWorld().GetRegistry().view<MainCameraTag>().front();
+
+						if (curCam == entt::null)
+						{
+							TMT_WARN << "Main camera not present";
+							continue;
+						}
+						else
+							engine.SetCurrentCamera(curCam);
+					}
+
+					if ((cam = engine.GetWorld().GetRegistry().try_get<CameraComponent>(curCam)))
+						viewProjection = cam->viewProjection;
+					
+					glm::vec3 screenPos = WorldToScreen(targetTransform.position, viewProjection, 1600.f, 900.f);
+					rect.position = screenPos + target.headOffset;
+
+					rect.computedSize = rect.sizeDelta;
+					continue;
+				}
+
 				rect.computedSize = rect.sizeDelta;
 				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 			}
@@ -200,5 +186,46 @@ namespace tomato
 				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 			}
 		}
+	}
+	void UISystem::HitTest(Engine& engine)
+	{
+		auto& r = engine.GetWorld().GetRegistry();
+		double x, y;
+		InputService::GetMouseCursorPos(engine.GetWindowService().GetHandle(), &x, &y);
+		//std::cout << x << ", " << y << '\n';
+
+		auto* uiCtx = r.ctx().find<UIContext>();
+		if (uiCtx == nullptr)
+		{
+			std::cout << "NULL DRAWLIST\n";
+			return;
+		}
+		
+		//for (auto it = uiCtx->drawList.end(); it != uiCtx->drawList.begin(); it--)
+		//{
+		//	auto& rect = r.get<RectTransformComponent>(*it);
+
+		//	glm::vec2 rectMin, rectMax;
+
+		//}
+	}
+
+	glm::vec3 UISystem::WorldToScreen(const glm::vec3& worldPos, const glm::mat4& viewProjection, float screenWidth, float screenHeight)
+	{
+		//World -> Clip
+		glm::vec4 clipPos = viewProjection * glm::vec4(worldPos, 1.0f);
+
+		//Perspective divide (Clip -> NDC)
+		glm::vec3 ndc = glm::vec3(clipPos) / clipPos.w;
+
+		//NDC -> Screen
+		glm::vec2 screenPos{};
+		screenPos.x = (ndc.x * 0.5f + 0.5f) * screenWidth;
+		screenPos.x -= screenWidth * 0.5f;
+
+		screenPos.y = (ndc.y * 0.5f + 0.5f) * screenHeight;
+		screenPos.y -= screenHeight * 0.5f;
+
+		return glm::vec3(screenPos, 0.f);
 	}
 }
