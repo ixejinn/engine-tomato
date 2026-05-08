@@ -30,6 +30,12 @@ namespace tomato
 		int type{ 0 };
 	}; // Tag
 
+	struct UIRect
+	{
+		glm::vec2 min;
+		glm::vec2 max;
+	};
+
 	struct RectTransformComponent
 	{
 		glm::vec2 anchoredPosition{ 0.f, 0.f }; // anchorMin == anchorMax, posX, posY
@@ -46,13 +52,17 @@ namespace tomato
 
 		// for calculation
 		glm::vec2 computedSize{ 0.f, 0.f };
-		Vector3 position{ 0.f, 0.f, 0.f };
+		Vector3 position{ 0.f, 0.f, 0.f }; //local position
 		Vector3 scale{ 1.f, 1.f, 1.f };
 		Vector3 rotation{ 0.f, 0.f, 0.f };
 
 		glm::mat4 local_matrix{ 1.f };
 		glm::mat4 world_matrix{ 1.f };
 		glm::mat4 model_matrix{ 1.f };
+
+		// for hit test
+		Vector3 screenPosition{ 0.f, 0.f, 0.f };
+		UIRect screenRect;
 
 		//bool dirty{ true };
 	};
@@ -90,6 +100,13 @@ namespace tomato
 		}
 	}
 
+	struct SelectableComponent
+	{
+		bool interactable{ true };
+		//transition
+
+		//Event
+	};
 }
 
 #endif // !TOMATO_UI_H

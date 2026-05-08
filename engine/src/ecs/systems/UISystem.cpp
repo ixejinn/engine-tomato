@@ -6,6 +6,7 @@
 #include "tomato/ecs/components/Transform.h"
 #include "tomato/ecs/components/UI.h"
 #include "tomato/ecs/components/Text.h"
+#include "tomato/ecs/components/Render.h"
 #include "tomato/ecs/components/Camera.h"
 #include "tomato/ecs/components/Tags.h"
 #include "tomato/resource/AssetRegistry.h"
@@ -97,6 +98,7 @@ namespace tomato
 				rect.position = glm::vec3(rect.computedSize * rect.pivot, 0.f);
 				rect.scale = glm::vec3(1.f);
 
+				rect.screenPosition = rect.position;
 				break;
 			}
 		}
@@ -112,7 +114,6 @@ namespace tomato
 			auto& rect = r.get<RectTransformComponent>(entity);
 			auto& parentRect = r.get<RectTransformComponent>(hierarchy.parent);
 			auto& ui = r.get<UIComponent>(entity);
-
 
 			glm::vec2 scaleFactor = currentCanvas->actualSize / currentCanvas->referenceSize;
 			glm::vec2 parentSize = parentRect.computedSize;
@@ -185,14 +186,32 @@ namespace tomato
 				glm::vec2 localPos = finalLocalMin + (rect.computedSize * rect.pivot);
 				rect.position = glm::vec3(localPos * scaleFactor, 0.f);
 			}
+
+			rect.screenPosition = parentRect.screenPosition + rect.position;
+			rect.screenRect.min.x = rect.screenPosition.x - (rect.computedSize.x * rect.pivot.x);
+			rect.screenRect.min.y = rect.screenPosition.y - (rect.computedSize.y * rect.pivot.y);
+
+			rect.screenRect.max.x = rect.screenRect.min.x + rect.computedSize.x;
+			rect.screenRect.max.y = rect.screenRect.min.y + rect.computedSize.y;
 		}
 	}
+
+	bool UISystem::PointInRect(glm::vec2 point, UIRect rect)
+	{
+		return
+			point.x >= rect.min.x &&
+			point.x <= rect.max.x &&
+			point.y >= rect.min.y &&
+			point.y <= rect.max.y;
+	}
+
 	void UISystem::HitTest(Engine& engine)
 	{
 		auto& r = engine.GetWorld().GetRegistry();
+		float windowHeight = (float)engine.GetWindowService().GetHeight();
+
 		double x, y;
 		InputService::GetMouseCursorPos(engine.GetWindowService().GetHandle(), &x, &y);
-		//std::cout << x << ", " << y << '\n';
 
 		auto* uiCtx = r.ctx().find<UIContext>();
 		if (uiCtx == nullptr)
@@ -201,13 +220,29 @@ namespace tomato
 			return;
 		}
 		
-		//for (auto it = uiCtx->drawList.end(); it != uiCtx->drawList.begin(); it--)
-		//{
-		//	auto& rect = r.get<RectTransformComponent>(*it);
-
-		//	glm::vec2 rectMin, rectMax;
-
-		//}
+		for (auto it = uiCtx->drawList.rbegin(); it != uiCtx->drawList.rend(); ++it)
+		{
+			if (!r.all_of<SelectableComponent>(*it)) continue;
+			
+			auto& rect = r.get<RectTransformComponent>(*it);
+			auto& button = r.get<SelectableComponent>(*it);
+			if (button.interactable)
+			{
+				if (PointInRect(glm::vec2(x, windowHeight - y), rect.screenRect))
+				{
+					std::cout << "Point In Rect!!\n";
+					auto& render = r.get<RenderComponent>(*it);
+					render.color = glm::vec4(0.2f, 0.75f, 0.4f, 1.0f);
+					break;
+				}
+				else
+				{
+					auto& render = r.get<RenderComponent>(*it);
+					render.color = glm::vec4(1.f, 0.f, 1.f, 1.f);
+					break;
+				}
+			}
+		}
 	}
 
 	glm::vec3 UISystem::WorldToScreen(const glm::vec3& worldPos, const glm::mat4& viewProjection, float screenWidth, float screenHeight)

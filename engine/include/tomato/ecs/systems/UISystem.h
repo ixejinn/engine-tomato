@@ -8,6 +8,7 @@
 
 namespace tomato
 {
+	struct UIRect;
 	class UISystem : public System
 	{
 	public:
@@ -26,6 +27,7 @@ namespace tomato
 
 		void UpdateRectTransform(Engine& engine);
 		
+		bool PointInRect(glm::vec2 point, UIRect rect);
 		void HitTest(Engine& engine);
 	};
 
