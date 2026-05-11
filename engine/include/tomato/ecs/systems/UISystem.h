@@ -8,7 +8,6 @@
 
 namespace tomato
 {
-	struct UIRect;
 	class UISystem : public System
 	{
 	public:
@@ -18,6 +17,7 @@ namespace tomato
 	private:
 		void Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList);
 		void BuildDrawList(Engine& engine);
+		void BulidSelectableList(Engine& engine);
 
 		glm::vec3 WorldToScreen(
 			const glm::vec3& worldPos,
@@ -26,9 +26,6 @@ namespace tomato
 			float screenHeight);
 
 		void UpdateRectTransform(Engine& engine);
-		
-		bool PointInRect(glm::vec2 point, UIRect rect);
-		void HitTest(Engine& engine);
 	};
 
 }

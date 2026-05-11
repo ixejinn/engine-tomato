@@ -15,11 +15,12 @@ namespace tomato
 	class InputUI
 	{
 	public:
-		bool HitTest(const MouseEvent& mouseEvent);
-		bool Hover(const MouseMoveEvent& moveEvent);
+		bool OnClick(const MouseEvent& mouseEvent);
+		bool OnHover(const MouseMoveEvent& moveEvent);
 
 	private:
 		bool PointInRect(glm::vec2 point, glm::vec2 min, glm::vec2 max);
+		entt::entity PickSelectable(glm::vec2 point);
 	};
 }
 

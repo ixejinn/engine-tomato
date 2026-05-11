@@ -28,7 +28,7 @@ namespace tomato
 
 		UpdateRectTransform(engine);
 		
-		//HitTest(engine);
+		BulidSelectableList(engine);
 	}
 
 	void UISystem::Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList)
@@ -71,6 +71,24 @@ namespace tomato
 
 		uiCtx->drawList.clear();
 		uiCtx->drawList = std::move(drawList);
+	}
+
+	void UISystem::BulidSelectableList(Engine& engine)
+	{
+		auto* uiCtx = engine.GetWorld().GetRegistry().ctx().find<UIContext>();
+
+		if (uiCtx == nullptr)
+			return;
+
+		if (!uiCtx->selectableDirty) return;
+
+		for (auto it = uiCtx->drawList.rbegin(); it != uiCtx->drawList.rend(); ++it)
+		{
+			if (!engine.GetWorld().GetRegistry().all_of<SelectableComponent>(*it)) continue;
+			uiCtx->selectableList.emplace_back(*it);
+		}
+
+		uiCtx->selectableDirty = false;
 	}
 
 	void UISystem::UpdateRectTransform(Engine& engine)
@@ -191,51 +209,6 @@ namespace tomato
 
 			rect.screenRect.max.x = rect.screenRect.min.x + rect.computedSize.x;
 			rect.screenRect.max.y = rect.screenRect.min.y + rect.computedSize.y;
-		}
-	}
-
-	bool UISystem::PointInRect(glm::vec2 point, UIRect rect)
-	{
-		return
-			point.x >= rect.min.x &&
-			point.x <= rect.max.x &&
-			point.y >= rect.min.y &&
-			point.y <= rect.max.y;
-	}
-
-	void UISystem::HitTest(Engine& engine)
-	{
-		auto& r = engine.GetWorld().GetRegistry();
-		float windowHeight = (float)engine.GetWindowService().GetHeight();
-
-		double x, y;
-		InputService::GetMouseCursorPos(engine.GetWindowService().GetHandle(), &x, &y);
-
-		auto* uiCtx = r.ctx().find<UIContext>();
-		if (uiCtx == nullptr)
-			return;
-		
-		for (auto it = uiCtx->drawList.rbegin(); it != uiCtx->drawList.rend(); ++it)
-		{
-			if (!r.all_of<SelectableComponent>(*it)) continue;
-			
-			auto& rect = r.get<RectTransformComponent>(*it);
-			auto& button = r.get<SelectableComponent>(*it);
-			if (button.interactable)
-			{
-				if (PointInRect(glm::vec2(x, windowHeight - y), rect.screenRect))
-				{
-					auto& render = r.get<RenderComponent>(*it);
-					render.color = button.highlightedColor;
-					break;
-				}
-				else
-				{
-					auto& render = r.get<RenderComponent>(*it);
-					render.color = button.normalColor;
-					break;
-				}
-			}
 		}
 	}
 

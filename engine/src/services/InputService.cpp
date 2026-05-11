@@ -152,6 +152,16 @@ namespace tomato
         glfwGetCursorPos(window, xpos, ypos);
     }
 
+    bool InputService::IsKeyPressed(Key key)
+    {
+        return keyStates_[(int)key] == KeyAction::PRESS;
+    }
+
+    bool InputService::IsKeyReleased(Key key)
+    {
+        return keyStates_[(int)key] == KeyAction::RELEASE;
+    }
+
     void InputService::OnKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods)
     {
         Key k = ConvertKeyGLFW(key);
@@ -163,6 +173,8 @@ namespace tomato
             return;
         }
 
+        keyStates_[(int)k] = a;
+
         auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
         auto& input = engine->GetInputService();
         input.keySignal_.Collect(input.collector,
@@ -173,12 +185,14 @@ namespace tomato
     {
         Key k = ConvertKeyGLFW(button);
         KeyAction a = ConvertActionGLFW(action);
-
+        
         if (a >= KeyAction::COUNT)
         {
             TMT_WARN << "Invalid KeyAction " << action;
             return;
         }
+        
+        keyStates_[(int)k] = a;
 
         auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
         auto& input = engine->GetInputService();
@@ -206,9 +220,9 @@ namespace tomato
         glfwSetCursorPosCallback(window.GetHandle(), OnMouseMoveEvent);
 
         keySignal_.Connect<&InputRecorder::UpdateInputKey>(recorder);
-        moveSignal_.Connect<&InputUI::Hover>(inputUI);
+        moveSignal_.Connect<&InputUI::OnHover>(inputUI);
         mouseSignal_.Connect<&InputRecorder::UpdateInputMouse>(recorder);
-        mouseSignal_.Connect<&InputUI::HitTest>(inputUI);
+        mouseSignal_.Connect<&InputUI::OnClick>(inputUI);
 
     }
 }

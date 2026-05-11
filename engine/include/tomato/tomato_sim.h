@@ -45,6 +45,9 @@ namespace tomato
     struct UIContext
     {
         std::vector<Entity> drawList;
+        std::vector<Entity> selectableList;
+
+        bool selectableDirty{ true };
     };
 }
 

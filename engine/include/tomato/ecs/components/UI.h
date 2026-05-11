@@ -119,7 +119,7 @@ namespace tomato
 		glm::vec4 pressedColor{ 1.f, 0.f, 1.f, 1.f };
 
 		//Event
-		UICallBack enter = UICallTest;
+		UICallBack click = UICallTest;
 	};
 
 }

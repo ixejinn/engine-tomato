@@ -9,11 +9,12 @@
 
 namespace tomato
 {
-	bool InputUI::HitTest(const MouseEvent& mouseEvent)
+	bool InputUI::OnClick(const MouseEvent& mouseEvent)
 	{
 		GLFWwindow* w = glfwGetCurrentContext();
 		auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
 		auto& r = engine->GetWorld().GetRegistry();
+#if 1
 		float windowHeight = (float)engine->GetWindowService().GetHeight();
 
 		double x, y;
@@ -41,8 +42,8 @@ namespace tomato
 					{
 						render.color = selectable.normalColor;
 
-						if(selectable.enter)
-							selectable.enter(MouseEnterEvent{ *it, &r });
+						if(selectable.click)
+							selectable.click(MouseEnterEvent{ *it, &r });
 					}
 
 					break;
@@ -54,15 +55,36 @@ namespace tomato
 				}
 			}
 		}
+#elif 0
+		auto hovered = PickSelectable(glm::vec2{ mouseEvent.xPos, mouseEvent.yPos });
+		if (hovered == entt::null)
+			return true;
 
+		auto& rect = r.get<RectTransformComponent>(hovered);
+		auto& selectable = r.get<SelectableComponent>(hovered);
+		auto& render = r.get<RenderComponent>(hovered);
+
+		if (mouseEvent.action == KeyAction::PRESS)
+			render.color = selectable.pressedColor;
+
+		if (mouseEvent.action == KeyAction::RELEASE)
+		{
+			render.color = selectable.normalColor;
+
+			if (selectable.click)
+				selectable.click(MouseEnterEvent{ hovered, &r });
+		}
+
+#endif
 		return false;
 	}
 
-	bool InputUI::Hover(const MouseMoveEvent& moveEvent)
+	bool InputUI::OnHover(const MouseMoveEvent& moveEvent)
 	{
 		GLFWwindow* w = glfwGetCurrentContext();
 		auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
 		auto& r = engine->GetWorld().GetRegistry();
+#if 1
 		float windowHeight = (float)engine->GetWindowService().GetHeight();
 
 		double x{ moveEvent.xPos }, y{ moveEvent.yPos };
@@ -81,6 +103,9 @@ namespace tomato
 
 			if (button.interactable)
 			{
+				if (InputService::IsKeyPressed(Key::LeftMouseButton))
+					return true;
+
 				if (PointInRect(glm::vec2(x, windowHeight - y), rect.screenRect.min, rect.screenRect.max))
 				{
 					render.color = button.highlightedColor;
@@ -93,6 +118,20 @@ namespace tomato
 				}
 			}
 		}
+#elif 0
+		auto hovered = PickSelectable(glm::vec2{ moveEvent.xPos, moveEvent.yPos });
+		if (hovered == entt::null)
+			return true;
+
+		if (InputService::IsKeyPressed(Key::LeftMouseButton))
+			return true;
+
+		auto& rect = r.get<RectTransformComponent>(hovered);
+		auto& selectable = r.get<SelectableComponent>(hovered);
+		auto& render = r.get<RenderComponent>(hovered);
+
+		render.color = selectable.highlightedColor;
+#endif
 		return false;
 	}
 
@@ -103,5 +142,35 @@ namespace tomato
 			point.x <= max.x &&
 			point.y >= min.y &&
 			point.y <= max.y;
+	}
+
+	entt::entity InputUI::PickSelectable(glm::vec2 point)
+	{
+		GLFWwindow* w = glfwGetCurrentContext();
+		auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
+		auto& r = engine->GetWorld().GetRegistry();
+		float windowHeight = (float)engine->GetWindowService().GetHeight();
+
+		auto* uiCtx = r.ctx().find<UIContext>();
+		if (uiCtx == nullptr)
+			return entt::null;
+
+		for (auto it = uiCtx->selectableList.begin(); it != uiCtx->selectableList.end(); ++it)
+		{
+			if (!r.all_of<SelectableComponent>(*it)) continue;
+
+			auto& rect = r.get<RectTransformComponent>(*it);
+			auto& button = r.get<SelectableComponent>(*it);
+			auto& render = r.get<RenderComponent>(*it);
+
+			if (button.interactable)
+			{
+				if (PointInRect(glm::vec2(point.x, windowHeight - point.y), rect.screenRect.min, rect.screenRect.max))
+					return *it;
+				else
+					render.color = button.normalColor;
+			}
+		}
+		return entt::null;
 	}
 }

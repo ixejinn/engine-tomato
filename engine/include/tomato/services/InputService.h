@@ -29,14 +29,22 @@ namespace tomato
         static KeyAction ConvertActionGLFW(int glfwAction);
 
         static void GetMouseCursorPos(GLFWwindow* window, double* xpos, double* ypos);
+        
+        static bool IsKeyPressed(Key key);
+        static bool IsKeyReleased(Key key);
+
     private:
         static void OnKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
         static void OnMouseButtonEvent(GLFWwindow* w, int button, int action, int mods);
         static void OnMouseMoveEvent(GLFWwindow* w, double xpos, double ypos);
 
+    private:
+        static inline KeyAction keyStates_[(int)Key::COUNT];
+
         EventSignal<KeyEvent> keySignal_;
         EventSignal<MouseEvent> mouseSignal_;
         EventSignal<MouseMoveEvent> moveSignal_;
+
         struct InputEventCollector
         {
             bool operator()(int ret) { return !ret; }   // 리스너 함수에서 true가 반환되면 계속
