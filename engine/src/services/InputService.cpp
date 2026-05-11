@@ -1,6 +1,7 @@
 ﻿#include "tomato/services/InputService.h"
 #include "tomato/services/WindowService.h"
 #include "tomato/input/InputRecorder.h"
+#include "tomato/input/InputUI.h"
 #include "tomato/Engine.h"
 #include "tomato/Logger.h"
 #include "tomato/event/EventDispatcher.h"
@@ -189,12 +190,25 @@ namespace tomato
                                    MouseEvent{k, a, a == KeyAction::RELEASE ? 0.f : 1.f, engine->GetTick(), static_cast<float>(xPos), static_cast<float>(yPos)});
     }
 
-    InputService::InputService(WindowService& window, InputRecorder& recorder)
+    void InputService::OnMouseMoveEvent(GLFWwindow* w, double xpos, double ypos)
+    {
+        auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
+        auto& input = engine->GetInputService();
+
+        input.moveSignal_.Collect(input.collector,
+            MouseMoveEvent{ engine->GetTick(), static_cast<float>(xpos), static_cast<float>(ypos) });
+    }
+
+    InputService::InputService(WindowService& window, InputRecorder& recorder, InputUI& inputUI)
     {
         glfwSetKeyCallback(window.GetHandle(), OnKeyEvent);
         glfwSetMouseButtonCallback(window.GetHandle(), OnMouseButtonEvent);
+        glfwSetCursorPosCallback(window.GetHandle(), OnMouseMoveEvent);
 
         keySignal_.Connect<&InputRecorder::UpdateInputKey>(recorder);
+        moveSignal_.Connect<&InputUI::Hover>(inputUI);
         mouseSignal_.Connect<&InputRecorder::UpdateInputMouse>(recorder);
+        mouseSignal_.Connect<&InputUI::HitTest>(inputUI);
+
     }
 }

@@ -1,4 +1,4 @@
-#ifndef TOMATO_INPUTCONSTANTS_H
+﻿#ifndef TOMATO_INPUTCONSTANTS_H
 #define TOMATO_INPUTCONSTANTS_H
 
 #include <cstdint>

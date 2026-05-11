@@ -13,6 +13,7 @@ namespace tomato
 {
     class WindowService;
     class InputRecorder;
+    class InputUI;
 
     /**
      * @brief Translates raw platform input into engine-level input actions.
@@ -22,7 +23,7 @@ namespace tomato
     class InputService
     {
     public:
-        explicit InputService(WindowService& window, InputRecorder& recorder);
+        explicit InputService(WindowService& window, InputRecorder& recorder, InputUI& inputUI);
 
         static Key ConvertKeyGLFW(int glfwKey);
         static KeyAction ConvertActionGLFW(int glfwAction);
@@ -31,9 +32,11 @@ namespace tomato
     private:
         static void OnKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods);
         static void OnMouseButtonEvent(GLFWwindow* w, int button, int action, int mods);
+        static void OnMouseMoveEvent(GLFWwindow* w, double xpos, double ypos);
 
         EventSignal<KeyEvent> keySignal_;
         EventSignal<MouseEvent> mouseSignal_;
+        EventSignal<MouseMoveEvent> moveSignal_;
         struct InputEventCollector
         {
             bool operator()(int ret) { return !ret; }   // 리스너 함수에서 true가 반환되면 계속

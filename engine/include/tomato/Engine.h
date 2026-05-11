@@ -1,4 +1,4 @@
-#ifndef TOMATO_ENGINE_H
+﻿#ifndef TOMATO_ENGINE_H
 #define TOMATO_ENGINE_H
 
 #include <chrono>
@@ -14,6 +14,7 @@
 #include "tomato/net/rollback/RollbackManager.h"
 #include "tomato/net/rollback/RollbackSlice.h"
 #include "tomato/input/InputRecorder.h"
+#include "tomato/input/InputUI.h"
 
 namespace tomato
 {
@@ -93,6 +94,7 @@ namespace tomato
 
         InputService input_;
         InputRecorder inputRecorder_;
+        InputUI inputUI_;
 
         PlayerInputTimelines inputTimelines_;
 

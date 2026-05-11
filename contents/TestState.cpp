@@ -148,7 +148,7 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::HierarchyComponent>(button);
     SetParent(world, button, canvas);
     registry.emplace<tomato::RenderComponent>(button,
-             glm::vec4{ 1.f, 0.f, 1.f, 1.f },
+             glm::vec4{ 0.2f, 0.75f, 0.4f, 1.0f },
              tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::LBPLAIN)),
              tmt::GetAssetID("UI"),
              tmt::GetAssetID(tmt::Texture::PrimitiveName));
@@ -177,3 +177,4 @@ void TestState::Init(tomato::World& world)
 }
 
 void TestState::Exit() {}
+//void TestState::UICallTest(const tomato::MouseEnterEvent& event, entt::entity e) { std::cout << "MOUSE RELEASE\n"; }

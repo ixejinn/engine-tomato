@@ -6,6 +6,7 @@
 #include "tomato/ecs/World.h"
 #include "tomato/ecs/systems/System.h"
 #include "tomato/input/InputTypes.h"
+#include "tomato/input/InputUI.h"
 #include "tomato/Logger.h"
 #include "tomato/event/EventDispatcher.h"
 #include "tomato/net/tomato_message_type.h"
@@ -14,7 +15,7 @@
 namespace tomato
 {
     Engine::Engine(WindowService& window)
-    : window_(window), input_(window, inputRecorder_), network_(*this, NetMode::NM_Alone), systemManager_(SystemManager{}), curCam_(entt::null)
+    : window_(window), input_(window, inputRecorder_, inputUI_), network_(*this, NetMode::NM_Alone), systemManager_(SystemManager{}), curCam_(entt::null)
     {
         window_.SetWindowUserPointer(this);
 

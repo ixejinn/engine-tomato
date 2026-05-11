@@ -2,7 +2,7 @@
 #define TOMATO_UI_H
 
 #include "tomato/ecs/tomato_ecs.h"
-#include <glm/glm.hpp>
+#include "tomato/tomato_math.h"
 
 namespace tomato
 {
@@ -100,13 +100,27 @@ namespace tomato
 		}
 	}
 
+	//Separating "Selectable" related
+	struct MouseEnterEvent
+	{
+		entt::entity e;
+		entt::registry* reg;
+	};
+
+	using UICallBack = std::function<void(const MouseEnterEvent&)>;
+	inline void UICallTest(const MouseEnterEvent& event) { std::cout << "MOUSE RELEASE\n"; }
 	struct SelectableComponent
 	{
 		bool interactable{ true };
+
 		//transition
+		glm::vec4 normalColor{ 0.2f, 0.75f, 0.4f, 1.0f };
+		glm::vec4 highlightedColor{ 0.f, 1.f, 0.5f, 1.f };
+		glm::vec4 pressedColor{ 1.f, 0.f, 1.f, 1.f };
 
 		//Event
+		UICallBack enter = UICallTest;
 	};
-}
 
+}
 #endif // !TOMATO_UI_H

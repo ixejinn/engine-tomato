@@ -1,4 +1,4 @@
-#ifndef TOMATO_TESTSTATE_H
+﻿#ifndef TOMATO_TESTSTATE_H
 #define TOMATO_TESTSTATE_H
 
 #include "tomato/State.h"

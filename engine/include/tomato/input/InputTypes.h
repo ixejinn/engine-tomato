@@ -1,4 +1,4 @@
-#ifndef TOMATO_INPUTTYPES_H
+﻿#ifndef TOMATO_INPUTTYPES_H
 #define TOMATO_INPUTTYPES_H
 
 #include "tomato/input/InputConstants.h"
@@ -29,10 +29,19 @@ namespace tomato
     /**
      * @brief A input event for a mouse.
      */
-    struct MouseEvent : public KeyEvent
+    struct MouseEvent : KeyEvent
     {
         MouseEvent(Key k, KeyAction a, float v, uint32_t t, float x, float y) : KeyEvent(k, a, v, t), xPos(x), yPos(y) {}
 
+        float xPos, yPos;
+    };
+
+    /**
+     * @brief A move event for a mouse.
+     */
+    struct MouseMoveEvent
+    {
+        MouseMoveEvent(uint32_t t, float x, float y) : xPos(x), yPos(y) {}
         float xPos, yPos;
     };
 }

@@ -27,9 +27,8 @@ namespace tomato
 		BuildDrawList(engine);
 
 		UpdateRectTransform(engine);
-
 		
-		HitTest(engine);
+		//HitTest(engine);
 	}
 
 	void UISystem::Traverse(Engine& engine, Entity e, std::vector<Entity>& drawList)
@@ -69,7 +68,6 @@ namespace tomato
 
 		for (auto canvas : canvases)
 			Traverse(engine, canvas, drawList);
-		//std::cout << '\n';
 
 		uiCtx->drawList.clear();
 		uiCtx->drawList = std::move(drawList);
@@ -215,10 +213,7 @@ namespace tomato
 
 		auto* uiCtx = r.ctx().find<UIContext>();
 		if (uiCtx == nullptr)
-		{
-			std::cout << "NULL DRAWLIST\n";
 			return;
-		}
 		
 		for (auto it = uiCtx->drawList.rbegin(); it != uiCtx->drawList.rend(); ++it)
 		{
@@ -230,15 +225,14 @@ namespace tomato
 			{
 				if (PointInRect(glm::vec2(x, windowHeight - y), rect.screenRect))
 				{
-					std::cout << "Point In Rect!!\n";
 					auto& render = r.get<RenderComponent>(*it);
-					render.color = glm::vec4(0.2f, 0.75f, 0.4f, 1.0f);
+					render.color = button.highlightedColor;
 					break;
 				}
 				else
 				{
 					auto& render = r.get<RenderComponent>(*it);
-					render.color = glm::vec4(1.f, 0.f, 1.f, 1.f);
+					render.color = button.normalColor;
 					break;
 				}
 			}

@@ -77,6 +77,7 @@
         include/tomato/collision/CollisionLayerMatrix.h
         include/tomato/utils/BitmaskOperators.h
         include/tomato/utils/Utf.h
+        include/tomato/input/InputUI.h
 )
 
 set(ENGINE_SOURCES
@@ -114,6 +115,7 @@ set(ENGINE_SOURCES
         src/net/InputNetMessage.cpp
         src/net/NetMessageRegistry.cpp
         src/input/InputRecorder.cpp
+        src/input/InputUI.cpp
         src/utils/Utf.cpp
 )
 
