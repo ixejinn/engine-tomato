@@ -39,7 +39,7 @@ namespace tomato
         static void OnMouseMoveEvent(GLFWwindow* w, double xpos, double ypos);
 
     private:
-        static inline KeyAction keyStates_[(int)Key::COUNT];
+        static inline KeyAction latestKeyAction_[(int)Key::COUNT];
 
         EventSignal<KeyEvent> keySignal_;
         EventSignal<MouseEvent> mouseSignal_;

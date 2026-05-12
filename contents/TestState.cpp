@@ -142,7 +142,6 @@ void TestState::Init(tomato::World& world)
 
     const auto button = world.CreateEntity();
     registry.emplace<tomato::UIComponent>(button, canvas, 1);
-    //registry.emplace<tomato::RectTransformComponent>(button, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.f), glm::vec2(0.5f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec2(0.5f, 0.5f));
     registry.emplace<tomato::RectTransformComponent>(button, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
     registry.emplace<tomato::SelectableComponent>(button);
     registry.emplace<tomato::HierarchyComponent>(button);
@@ -174,7 +173,25 @@ void TestState::Init(tomato::World& world)
     registry.emplace<tomato::HierarchyComponent>(TargetLabel);
     registry.emplace<tomato::TargetComponent>(TargetLabel, me);
     SetParent(world, TargetLabel, canvas);
+
+    const auto button2 = world.CreateEntity();
+    registry.emplace<tomato::UIComponent>(button2, canvas, 1);
+    registry.emplace<tomato::RectTransformComponent>(button2, glm::vec2(400.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(200.f, 200.f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
+    registry.emplace<tomato::SelectableComponent>(button2);
+    registry.emplace<tomato::HierarchyComponent>(button2);
+    SetParent(world, button2, canvas);
+    registry.emplace<tomato::RenderComponent>(button2,
+        glm::vec4{ 0.2f, 0.75f, 0.4f, 1.0f },
+        tmt::GetAssetID(tmt::Mesh::GetName(tmt::Mesh::PrimitiveType::LBPLAIN)),
+        tmt::GetAssetID("UI"),
+        tmt::GetAssetID(tmt::Texture::PrimitiveName));
+
+    const auto buttonText3 = world.CreateEntity();
+    registry.emplace<tomato::UIComponent>(buttonText3, canvas, 2);
+    registry.emplace<tomato::TextComponent>(buttonText3, "EXIT", glm::vec4{ 0.3, 0.7f, 0.9f, 1.0f }, 30.f);
+    registry.emplace<tomato::RectTransformComponent>(buttonText3, glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.f, 0.f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f), glm::vec2(0.5f, 0.5f));
+    registry.emplace<tomato::HierarchyComponent>(buttonText3);
+    SetParent(world, buttonText3, button2);
 }
 
 void TestState::Exit() {}
-//void TestState::UICallTest(const tomato::MouseEnterEvent& event, entt::entity e) { std::cout << "MOUSE RELEASE\n"; }

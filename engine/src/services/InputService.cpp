@@ -154,12 +154,12 @@ namespace tomato
 
     bool InputService::IsKeyPressed(Key key)
     {
-        return keyStates_[(int)key] == KeyAction::PRESS;
+        return latestKeyAction_[(int)key] == KeyAction::PRESS;
     }
 
     bool InputService::IsKeyReleased(Key key)
     {
-        return keyStates_[(int)key] == KeyAction::RELEASE;
+        return latestKeyAction_[(int)key] == KeyAction::RELEASE;
     }
 
     void InputService::OnKeyEvent(GLFWwindow* w, int key, int scancode, int action, int mods)
@@ -173,7 +173,7 @@ namespace tomato
             return;
         }
 
-        keyStates_[(int)k] = a;
+        latestKeyAction_[(int)k] = a;
 
         auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
         auto& input = engine->GetInputService();
@@ -192,7 +192,7 @@ namespace tomato
             return;
         }
         
-        keyStates_[(int)k] = a;
+        latestKeyAction_[(int)k] = a;
 
         auto* engine = static_cast<WindowData*>(glfwGetWindowUserPointer(w))->engine;
         auto& input = engine->GetInputService();

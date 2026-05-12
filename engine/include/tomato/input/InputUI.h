@@ -7,11 +7,6 @@
 
 namespace tomato
 {
-	struct ButtonHoverEvent
-	{
-		entt::entity e;
-	};
-
 	class InputUI
 	{
 	public:
@@ -21,6 +16,10 @@ namespace tomato
 	private:
 		bool PointInRect(glm::vec2 point, glm::vec2 min, glm::vec2 max);
 		entt::entity PickSelectable(glm::vec2 point);
+
+		entt::entity currentHovered;
+		entt::entity previousHovered;
+		entt::entity pressed{ entt::null };
 	};
 }
 

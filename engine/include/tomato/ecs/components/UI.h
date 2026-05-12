@@ -3,7 +3,8 @@
 
 #include "tomato/ecs/tomato_ecs.h"
 #include "tomato/tomato_math.h"
-
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 namespace tomato
 {
 	enum class RenderMode
@@ -108,7 +109,11 @@ namespace tomato
 	};
 
 	using UICallBack = std::function<void(const MouseEnterEvent&)>;
-	inline void UICallTest(const MouseEnterEvent& event) { std::cout << "MOUSE RELEASE\n"; }
+	inline void UICallTest(const MouseEnterEvent& event)
+	{
+		std::cout << "MOUSE RELEASE\n";
+		glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
+	}
 	struct SelectableComponent
 	{
 		bool interactable{ true };
