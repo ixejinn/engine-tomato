@@ -1,4 +1,4 @@
-#include "tomato/services/network/NetworkService.h"
+﻿#include "tomato/services/network/NetworkService.h"
 #include "tomato/Logger.h"
 #include "tomato/Engine.h"
 #include "tomato/net/NetBitReader.h"
@@ -10,7 +10,12 @@ namespace tomato
 {
 	NetworkService::NetworkService(Engine& engine, NetMode mode)
     : engine_(engine), server_(mode), playerID_(0), netState_(NetworkServiceState::NSS_Uninitialized)
-    {}
+    {
+        conn.try_emplace((PlayerId)0, NetConnection{ 0, 0, 0, "me", {"192.168.31.231", 9000} });
+        conn.try_emplace((PlayerId)1, NetConnection{ 1, 0, 1, "you", {"192.168.31.231", 9001} });
+        addToId.try_emplace({ "192.168.31.231", 9000 }, 0);
+        addToId.try_emplace({ "192.168.31.231", 9001 }, 1);
+    }
 
     NetworkService::~NetworkService() {}
 
@@ -73,6 +78,8 @@ namespace tomato
         {
             //auto tmp = NetMessageRegistry::GetInstance().GetFactory(NetMessageType::INPUT)();
             //tmp->Read(reader, engine_, inToAddress);
+            InputNetMessage tmp;
+            tmp.Read(reader, engine_, inToAddress);
             break;
         }
         }
@@ -94,6 +101,8 @@ namespace tomato
         {
             //auto tmp = NetMessageRegistry::GetInstance().GetFactory(NetMessageType::INPUT)();
             //tmp->Write(writer, engine_);
+            InputNetMessage tmp;
+            tmp.Write(writer, engine_);
             break;
         }
         }

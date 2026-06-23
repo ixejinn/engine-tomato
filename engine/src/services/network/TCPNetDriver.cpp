@@ -1,4 +1,4 @@
-#include "tomato/services/network/TCPNetDriver.h"
+﻿#include "tomato/services/network/TCPNetDriver.h"
 #include "tomato/net/NetBitReader.h"
 #include "tomato/net/NetBitWriter.h"
 #include "tomato/net/InputNetMessage.h"
@@ -12,8 +12,8 @@ namespace tomato
 		if (mode_ == NetMode::NM_ListenServer)
 			InitListenServerMode();
 
-		else if (mode_ == NetMode::NM_Client)
-			InitClientMode();
+		/*else if (mode_ == NetMode::NM_Client)
+			InitClientMode();*/
 	}
 
 	TCPNetDriver::~TCPNetDriver(){}

@@ -15,7 +15,7 @@
 namespace tomato
 {
     Engine::Engine(WindowService& window)
-    : window_(window), input_(window, inputRecorder_, inputUI_), network_(*this, NetMode::NM_Alone), systemManager_(SystemManager{}), curCam_(entt::null)
+    : window_(window), input_(window, inputRecorder_, inputUI_), network_(*this, NetMode::NM_Client), systemManager_(SystemManager{}), curCam_(entt::null)
     {
         window_.SetWindowUserPointer(this);
 
@@ -161,7 +161,7 @@ namespace tomato
 
         while (simLimit--) {
             systemManager_.Simulate(*this, SimContext{tick_});
-            if(network_.GetNetState() == NetworkServiceState::NSS_Playing)
+            //if(network_.GetNetState() == NetworkServiceState::NSS_Playing)
                 network_.SendUDPPacket(UDPPacketType::INPUT, SendPolicy::Broadcast);
             ++tick_;
 

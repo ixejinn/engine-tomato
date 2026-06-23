@@ -1,4 +1,4 @@
-#ifndef TOMATO_NETWORKSERVICE_H
+﻿#ifndef TOMATO_NETWORKSERVICE_H
 #define TOMATO_NETWORKSERVICE_H
 
 #include <bitset>
